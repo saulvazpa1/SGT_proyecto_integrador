@@ -1,0 +1,3 @@
+nombre: Fatima Liseth Quintero López
+grado y grupo: 3° "A"
+carrera: Desarrollo de software multiplataforma
