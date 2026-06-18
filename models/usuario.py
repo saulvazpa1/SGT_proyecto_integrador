@@ -1,22 +1,22 @@
 class Usuario:
-    # Constructor con los atributos de tu documento de requerimientos
-    def __init__(self, id_usuario, nombre, apellido_p, apellido_m, telefono, correo, password, rol_id):
-        self.id_usuario = id_usuario
-        self.nombre = nombre
-        self.apellido_p = apellido_p
-        self.apellido_m = apellido_m
-        self.telefono = telefono
-        self.correo = correo
-        self.password = password  # Almacena el hash encriptado (RNF_08)
+    def __init__(self, usuario_id, usuario_nombre, usuario_apellidop, usuario_apellidom, usuario_telefono, usuario_correo, usuario_password, rol_id):
+        self.usuario_id = usuario_id
+        self.usuario_nombre = usuario_nombre
+        self.usuario_apellidop = usuario_apellidop
+        self.usuario_apellidom = usuario_apellidom
+        self.usuario_telefono = usuario_telefono
+        self.usuario_correo = usuario_correo
+        self.usuario_password = usuario_password
         self.rol_id = rol_id
 
     def mostrar_info_completa(self):
         return (
-            f"ID Usuario: {self.id_usuario}"
-            f"Nombre Completo: {self.nombre} {self.apellido_p} {self.apellido_m if self.apellido_m else ''}\n"
-            f"Teléfono: {self.telefono}\n"
-            f"Correo: {self.correo}\n"
-            f"ID Rol Asignado: {self.rol_id}\n"
-            f"Password (Hash): {self.password}\n"
-            
+            f"ID Usuario: {self.usuario_id}"
+            f"Nombre: {self.usuario_nombre}"
+            f"Apellido Paterno: {self.usuario_apellidop}"
+            f"Apellido Materno: {self.usuario_apellidom}"
+            f"Teléfono: {self.usuario_telefono}"
+            f"Correo: {self.usuario_correo}"
+            f"Password: {self.usuario_password}"
+            f"ID Rol: {self.rol_id}"
         )
