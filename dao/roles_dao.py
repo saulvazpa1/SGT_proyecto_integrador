@@ -1,5 +1,5 @@
 #DAO: Data Access Object
-#cliente_dao: Objeto de acceso a datos de la tabla clientes
+#roles_dao: Objeto de acceso a datos de la tabla roles
 
 from database.conexion import Conexion
 from models.cliente import Cliente
@@ -14,7 +14,7 @@ class RolesDAO:
         
         roles = []
         for registro in registros:
-            roles = roles( 
+            roles = Roles( 
                 registro[0],  # rol_id
                 registro[1],  # rol_nombre
                 registro[2],  # rol_permisos
@@ -67,7 +67,7 @@ class RolesDAO:
         conexion = Conexion.obtener_conexion()
         cursor = conexion.cursor()
         cursor.execute(
-            "DELETE FROM clientes WHERE rol_id = %s",
+            "DELETE FROM roles WHERE rol_id = %s",
             (rol_id,)
         )
         conexion.commit()
