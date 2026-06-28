@@ -403,7 +403,7 @@ def main():
                 case 7:
                     submenu("Trabajos Asignados", ver_trabajos, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
                 case 8:
-                    print("Cerrando sesión en SGT Integrador... ¡Hasta luego!")
+                    print("Cerrando sesión en SGT Integrador... ¡Hasta luego BOT !")
                     break
                 case _:
                     print("Opción fuera de rango. Elige entre 1 y 8.")
