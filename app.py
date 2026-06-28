@@ -1,30 +1,26 @@
-# app.py
-from dao.usuario_dao import UsuarioDAO
+from database.conexion import Conexion    # Carpeta/archivo/clase 
 from models.usuario import Usuario
-
-from dao.cliente_dao import ClienteDAO
 from models.cliente import Cliente
-
-from dao.material_dao import MaterialDAO
 from models.material import Material
-
-from dao.entrada_material_dao import EntradaMaterialDAO
 from models.entrada_material import EntradaMaterial
 
-# NOTA: Asegúrate de tener también creados los DAOs/Modelos de Producto para esta sección
-# from dao.producto_dao import ProductoDAO
-# from models.producto import Producto
+# Importaciones de la rama de Ulises
+from dao.usuario_dao import UsuarioDAO
+from dao.cliente_dao import ClienteDAO
+from dao.material_dao import MaterialDAO
+from dao.entrada_material_dao import EntradaMaterialDAO
+from dao.orden_produccion_dao import OrdenProduccionDAO
+from dao.salida_material_dao import SalidaMaterialDAO
+from dao.trabajos_asignados_dao import TrabajoAsignadoDAO
 
 # ==========================================
 # 1. SUBMÓDULO: USUARIOS (RF_02, RF_03, RF_04)
 # ==========================================
 def ver_usuarios():
     try:
-        usuario_dao = UsuarioDAO() # tiene todo de Usuario Dao
+        usuario_dao = UsuarioDAO() 
         usuarios = usuario_dao.obtener_todos()
-
         print("\n=== Usuarios en el Sistema ===")
-
         if len(usuarios) == 0:
             print("No hay usuarios registrados")
         else:
@@ -37,10 +33,9 @@ def ver_usuarios():
                     f" Password:{usuario.usuario_password}, Rol ID:{usuario.rol_id}"
                 )
                 print("-------------------------------------------")
-        print("\n Conexión exitosa ala base de datos")
+        print("\n Conexión exitosa a la base de datos")
     except Exception as e:
-        print("Error:")
-        print(e)
+        print("Error:", e)
 
 def insertar_usuario():
     nombre = input("Escribe el nombre del nuevo usuario: ")
@@ -57,8 +52,7 @@ def insertar_usuario():
         usuario_dao.insertar(usuario)
         print("Inserción realizada con éxito")
     except Exception as e:
-        print("Error al insertar un nuevo usuario")
-        print(e)
+        print("Error al insertar un nuevo usuario\n", e)
 
 def actualizar_usuario():
     print("Selecciona el usuario a actualizar")
@@ -78,8 +72,7 @@ def actualizar_usuario():
         usuario_dao.actualizar(usuario)
         print(f"El usuario {id} se ha actualizado exitosamente")
     except Exception as e:
-        print(" Error al actualizar usuario")
-        print(e)
+        print(" Error al actualizar usuario\n", e)
 
 def eliminar_usuario():
     try:
@@ -90,8 +83,7 @@ def eliminar_usuario():
         usuario_dao.eliminar(id)
         print(f"El usuario {id} ha sido eliminado con éxito")
     except Exception as e:
-        print("Error al eliminar el usuario")
-        print(e)
+        print("Error al eliminar el usuario\n", e)
 
 
 # ==========================================
@@ -99,11 +91,9 @@ def eliminar_usuario():
 # ==========================================
 def ver_clientes():
     try:
-        cliente_dao = ClienteDAO() # tiene todo de Cliente Dao
+        cliente_dao = ClienteDAO() 
         clientes = cliente_dao.obtener_todos()
-
         print("\n=== Clientes en el Sistema ===")
-
         if len(clientes) == 0:
             print("No hay clientes registrados")
         else:
@@ -117,10 +107,9 @@ def ver_clientes():
                     f" CP:{cliente.cliente_codigopostal}"
                 )
                 print("-------------------------------------------")
-        print("\n Conexión exitosa ala base de datos")
+        print("\n Conexión exitosa a la base de datos")
     except Exception as e:
-        print("Error:")
-        print(e)
+        print("Error:", e)
 
 def insertar_cliente():
     nombre = input("Escribe el nombre o razón social del cliente: ")
@@ -138,8 +127,7 @@ def insertar_cliente():
         cliente_dao.insertar(cliente)
         print("Inserción realizada con éxito")
     except Exception as e:
-        print("Error al insertar un nuevo cliente")
-        print(e)
+        print("Error al insertar un nuevo cliente\n", e)
 
 def actualizar_cliente():
     print("Selecciona el cliente a actualizar")
@@ -160,8 +148,7 @@ def actualizar_cliente():
         cliente_dao.actualizar(cliente)
         print(f"El cliente {id} se ha actualizado exitosamente")
     except Exception as e:
-        print(" Error al actualizar cliente")
-        print(e)
+        print(" Error al actualizar cliente\n", e)
 
 def eliminar_cliente():
     try:
@@ -172,8 +159,7 @@ def eliminar_cliente():
         cliente_dao.eliminar(id)
         print(f"El cliente {id} ha sido eliminado con éxito")
     except Exception as e:
-        print("Error al eliminar el cliente")
-        print(e)
+        print("Error al eliminar el cliente\n", e)
 
 
 # ==========================================
@@ -183,9 +169,7 @@ def ver_materiales():
     try:
         material_dao = MaterialDAO()
         materiales = material_dao.obtener_todos()
-
         print("\n=== Materiales en Inventario ===")
-
         if len(materiales) == 0:
             print("No hay materiales registrados")
         else:
@@ -198,10 +182,9 @@ def ver_materiales():
                     f" Marca:{mat.material_marca}, Precio:${mat.material_precio}"
                 )
                 print("-------------------------------------------")
-        print("\n Conexión exitosa ala base de datos")
+        print("\n Conexión exitosa a la base de datos")
     except Exception as e:
-        print("Error:")
-        print(e)
+        print("Error:", e)
 
 def insertar_material():
     nombre = input("Nombre de la tela o insumo: ")
@@ -219,8 +202,7 @@ def insertar_material():
         material_dao.insertar(material)
         print("Material registrado exitosamente en el inventario")
     except Exception as e:
-        print("Error al registrar el material")
-        print(e)
+        print("Error al registrar el material\n", e)
 
 def actualizar_material():
     print("Selecciona el material a actualizar")
@@ -241,8 +223,7 @@ def actualizar_material():
         material_dao.actualizar(material)
         print(f"El material {id} ha sido actualizado")
     except Exception as e:
-        print("Error al actualizar material")
-        print(e)
+        print("Error al actualizar material\n", e)
 
 def eliminar_material():
     try:
@@ -252,8 +233,7 @@ def eliminar_material():
         material_dao.eliminar(id)
         print(f"El material {id} fue removido")
     except Exception as e:
-        print("Error al borrar material")
-        print(e)
+        print("Error al borrar material\n", e)
 
 
 # ==========================================
@@ -261,11 +241,9 @@ def eliminar_material():
 # ==========================================
 def ver_entradas_materiales():
     try:
-        entrada_dao = EntradaMaterialDAO() # tiene todo de EntradaMaterialDAO
+        entrada_dao = EntradaMaterialDAO()
         entradas = entrada_dao.obtener_todos()
-
         print("\n=== Historial de Entradas de Materiales ===")
-
         if len(entradas) == 0:
             print("No hay entradas de materiales registradas")
         else:
@@ -277,10 +255,9 @@ def ver_entradas_materiales():
                     f" Cantidad:{entrada.entrada_cantidad}"
                 )
                 print("-------------------------------------------")
-        print("\n Conexión exitosa ala base de datos")
+        print("\n Conexión exitosa a la base de datos")
     except Exception as e:
-        print("Error:")
-        print(e)
+        print("Error:", e)
 
 def insertar_entrada():
     try:
@@ -297,8 +274,76 @@ def insertar_entrada():
         entrada_dao.insertar(entrada)
         print("¡Entrada e historial de almacén añadidos exitosamente!")
     except Exception as e:
-        print("Error al guardar transacción de entrada")
-        print(e)
+        print("Error al guardar transacción de entrada\n", e)
+
+
+# ==========================================
+# NUEVOS SUBMÓDULOS DEL EQUIPO (RAMA ULISES)
+# ==========================================
+def ver_ordenes_produccion():
+    try:
+        orden_produccion_dao = OrdenProduccionDAO() 
+        ordenes = orden_produccion_dao.obtener_todos()
+        print("\n=== Ordenes de Producción en el Sistema ===")
+        if len(ordenes) == 0:
+            print("No hay ordenes registradas")
+        else:
+            for orden in ordenes:
+                print("-------------------------------------------")
+                print(
+                    f"ID:{orden.produccion_id}, Pedido:{orden.pedido_id},"
+                    f" Producto:{orden.producto_id}, Encargado de producción:{orden.encargado_produccion_id},"
+                    f" Cantidad:{orden.produccion_cantidad}, Estado de produccion:{orden.produccion_estado},"
+                    f" Inicio:{orden.fecha_inicio}, Entrega:{orden.fecha_entrega},"
+                    f" Tipo de tela:{orden.tela_tipo}, Ancho de tela:{orden.tela_ancho},"
+                    f" Largo de tela:{orden.tela_largo}, Patron Largo:{orden.patron_largo},"
+                    f" Patron ancho:{orden.patron_ancho}, Sobrante:{orden.retazo_sobrante},"
+                    f" Total de tela utilizada:{orden.tela_total_utilizada}"
+                )
+                print("-------------------------------------------")
+        print("\n Conexión exitosa a la base de datos")
+    except Exception as e:
+        print("Error:", e)
+
+def ver_salidas():
+    try:
+        salida_material_dao = SalidaMaterialDAO() 
+        ordenes = salida_material_dao.obtener_todos()
+        print("\n=== Salidas de Material en el Sistema ===")
+        if len(ordenes) == 0:
+            print("No hay salidas registradas")
+        else:
+            for salida in ordenes:
+                print("-------------------------------------------")
+                print(
+                    f"ID:{salida.salida_id}, Material:{salida.material_id},"
+                    f" Produccion:{salida.produccion_id}, Usuario:{salida.usuario_id},"
+                    f" Fecha de salida:{salida.salida_fecha}, Cantidad:{salida.salida_cantidad}"
+                )
+                print("-------------------------------------------")
+        print("\n Conexión exitosa a la base de datos")
+    except Exception as e:
+        print("Error:", e)
+
+def ver_trabajos():
+    try:
+        trabajos_asignados_dao = TrabajoAsignadoDAO() 
+        trabajos = trabajos_asignados_dao.obtener_todos()
+        print("\n=== Trabajos Asignados en el Sistema ===")
+        if len(trabajos) == 0:
+            print("No hay trabajos registrados")
+        else:
+            for trabajo in trabajos:
+                print("-------------------------------------------")
+                print(
+                    f"ID:{trabajo.trabajo_id}, Trabajador:{trabajo.trabajador_id},"
+                    f" Produccion:{trabajo.produccion_id}, Nombre del trabajo:{trabajo.trabajo_nombre},"
+                    f" Fecha del trabajo:{trabajo.trabajo_fecha}, Estado del trabajo:{trabajo.trabajo_estado}"
+                )
+                print("-------------------------------------------")
+        print("\n Conexión exitosa a la base de datos")
+    except Exception as e:
+        print("Error:", e)
 
 
 # ==========================================
@@ -335,10 +380,13 @@ def main():
         print("2. Módulo: Clientes Registrados")
         print("3. Módulo: Inventario de Materiales")
         print("4. Módulo: Historial de Entradas")
-        print("5. Salir de la Aplicación")
+        print("5. Módulo: Órdenes de Producción (Nuevo)")
+        print("6. Módulo: Salidas de Materiales (Nuevo)")
+        print("7. Módulo: Trabajos Asignados (Nuevo)")
+        print("8. Salir de la Aplicación")
 
         try:
-            opcion = int(input("\nSelecciona un submódulo (1-5): "))
+            opcion = int(input("\nSelecciona un submódulo (1-8): "))
             match opcion:
                 case 1:
                     submenu("Usuarios", ver_usuarios, insertar_usuario, actualizar_usuario, eliminar_usuario)
@@ -349,10 +397,16 @@ def main():
                 case 4:
                     submenu("Entradas de Almacén", ver_entradas_materiales, insertar_entrada, es_movimiento=True)
                 case 5:
+                    submenu("Órdenes de Producción", ver_ordenes_produccion, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
+                case 6:
+                    submenu("Salidas de Materiales", ver_salidas, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
+                case 7:
+                    submenu("Trabajos Asignados", ver_trabajos, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
+                case 8:
                     print("Cerrando sesión en SGT Integrador... ¡Hasta luego!")
                     break
                 case _:
-                    print("Opción fuera de rango. Elige entre 1 y 5.")
+                    print("Opción fuera de rango. Elige entre 1 y 8.")
         except ValueError:
             print("Entrada no válida. Elige una opción del menú numérico.")
 
