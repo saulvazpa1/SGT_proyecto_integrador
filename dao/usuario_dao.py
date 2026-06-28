@@ -41,13 +41,13 @@ class UsuarioDAO:
         cursor.execute(
             sql,
             (usuario.usuario_id,
-             usuario.usuario_nombre,
-             usuario.usuario_apellidop,
-             usuario.usuario_apellidom,
-             usuario.usuario_telefono,
-             usuario.usuario_correo,
-             usuario.usuario_password,
-             usuario.rol_id)
+            usuario.usuario_nombre,
+            usuario.usuario_apellidop,
+            usuario.usuario_apellidom,
+            usuario.usuario_telefono,
+            usuario.usuario_correo,
+            usuario.usuario_password,
+            usuario.rol_id)
         )
         conexion.commit()
         cursor.close()
@@ -66,13 +66,13 @@ class UsuarioDAO:
         cursor.execute(
             sql,
             (usuario.usuario_nombre,
-             usuario.usuario_apellidop,
-             usuario.usuario_apellidom,
-             usuario.usuario_telefono,
-             usuario.usuario_correo,
-             usuario.usuario_password,
-             usuario.rol_id,
-             usuario.usuario_id)
+            usuario.usuario_apellidop,
+            usuario.usuario_apellidom,
+            usuario.usuario_telefono,
+            usuario.usuario_correo,
+            usuario.usuario_password,
+            usuario.rol_id,
+            usuario.usuario_id)
         )
         conexion.commit()
         cursor.close()

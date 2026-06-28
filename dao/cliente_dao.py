@@ -42,14 +42,14 @@ class ClienteDAO:
         cursor.execute(
             sql,
             (cliente.cliente_id,
-             cliente.cliente_nombre,
-             cliente.cliente_telefono,
-             cliente.cliente_correo,
-             cliente.cliente_calle,
-             cliente.cliente_numero,
-             cliente.cliente_municipio,
-             cliente.cliente_estado,
-             cliente.cliente_codigopostal)
+            cliente.cliente_nombre,
+            cliente.cliente_telefono,
+            cliente.cliente_correo,
+            cliente.cliente_calle,
+            cliente.cliente_numero,
+            cliente.cliente_municipio,
+            cliente.cliente_estado,
+            cliente.cliente_codigopostal)
         )
         conexion.commit()
         cursor.close()
@@ -68,14 +68,14 @@ class ClienteDAO:
         cursor.execute(
             sql,
             (cliente.cliente_nombre,
-             cliente.cliente_telefono,
-             cliente.cliente_correo,
-             cliente.cliente_calle,
-             cliente.cliente_numero,
-             cliente.cliente_municipio,
-             cliente.cliente_estado,
-             cliente.cliente_codigopostal,
-             cliente.cliente_id)
+            cliente.cliente_telefono,
+            cliente.cliente_correo,
+            cliente.cliente_calle,
+            cliente.cliente_numero,
+            cliente.cliente_municipio,
+            cliente.cliente_estado,
+            cliente.cliente_codigopostal,
+            cliente.cliente_id)
         )
         conexion.commit()
         cursor.close()

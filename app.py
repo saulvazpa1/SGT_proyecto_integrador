@@ -4,6 +4,9 @@ from models.usuario import Usuario
 from dao.cliente_dao import ClienteDAO
 
 from dao.entrada_material_dao import EntradaMaterialDAO #Carpeta/archivo/clase
+from dao.orden_produccion_dao import OrdenProduccionDAO
+from dao.salida_material_dao import SalidaMaterialDAO
+from dao.trabajos_asignados_dao import TrabajoAsignadoDAO
 
 
 
@@ -29,7 +32,7 @@ def ver_usuarios():
                     f"Password:{usuario.usuario_password},Rol ID:{usuario.rol_id}"
                 )
                 print("-------------------------------------------")
-        print("\n Conexión exitosa ala base de datos")
+        print("\n Conexión exitosa a la base de datos")
     except Exception as e:
         print("Error:")
         print(e)
@@ -62,7 +65,7 @@ def ver_clientes():
                     f" CP:{cliente.cliente_codigopostal}"
                 )
                 print("-------------------------------------------")
-        print("\n Conexión exitosa ala base de datos")
+        print("\n Conexión exitosa a la base de datos")
     except Exception as e:
         print("Error:")
         print(e)
@@ -91,7 +94,7 @@ def ver_entradas_materiales():
                     f" Cantidad:{entrada.entrada_cantidad}"
                 )
                 print("-------------------------------------------")
-        print("\n Conexión exitosa ala base de datos")
+        print("\n Conexión exitosa a la base de datos")
     except Exception as e:
         print("Error:")
         print(e)
@@ -123,10 +126,102 @@ def ver_materiales():
                     f" Marca:{mat.material_marca}, Precio:${mat.material_precio}"
                 )
                 print("-------------------------------------------")
-        print("\n Conexión exitosa ala base de datos")
+        print("\n Conexión exitosa a la base de datos")
     except Exception as e:
         print("Error:")
         print(e)
 
 if __name__ == "__main__":
     ver_materiales()
+
+def ver_ordenes_produccion():
+    try:
+        orden_produccion_dao = OrdenProduccionDAO() 
+
+        ordenes = orden_produccion_dao.obtener_todos()
+
+        print("=== Ordenes en el Sistema ===")
+
+    #si es que no hay ordenes
+        if len(ordenes) == 0:
+            print("No hay ordenes registradas")
+        else:
+            for orden in ordenes:
+                print("-------------------------------------------")
+
+                print(
+                    f"ID:{orden.produccion_id},Pedido:{orden.pedido_id},"
+                    f"Producto:{orden.producto_id},Encargado de producción:{orden.encargado_produccion_id},"
+                    f"Cantidad:{orden.produccion_cantidad},Estado de produccion:{orden.produccion_estado},"
+                    f"Inicio:{orden.fecha_inicio},Entrega:{orden.fecha_entrega},"
+                    f"Tipo de tela:{orden.tela_tipo},Ancho de tela:{orden.tela_ancho},"
+                    f"Largo de tela:{orden.tela_largo,},Patron Largo:{orden.patron_largo},"
+                    f"Patron ancho:{orden.patron_ancho},Sobrante:{orden.retazo_sobrante},"
+                    f"Total de tela utilizada:{orden.tela_total_utilizada}"
+                )
+                print("-------------------------------------------")
+        print("\n Conexión exitosa a la base de datos")
+    except Exception as e:
+        print("Error:")
+        print(e)
+
+if __name__ == "__main__":
+    ver_ordenes_produccion()
+
+def ver_salidas():
+    try:
+        salida_material_dao = SalidaMaterialDAO() 
+
+        ordenes = salida_material_dao.obtener_todos()
+
+        print("=== Salidas en el Sistema ===")
+
+    #si es que no hay salidas
+        if len(ordenes) == 0:
+            print("No hay ordenes registradas")
+        else:
+            for salida in ordenes:
+                print("-------------------------------------------")
+
+                print(
+                    f"ID:{salida.salida_id},Material:{salida.material_id},"
+                    f"Produccion:{salida.produccion_id},Usuario:{salida.usuario_id},"
+                    f"Fecha de salida:{salida.salida_fecha},Cantidad:{salida.salida_cantidad}"
+                )
+                print("-------------------------------------------")
+        print("\n Conexión exitosa a la base de datos")
+    except Exception as e:
+        print("Error:")
+        print(e)
+
+if __name__ == "__main__":
+    ver_salidas()
+
+def ver_trabajos():
+    try:
+        trabajos_asignados_dao= TrabajoAsignadoDAO() 
+
+        trabajos = trabajos_asignados_dao.obtener_todos()
+
+        print("=== Trabajos en el Sistema ===")
+
+    #si es que no hay salidas
+        if len(trabajos) == 0:
+            print("No hay trabajos registrados")
+        else:
+            for trabajo in trabajos:
+                print("-------------------------------------------")
+
+                print(
+                    f"ID:{trabajo.trabajo_id},Trabajador:{trabajo.trabajador_id},"
+                    f"Produccion:{trabajo.produccion_id},Nombre del trabajo:{trabajo.trabajo_nombre},"
+                    f"Fecha del trabajo:{trabajo.trabajo_fecha},Estado del trabajo:{trabajo.trbajo_estado}"
+                )
+                print("-------------------------------------------")
+        print("\n Conexión exitosa a la base de datos")
+    except Exception as e:
+        print("Error:")
+        print(e)
+
+if __name__ == "__main__":
+    ver_trabajos()
