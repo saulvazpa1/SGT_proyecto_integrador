@@ -48,14 +48,14 @@ class MaterialDAO:
         cursor.execute(
             sql,
             (material.material_id,
-             material.material_nombre,
-             material.material_tipo,
-             material.material_color,
-             material.material_cantidad,
-             material.material_unidad,
-             material.material_marca,
-             material.material_proveedor,
-             material.material_precio)
+            material.material_nombre,
+            material.material_tipo,
+            material.material_color,
+            material.material_cantidad,
+            material.material_unidad,
+            material.material_marca,
+            material.material_proveedor,
+            material.material_precio)
         )
 
         conexion.commit()
@@ -78,14 +78,14 @@ class MaterialDAO:
         cursor.execute(
             sql,
             (material.material_nombre,
-             material.material_tipo,
-             material.material_color,
-             material.material_cantidad,
-             material.material_unidad,
-             material.material_marca,
-             material.material_proveedor,
-             material.material_precio,
-             material.material_id)
+            material.material_tipo,
+            material.material_color,
+            material.material_cantidad,
+            material.material_unidad,
+            material.material_marca,
+            material.material_proveedor,
+            material.material_precio,
+            material.material_id)
         )
 
         conexion.commit()#confirmar un edicion de base de datos

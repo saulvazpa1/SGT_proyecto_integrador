@@ -44,10 +44,10 @@ class EntradaMaterialDAO:
         cursor.execute(
             sql,
             (entrada.entrada_id,
-             entrada.material_id,
-             entrada.usuario_id,
-             entrada.entrada_fecha,
-             entrada.entrada_cantidad)
+            entrada.material_id,
+            entrada.usuario_id,
+            entrada.entrada_fecha,
+            entrada.entrada_cantidad)
         )
 
         conexion.commit()
@@ -69,10 +69,10 @@ class EntradaMaterialDAO:
         cursor.execute(
             sql,
             (entrada.material_id,
-             entrada.usuario_id,
-             entrada.entrada_fecha,
-             entrada.entrada_cantidad,
-             entrada.entrada_id)
+            entrada.usuario_id,
+            entrada.entrada_fecha,
+            entrada.entrada_cantidad,
+            entrada.entrada_id)
         )
 
         conexion.commit()#confirmar un edicion de base de datos
