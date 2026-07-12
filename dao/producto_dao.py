@@ -4,64 +4,55 @@
 from database.conexion import Conexion
 from models.producto import Producto
 
-
 class ProductoDAO:
 
     # SELECT * FROM productos
+    # SELECT * FROM vista_productos (Ajustado a sus 7 columnas reales)
     def obtener_todos(self):
         conexion = Conexion.obtener_conexion()
         cursor = conexion.cursor()
-        cursor.execute("SELECT * FROM productos")
+        
+        # Llama a tu vista tal cual, sin complicaciones
+        cursor.execute("SELECT * FROM vista_productos")
         registros = cursor.fetchall()
-
+        
         productos = []
-        for registro in registros:
+        for reg in registros:
             producto = Producto(
-                registro[0],  # producto_id
-                registro[1],  # producto_nombre
-                registro[2],  # producto_categoria
-                registro[3],  # producto_precio
-                registro[4],  # producto_stock
-                registro[5],  # producto_descripcion
-                registro[6],  # producto_unidad_medida
-                registro[7],  # producto_color
+                producto_id=reg[0],            # producto_id
+                producto_nombre=reg[1],        # articulo
+                producto_categoria=reg[2],     # categoria
+                producto_precio=reg[3],        # precio_venta
+                producto_stock=reg[4],         # inventario_disponible
+                producto_descripcion="",       # Se deja vacío porque tu vista no tiene descripción
+                producto_unidad_medida=reg[5],  # unidad
+                producto_color=reg[6]          # producto_color
             )
             productos.append(producto)
 
         cursor.close()
         conexion.close()
         return productos
-
-    # Crear insertar
+    # Insertar un nuevo producto
     def insertar(self, producto):
         conexion = Conexion.obtener_conexion()
         cursor = conexion.cursor()
 
         sql = """
-        INSERT INTO productos(
-            producto_id,
-            producto_nombre,
-            producto_categoria,
-            producto_precio,
-            producto_stock,
-            producto_descripcion,
-            producto_unidad_medida,
-            producto_color
-        )
+        INSERT INTO productos(producto_id, producto_nombre, producto_categoria, producto_precio, producto_stock, producto_descripcion, producto_unidad_medida, producto_color)
         VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
         """
-
         cursor.execute(
             sql,
             (
-                producto.producto_id,
-                producto.producto_nombre,
+                producto.producto_id, 
+                producto.producto_nombre, 
                 producto.producto_categoria,
-                producto.producto_precio,
-                producto.producto_stock,
+                producto.producto_precio, 
+                producto.producto_stock, 
                 producto.producto_descripcion,
-                producto.producto_unidad_medida,
-                producto.producto_color,
+                producto.producto_unidad_medida, 
+                producto.producto_color
             )
         )
 
@@ -69,7 +60,7 @@ class ProductoDAO:
         cursor.close()
         conexion.close()
 
-    # Actualizar
+    # Actualizar un producto existente
     def actualizar(self, producto):
         conexion = Conexion.obtener_conexion()
         cursor = conexion.cursor()
@@ -96,7 +87,7 @@ class ProductoDAO:
                 producto.producto_descripcion,
                 producto.producto_unidad_medida,
                 producto.producto_color,
-                producto.producto_id,
+                producto.producto_id
             )
         )
 
@@ -118,7 +109,7 @@ class ProductoDAO:
         cursor.close()
         conexion.close()
 
-    # Obtener el último ID
+    # Obtener el último ID para el auto-incremental manual
     def obtener_ultimo_id(self):
         conexion = Conexion.obtener_conexion()
         cursor = conexion.cursor()
@@ -129,7 +120,6 @@ class ProductoDAO:
         cursor.close()
         conexion.close()
 
-        if resultado[0] is None:
-            return 0
-
-        return resultado[0]
+        if resultado and resultado[0] is not None:
+            return resultado[0]
+        return 0
