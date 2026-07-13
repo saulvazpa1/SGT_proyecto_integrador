@@ -7,26 +7,26 @@ from models.producto import Producto
 class ProductoDAO:
 
     # SELECT * FROM productos
-    # SELECT * FROM vista_productos (Ajustado a sus 7 columnas reales)
+   
     def obtener_todos(self):
         conexion = Conexion.obtener_conexion()
         cursor = conexion.cursor()
         
-        # Llama a tu vista tal cual, sin complicaciones
+        
         cursor.execute("SELECT * FROM vista_productos")
         registros = cursor.fetchall()
         
         productos = []
         for reg in registros:
             producto = Producto(
-                producto_id=reg[0],            # producto_id
-                producto_nombre=reg[1],        # articulo
-                producto_categoria=reg[2],     # categoria
-                producto_precio=reg[3],        # precio_venta
-                producto_stock=reg[4],         # inventario_disponible
+                producto_id=reg[0],            
+                producto_nombre=reg[1],        
+                producto_categoria=reg[2],    
+                producto_precio=reg[3],        
+                producto_stock=reg[4],         
                 producto_descripcion="",       # Se deja vacío porque tu vista no tiene descripción
-                producto_unidad_medida=reg[5],  # unidad
-                producto_color=reg[6]          # producto_color
+                producto_unidad_medida=reg[5],  
+                producto_color=reg[6]          
             )
             productos.append(producto)
 

@@ -3,7 +3,7 @@ from models.usuario import Usuario
 from models.cliente import Cliente
 from models.material import Material
 from models.entrada_material import EntradaMaterial
-from database.conexion import Conexion  # Ajusta la ruta según tu proyecto
+from database.conexion import Conexion  
 from models.orden_produccion import OrdenProduccion
 
 
@@ -523,14 +523,14 @@ def ver_ordenes_produccion():
         else:
             for orden in ordenes:
                 print("-------------------------------------------")
-                # Imprimimos los datos generales
+                
                 print(
                     f"ID Orden:{orden.produccion_id}, Pedido ID:{orden.pedido_id}, "
                     f"Producto ID:{orden.producto_id}, Encargado ID:{orden.encargado_produccion_id}\n"
                     f"Cantidad:{orden.produccion_cantidad}, Estado:{orden.produccion_estado}, "
                     f"Inicio:{orden.fecha_inicio}, Entrega:{orden.fecha_entrega}"
                 )
-                # ¡Aquí agregamos los datos de la tela que te faltaban mostrar!
+               
                 print(
                     f"Tipo Tela:{orden.tela_tipo}, Ancho:{orden.tela_ancho}m, Largo:{orden.tela_largo}m\n"
                     f"Patrón Largo:{orden.patron_largo}cm, Patrón Ancho:{orden.patron_ancho}cm\n"
@@ -545,8 +545,7 @@ def ver_ordenes_produccion():
 def insertar_orden_produccion():
     print("\n=== Registrar Nueva Orden de Producción ===")
     
-    # Pedimos los datos base
-    # ver_pedidos() # Puedes descomentar esto si quieres listar los pedidos antes
+    
     pedido_id = int(input("Escribe el ID del pedido asociado: "))
     ver_productos()  
     producto_id = int(input("Escribe el ID del producto a fabricar: "))
@@ -557,7 +556,7 @@ def insertar_orden_produccion():
     fecha_ini = input("Escribe la fecha de inicio (AAAA-MM-DD): ")
     fecha_ent = input("Escribe la fecha de entrega (AAAA-MM-DD): ")
     
-    # Pedimos los datos de confección
+    
     tela_tipo = input("Escribe el tipo de tela: ")
     tela_ancho = float(input("Escribe el ancho de la tela (metros): "))
     tela_largo = float(input("Escribe el largo de la tela (metros): "))
@@ -569,42 +568,40 @@ def insertar_orden_produccion():
     try:
         orden_dao = OrdenProduccionDAO()
         
-        # Calculamos tu ID correlativo manual como lo manejas en Usuarios
+       
         id_nuevo = orden_dao.obtener_ultimo_id() + 1
         
-        # Enviamos los 15 parámetros en el orden exacto que requiere el desempaquetado de tu DAO
+       
         nueva_orden = OrdenProduccion(
-            id_nuevo,              # 1. produccion_id
-            pedido_id,             # 2. pedido_id (¡El que nos faltaba!)
-            producto_id,           # 3. producto_id
-            encargado_id,          # 4. encargado_produccion_id
-            cantidad,              # 5. produccion_cantidad
-            estado,                # 6. produccion_estado
-            fecha_ini,             # 7. fecha_inicio
-            fecha_ent,             # 8. fecha_entrega
-            tela_tipo,             # 9. tela_tipo
-            tela_ancho,            # 10. tela_ancho
-            tela_largo,            # 11. tela_largo
-            patron_largo,          # 12. patron_largo
-            patron_ancho,          # 13. patron_ancho
-            retazo_sobrante,       # 14. retazo_sobrante
-            tela_usada             # 15. tela_total_utilizada
+            pedido_id,            
+            producto_id,           
+            encargado_id,         
+            cantidad,              
+            estado,               
+            fecha_ini,             #
+            fecha_ent,             
+            tela_tipo,             
+            tela_ancho,            
+            tela_largo,           
+            patron_largo,          
+            patron_ancho,          
+            retazo_sobrante,      
+            tela_usada             
         )
         
         orden_dao.insertar(nueva_orden)
         print("Inserción realizada con éxito")
     except Exception as e:
-        print("Error al insertar un nuevo usuario\n", e) # Mantenemos tu formato de print para errores
+        print("Error al insertar un nuevo usuario\n", e) 
 def actualizar_orden_produccion():
     print("=== Selecciona la Orden de Producción a actualizar ===")
     try:
         orden_dao = OrdenProduccionDAO()
-        ver_ordenes_produccion()  # Para que veas los IDs existentes
-        
-        # Pedimos el ID de la orden que se va a modificar
+        ver_ordenes_produccion()  
+       
         id = int(input("Escribe el ID de la orden a actualizar: "))
         
-        # Pedimos los 14 datos restantes en el orden exacto del modelo
+        
         pedido_id = int(input("Escribe el nuevo ID del pedido asociado: "))
         producto_id = int(input("Escribe el nuevo ID del producto: "))
         encargado_id = int(input("Escribe el nuevo ID del encargado de taller: "))
@@ -621,7 +618,7 @@ def actualizar_orden_produccion():
         retazo_sobrante = float(input("Escribe el nuevo retazo sobrante estimado: "))
         tela_usada = float(input("Escribe los nuevos metros de tela totales utilizados: "))
         
-        # Armamos el objeto con los 15 parámetros idénticos al constructor
+       
         orden = OrdenProduccion(
             id,
             pedido_id,
@@ -641,7 +638,7 @@ def actualizar_orden_produccion():
         )
         
         orden_dao.actualizar(orden)
-        print(f"El usuario {id} se ha actualizado exitosamente") # Manteniendo tu estilo de print
+        print(f"El usuario {id} se ha actualizado exitosamente") 
     except Exception as e:
         print(" Error al actualizar usuario\n", e)
 def eliminar_orden_produccion():

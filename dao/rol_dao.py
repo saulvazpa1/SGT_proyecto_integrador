@@ -8,9 +8,9 @@ class RolDAO:
 # SELECT * FROM roles
     def obtener_todos(self):
         conexion = Conexion.obtener_conexion()
-        # objeto para postgresql 
+        
         cursor = conexion.cursor()
-        # que comando ejecutar
+      
 
         cursor.execute("SELECT * FROM roles")
         registros = cursor.fetchall() # nombre de la tabla/el resultado de cursor fetchall

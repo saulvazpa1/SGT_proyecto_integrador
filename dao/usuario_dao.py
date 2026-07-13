@@ -17,8 +17,7 @@ class UsuarioDAO:
         
         usuarios = []
         for reg in registros:
-            # Creamos el objeto mapeando los datos de la vista.
-            # Nota: Asegúrate de adaptar los atributos según tu constructor de la clase Usuario.
+           
             usuario = Usuario(
                 usuario_id=reg[0],
                 usuario_nombre=reg[1],       
