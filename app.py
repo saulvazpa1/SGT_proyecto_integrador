@@ -631,88 +631,103 @@ def submenu(nombre, ver, insertar=None, actualizar=None, eliminar=None):
 
 def main():
 
-    while True:
+     while True:
 
-        print("\n=========================================")
-        print(" SISTEMA DE GESTIÓN DE PRODUCCIÓN TEXTIL ")
-        print("=========================================")
-        print("1. Usuarios")
-        print("2. Clientes")
-        print("3. Materiales")
-        print("4. Entradas de Material")
-        print("5. Productos")
-        print("6. Pedidos")
-        print("7. Pagos")
-        print("8. Roles")
-        opcion = int(input("Seleccione una opción: "))
+         print("\n=========================================")
+         print(" SISTEMA DE GESTIÓN DE PRODUCCIÓN TEXTIL ")
+         print("=========================================")
+         print("1. Usuarios")
+         print("2. Clientes")
+         print("3. Materiales")
+         print("4. Entradas de Material")
+         print("5. Productos")
+         print("6. Pedidos")
+         print("7. Pagos")
+         print("8. Roles")
+         opcion = int(input("Seleccione una opción: "))
 
-        match opcion:
+         match opcion:
 
-            case 1:
-                submenu(
-                    "Usuarios",
-                    ver_usuarios
-                )
+             case 1:
+                 submenu(
+                     "Usuarios",
+                     ver_usuarios
+                 )
 
-            case 2:
-                submenu(
-                    "Clientes",
-                    ver_clientes
-                )
+             case 2:
+                 submenu(
+                     "Clientes",
+                     ver_clientes
+                 )
 
-            case 3:
-                submenu(
-                    "Materiales",
-                    ver_materiales
-                )
+             case 3:
+                 submenu(
+                     "Materiales",
+                     ver_materiales
+                 )
 
-            case 4:
-                submenu(
-                    "Entradas de Material",
-                    ver_entradas_materiales
-                )
+             case 4:
+                 submenu(
+                     "Entradas de Material",
+                     ver_entradas_materiales
+                 )
 
-            case 5:
-                submenu(
-                    "Productos",
-                    ver_productos,
-                    insertar_producto,
-                    actualizar_producto,
-                    eliminar_producto
-                )
+             case 5:
+                 submenu(
+                     "Productos",
+                     ver_productos,
+                     insertar_producto,
+                     actualizar_producto,
+                     eliminar_producto
+                 )
 
-            case 6:
-                submenu(
-                    "Pedidos",
-                    ver_pedidos,
-                    insertar_pedido,
-                    actualizar_pedido,
-                    eliminar_pedido
-                )
+             case 6:
+                 submenu(
+                     "Pedidos",
+                     ver_pedidos,
+                     insertar_pedido,
+                     actualizar_pedido,
+                     eliminar_pedido
+                 )
 
-            case 7:
-                submenu(
-                    "Pagos",
-                    ver_pagos,
-                    insertar_pago,
-                    actualizar_pago,
-                    eliminar_pago
-                )
+             case 7:
+                 submenu(
+                     "Pagos",
+                     ver_pagos,
+                     insertar_pago,
+                     actualizar_pago,
+                     eliminar_pago
+                 )
 
-            case 8:
-                submenu(
-                    "Roles",
-                    ver_roles,
-                    insertar_rol,
-                    actualizar_rol,
-                    eliminar_rol
-                )
+             case 8:
+                 submenu(
+                     "Roles",
+                     ver_roles,
+                     insertar_rol,
+                     actualizar_rol,
+                     eliminar_rol
+                 )
 
-            case 9:
-                print("Gracias por utilizar el sistema.")
-                break
+             case 9:
+                 print("Gracias por utilizar el sistema.")
+                 break
 
-            case _:
-                print("Opción inválida.")
+             case _:
+                 print("Opción inválida.")
 if __name__ == "__main__":
     main()
+# import flet as ft
+# from views.login import LoginView
+
+# def main(page: ft.Page):
+#     page.title = "Sistema de Gestión Textil"
+#     page.window.width = 1400
+#     page.window.height = 800
+#     page.window.resizable = True
+#     page.theme_mode = ft.ThemeMode.LIGHT
+#     page.padding = 0
+
+#     login = LoginView(page)
+#     page.add(login)
+
+# ft.run(main)
