@@ -98,8 +98,8 @@ class UsuarioDAO:
 
         cursor.execute(
             "DELETE FROM usuarios WHERE usuario_id = %s",
-             (usuario_id,)
-             )
+            (usuario_id,)
+            )
         conexion.commit()
         cursor.close()
         conexion.close()
@@ -116,3 +116,32 @@ class UsuarioDAO:
         if resultado is None:
             return 0
         return resultado[0]
+
+    #Inicio de sesion
+    def iniciar_sesion(self, correo, password):
+        conexion = Conexion.obtener_conexion()
+        cursor = conexion.cursor()
+
+        sql = """
+        SELECT * FROM usuarios
+        WHERE usuario_correo = %s
+        AND usuario_password = %s
+        """
+
+        cursor.execute(sql, (correo, password))
+        registro = cursor.fetchone()
+        cursor.close()
+        conexion.close()
+
+        if registro:
+            return Usuario(
+                usuario_id = registro[0],
+                usuario_nombre = registro[1],
+                usuario_apellidop = registro[2],
+                usuario_apellidom = registro[3],
+                usuario_telefono = registro[4],
+                usuario_correo = registro[5],
+                usuario_password = registro[6],
+                rol_id = registro[7]
+            )
+        return None

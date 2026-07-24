@@ -1,3 +1,6 @@
+import flet as ft
+from ui.main_login import main_login
+
 from database.conexion import Conexion    # Carpeta/archivo/clase 
 from models.usuario import Usuario
 from models.cliente import Cliente
@@ -371,44 +374,46 @@ def submenu(modulo, f_ver, f_ins, f_act=None, f_elim=None, es_movimiento=False):
         except ValueError:
             print("Por favor, ingresa solo dígitos enteros.")
 
-def main():
-    while True:
-        print("\n=========================================")
-        print("    SISTEMA DE GESTIÓN SGT INTEGRADOR    ")
-        print("=========================================")
-        print("1. Módulo: Usuarios del Sistema")
-        print("2. Módulo: Clientes Registrados")
-        print("3. Módulo: Inventario de Materiales")
-        print("4. Módulo: Historial de Entradas")
-        print("5. Módulo: Órdenes de Producción (Nuevo)")
-        print("6. Módulo: Salidas de Materiales (Nuevo)")
-        print("7. Módulo: Trabajos Asignados (Nuevo)")
-        print("8. Salir de la Aplicación")
+ft.app(target = main_login)
 
-        try:
-            opcion = int(input("\nSelecciona un submódulo (1-8): "))
-            match opcion:
-                case 1:
-                    submenu("Usuarios", ver_usuarios, insertar_usuario, actualizar_usuario, eliminar_usuario)
-                case 2:
-                    submenu("Clientes", ver_clientes, insertar_cliente, actualizar_cliente, eliminar_cliente)
-                case 3:
-                    submenu("Inventario", ver_materiales, insertar_material, actualizar_material, eliminar_material)
-                case 4:
-                    submenu("Entradas de Almacén", ver_entradas_materiales, insertar_entrada, es_movimiento=True)
-                case 5:
-                    submenu("Órdenes de Producción", ver_ordenes_produccion, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
-                case 6:
-                    submenu("Salidas de Materiales", ver_salidas, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
-                case 7:
-                    submenu("Trabajos Asignados", ver_trabajos, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
-                case 8:
-                    print("Cerrando sesión en SGT Integrador... ¡Hasta luego!")
-                    break
-                case _:
-                    print("Opción fuera de rango. Elige entre 1 y 8.")
-        except ValueError:
-            print("Entrada no válida. Elige una opción del menú numérico.")
+#def main():
+ #   while True:
+  #      print("\n=========================================")
+   #     print("    SISTEMA DE GESTIÓN SGT INTEGRADOR    ")
+    #    print("=========================================")
+     #   print("1. Módulo: Usuarios del Sistema")
+      #  print("2. Módulo: Clientes Registrados")
+       # print("3. Módulo: Inventario de Materiales")
+        #print("4. Módulo: Historial de Entradas")
+        #print("5. Módulo: Órdenes de Producción (Nuevo)")
+        #print("6. Módulo: Salidas de Materiales (Nuevo)")
+        #print("7. Módulo: Trabajos Asignados (Nuevo)")
+        #print("8. Salir de la Aplicación")
 
-if __name__ == "__main__":
-    main()
+        #try:
+         #   opcion = int(input("\nSelecciona un submódulo (1-8): "))
+          #  match opcion:
+           #     case 1:
+            #        submenu("Usuarios", ver_usuarios, insertar_usuario, actualizar_usuario, eliminar_usuario)
+             #   case 2:
+              #      submenu("Clientes", ver_clientes, insertar_cliente, actualizar_cliente, eliminar_cliente)
+               # case 3:
+                #    submenu("Inventario", ver_materiales, insertar_material, actualizar_material, eliminar_material)
+                #case 4:
+                 #   submenu("Entradas de Almacén", ver_entradas_materiales, insertar_entrada, es_movimiento=True)
+                #case 5:
+                 #   submenu("Órdenes de Producción", ver_ordenes_produccion, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
+                #case 6:
+                 #   submenu("Salidas de Materiales", ver_salidas, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
+                #case 7:
+                 #   submenu("Trabajos Asignados", ver_trabajos, lambda: print("Función insertar en desarrollo..."), es_movimiento=True)
+                #case 8:
+                 #   print("Cerrando sesión en SGT Integrador... ¡Hasta luego!")
+                  #  break
+                #case _:
+                 #   print("Opción fuera de rango. Elige entre 1 y 8.")
+        #except ValueError:
+         #   print("Entrada no válida. Elige una opción del menú numérico.")
+
+#if __name__ == "__main__":
+ #   main()
