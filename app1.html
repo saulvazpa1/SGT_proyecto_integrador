@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGT - Sistema de Gestión Textil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f8fafc;
+            color: #1e293b;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 290px;
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #1e293b;
+        }
+
+        .sidebar h2 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+            color: #38bdf8;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #334155;
+            margin: 15px 0;
+        }
+
+        .section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 5px;
+        }
+
+        .role-btn {
+            background-color: #1e293b;
+            color: #cbd5e1;
+            border: none;
+            padding: 8px 4px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .role-btn:hover { background-color: #334155; color: #ffffff; }
+        .role-btn.active { background-color: #2563eb; color: #ffffff; }
+
+        .menu-dinamico {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .submenu-btn {
+            background: transparent;
+            color: #cbd5e1;
+            border: none;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .submenu-btn:hover { background-color: #1e293b; color: #ffffff; }
+        .submenu-btn.active { background-color: #334155; color: #38bdf8; font-weight: 600; }
+
+        /* --- ÁREA PRINCIPAL --- */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        h1 { font-size: 30px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+        .subtitle { color: #64748b; margin-bottom: 25px; font-size: 15px; }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .card {
+            background-color: #ffffff;
+            padding: 22px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .card-title { font-size: 13px; color: #64748b; font-weight: 600; margin-bottom: 6px; }
+        .card-value { font-size: 26px; font-weight: 700; color: #1e3a8a; }
+
+        /* TABLAS MODIFICADAS SEGÚN ATRIBUTOS SQL */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-top: 15px;
+        }
+
+        th, td { padding: 14px 18px; text-align: left; }
+        th { background-color: #f8fafc; font-size: 13px; font-weight: 700; color: #475569; border-bottom: 2px solid #e2e8f0; }
+        td { font-size: 13px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+
+        /* FORMULARIOS BASE DE DATOS */
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: #475569; }
+        .form-group input, .form-group select {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            width: 180px;
+        }
+
+        .submit-btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .submit-btn:hover { background-color: #1d4ed8; }
+
+        .calc-box {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            max-width: 550px;
+        }
+        .calc-result { font-weight: 600; color: #166534; white-space: pre-line; margin-top: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>SGT TEXTIL</h2>
+        <div class="divider"></div>
+        
+        <div class="section-title">Cambiar Rol Activo</div>
+        <div class="role-selector">
+            <button class="role-btn active" onclick="cambiarRol('Administrador', this)">👑 Admin</button>
+            <button class="role-btn" onclick="cambiarRol('Vendedor', this)">💰 Vend</button>
+            <button class="role-btn" onclick="cambiarRol('Producción', this)">🏭 Prod</button>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-title" id="submenu-header">Opciones: Administrador</div>
+        
+        <div class="menu-dinamico" id="menu-opciones">
+            </div>
+    </div>
+
+    <div class="main-content" id="vista-contenedor">
+        </div>
+
+    <script>
+        let rolActual = "Administrador";
+
+        // Estructura de navegación solicitada
+        const esquemasMenu = {
+            "Administrador": [
+                { text: "📊 Dashboard", id: "admin-dashboard" },
+                { text: "👥 Usuarios", id: "admin-usuarios" },
+                { text: "🔐 Roles", id: "admin-roles" },
+                { text: "📦 Productos", id: "admin-productos" },
+                { text: "📝 Pedidos", id: "admin-pedidos" },
+                { text: "🏭 Producción", id: "admin-produccion" },
+                { text: "📈 Reportes", id: "admin-reportes" }
+            ],
+            "Vendedor": [
+                { text: "📊 Dashboard", id: "vendedor-dashboard" },
+                { text: "👤 Clientes", id: "vendedor-clientes" },
+                { text: "📝 Pedidos", id: "vendedor-pedidos" },
+                { text: "📦 Catálogo de Productos", id: "vendedor-catalogo" }
+            ],
+            "Producción": [
+                { text: "📊 Dashboard", id: "produccion-dashboard" },
+                { text: "🏭 Órdenes de Producción", id: "produccion-ops" },
+                { text: "📦 Productos", id: "produccion-productos" },
+                { text: "📝 Pedidos Pendientes", id: "produccion-pendientes" }
+            ]
+        };
+
+        function cambiarRol(nuevoRol, botonElemento) {
+            rolActual = nuevoRol;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            botonElemento.classList.add('active');
+            document.getElementById('submenu-header').innerText = `Opciones: ${nuevoRol}`;
+
+            const contenedorMenu = document.getElementById('menu-opciones');
+            contenedorMenu.innerHTML = "";
+
+            esquemasMenu[nuevoRol].forEach((opcion, index) => {
+                const btn = document.createElement('button');
+                btn.className = `submenu-btn ${index === 0 ? 'active' : ''}`;
+                btn.innerText = opcion.text;
+                btn.onclick = () => {
+                    document.querySelectorAll('.submenu-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    cargarVistaPantalla(opcion.id, opcion.text);
+                };
+                contenedorMenu.appendChild(btn);
+            });
+
+            cargarVistaPantalla(esquemasMenu[nuevoRol][0].id, esquemasMenu[nuevoRol][0].text);
+        }
+
+        function cargarVistaPantalla(idVista, tituloOriginal) {
+            const contenedor = document.getElementById('vista-contenedor');
+            contenedor.innerHTML = ""; 
+
+            let html = `<h1>${tituloOriginal}</h1><p class="subtitle">Gestión operativa del SGT.</p>`;
+
+            // ----------------------------------------------------
+            // RENDER CON ATRIBUTOS REALES DEL SQL
+            // ----------------------------------------------------
+            
+            // ADMIN - USUARIOS (Campos exactos de public.usuarios y public.roles)
+            if (idVista === "admin-usuarios") {
+                html += `
+                    <div class="form-container">
+                        <div class="form-group"><label>usuario_nombre</label><input type="text" placeholder="Nombre"></div>
+                        <div class="form-group"><label>usuario_apellidop</label><input type="text" placeholder="Apellido P."></div>
+                        <div class="form-group"><label>usuario_correo</label><input type="email" placeholder="correo@mail.com"></div>
+                        <div class="form-group"><label>rol_id (Llave Foránea)</label>
+                            <select><option value="1">1 - Administrador</option><option value="2">2 - Vendedor</option><option value="3">3 - Producción</option></select>
+                        </div>
+                        <button class="submit-btn">INSERT INTO usuarios</button>
+                    </div>
+                    <table>
+                        <thead><tr><th>usuario_id (PK)</th><th>usuario_nombre</th><th>usuario_correo</th><th>rol_id (FK)</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td>Carlos</td><td>carlos@mail.com</td><td>1</td></tr>
+                            <tr><td>2</td><td>Ana</td><td>ana@mail.com</td><td>2</td></tr>
+                            <tr><td>3</td><td>Ulises</td><td>ulises@mail.com</td><td>3</td></tr>
+                        </tbody>
+                    </table>`;
+            }
+            // ADMIN - ROLES (Campos de public.roles)
+            else if (idVista === "admin-roles") {
+                html += `
+                    <table>
+                        <thead><tr><th>rol_id (PK)</th><th>rol_nombre</th><th>rol_permisos</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td>Administrador</td><td>all_privileges</td></tr>
+                            <tr><td>2</td><td>Vendedor</td><td>create_pedidos, read_productos</td></tr>
+                            <tr><td>3</td><td>Producción</td><td>update_ordenes, read_materiales</td></tr>
+                        </tbody>
+                    </table>`;
+            }
+            // ADMIN/PROD - PRODUCTOS (Campos de public.productos)
+            else if (idVista === "admin-productos" || idVista === "produccion-productos") {
+                html += `
+                    <table>
+                        <thead><tr><th>producto_id (PK)</th><th>producto_nombre</th><th>producto_categoria</th><th>producto_precio</th><th>producto_stock</th><th>producto_color</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td>Bolsa Mandadera Estándar</td><td>Bolsas</td><td>$15.50</td><td>150 pzas</td><td>Verde</td></tr>
+                            <tr><td>2</td><td>Bolsa Mandadera Reforzada</td><td>Bolsas</td><td>$22.00</td><td>80 pzas</td><td>Azul</td></tr>
+                        </tbody>
+                    </table>`;
+            }
+            // VENDEDOR - CLIENTES (Campos de public.clientes)
+            else if (idVista === "vendedor-clientes") {
+                html += `
+                    <div class="form-container">
+                        <div class="form-group"><label>cliente_nombre</label><input type="text" placeholder="Nombre / Razón"></div>
+                        <div class="form-group"><label>cliente_telefono</label><input type="text" placeholder="15 dígitos"></div>
+                        <div class="form-group"><label>cliente_municipio</label><input type="text" placeholder="Municipio"></div>
+                        <button class="submit-btn">INSERT INTO clientes</button>
+                    </div>
+                    <table>
+                        <thead><tr><th>cliente_id (PK)</th><th>cliente_nombre</th><th>cliente_telefono</th><th>cliente_municipio</th><th>cliente_estado</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td>Distribuidora Central</td><td>2461234567</td><td>Xaloztoc</td><td>Tlaxcala</td></tr>
+                        </tbody>
+                    </table>`;
+            }
+            // VENDEDOR/ADMIN - PEDIDOS (Campos de public.pedidos)
+            else if (idVista === "admin-pedidos" || idVista === "vendedor-pedidos") {
+                html += `
+                    <table>
+                        <thead><tr><th>pedido_id (PK)</th><th>cliente_id (FK)</th><th>producto_id (FK)</th><th>pedido_cantidad</th><th>pedido_total</th><th>pedido_estado</th></tr></thead>
+                        <tbody>
+                            <tr><td>101</td><td>1 (Distribuidora)</td><td>1 (Bolsa Estándar)</td><td>500</td><td>$7,750.00</td><td>En Producción</td></tr>
+                        </tbody>
+                    </table>`;
+            }
+            // PRODUCCIÓN - ÓRDENES DE PRODUCCIÓN (Campos analíticos de public.ordenes_produccion)
+            else if (idVista === "produccion-ops" || idVista === "admin-produccion") {
+                html += `
+                    <div class="form-container" style="max-width: 750px;">
+                        <div class="form-group"><label>produccion_cantidad</label><input type="number" id="prod-cant" value="100"></div>
+                        <div class="form-group"><label>tela_tipo</label><input type="text" id="tela-tipo" value="Malla Canasta"></div>
+                        <div class="form-group"><label>tela_ancho (m)</label><input type="number" id="tela-ancho" value="1.5" step="0.1"></div>
+                        <div class="form-group"><label>patron_largo (m)</label><input type="number" id="patron-largo" value="0.4" step="0.1"></div>
+                        <button class="submit-btn" onclick="calcularProduccionTelaSQL()">Simular tela_total_utilizada</button>
+                    </div>
+                    <div class="calc-box" style="margin-bottom:20px;">
+                        <strong>Cálculo Automático de Producción Textil:</strong>
+                        <div class="calc-result" id="sql-res">Ingresa los datos del patrón para calcular el rendimiento del rollo.</div>
+                    </div>
+                    <table>
+                        <thead><tr><th>produccion_id (PK)</th><th>pedido_id</th><th>produccion_cantidad</th><th>produccion_estado</th><th>tela_tipo</th><th>tela_total_utilizada</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td>101</td><td>500</td><td>Cortado</td><td>Malla Plastificada</td><td>175.00 m</td></tr>
+                        </tbody>
+                    </table>`;
+            }
+            // DASHBOARDS GENERALES CON CONTADORES
+            else if (idVista.includes("dashboard")) {
+                html += `
+                    <div class="cards-grid">
+                        <div class="card"><div class="card-title">Registros Activos</div><div class="card-value">OK</div></div>
+                        <div class="card"><div class="card-title">Conectado a Base de Datos</div><div class="card-value" style="color:#16a34a;">PostgreSQL</div></div>
+                    </div>`;
+            }
+            // PANTALLAS MOCK RESTANTES
+            else {
+                html += `<p>Módulo relacional mapeado correctamente en el SEARCHPATH del SGT.</p>`;
+            }
+
+            contenedor.innerHTML = html;
+        }
+
+        // Simulación analítica usando las propiedades de corte textil del script SQL
+        function calcularProduccionTelaSQL() {
+            const cant = parseFloat(document.getElementById('prod-cant').value);
+            const patronLargo = parseFloat(document.getElementById('patron-largo').value);
+            const resBox = document.getElementById('sql-res');
+
+            if (cant > 0 && patronLargo > 0) {
+                // Cálculo de metros totales ocupados según el patrón
+                const totalUtilizada = cant * patronLargo;
+                resBox.innerHTML = `• <strong>tela_total_utilizada:</strong> ${totalUtilizada.toFixed(2)} metros lineales.<br>• Retazo estimado por bolsa: 0.05m (Guardado en <em>retazo_sobrante</em>).`;
+            } else {
+                resBox.innerText = "Verifica que los atributos de dimensiones sean mayores a 0.";
+            }
+        }
+
+        // Inicialización nativa
+        cambiarRol("Administrador", document.querySelector('.role-btn'));
+    </script>
+</body>
+</html>
