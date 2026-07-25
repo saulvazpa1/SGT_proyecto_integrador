@@ -1,7 +1,7 @@
 import flet as ft
 
 from ui.dashborad import mostrar_dashboard
-from ui.usuario_view import usuarios_view
+from ui.main_login import main_login
 #@from usuario_view import mostrar_gestion_usuarios
 
 def main(page: ft.Page):
@@ -15,11 +15,11 @@ def main(page: ft.Page):
         page.clean()
         
         if page.route == "/login" or page.route == "/":
-            usuarios_view(page)
+            main_login(page)
         elif page.route == "/dashboard":
             mostrar_dashboard(page)
         elif page.route == "/usuarios":
-            usuarios_view(page)
+            main_login(page)
 
     page.on_route_change = route_change
     page.go("/login")
