@@ -7,6 +7,7 @@ from database.conexion import Conexion
 from models.orden_produccion import OrdenProduccion
 
 
+
 from dao.usuario_dao import UsuarioDAO
 from dao.cliente_dao import ClienteDAO
 from dao.material_dao import MaterialDAO
@@ -20,6 +21,14 @@ from models.producto import Producto
 from dao.pedido_dao import PedidoDAO
 from models.pedido import Pedido
 from models.producto import Producto
+
+from ui.dashborad import mostrar_dashboard
+from ui.usuario_view import usuarios_view
+
+
+import ui.main_window
+import flet as ft
+
 
 #Funciones v 2.0
 def ver_materiales():
@@ -677,39 +686,39 @@ def submenu(modulo, f_ver, f_ins, f_act=None, f_elim=None, es_movimiento=False):
         except ValueError:
             print("Por favor, ingresa solo dígitos enteros.")
 
-def main():
-    while True:
-        print("\n=========================================")
-        print(" SISTEMA DE GESTIÓN DE PRODUCCIÓN TEXTIL ")
-        print("=========================================")
-        print("1. Usuarios")
-        print("2.Clientes ")
-        print("3. Productos")
-        print("4. Pedidos")
-        print("5.Ordenes Producción")
-        print("6. Salir de la Aplicación")
+# def main():
+#     while True:
+#         print("\n=========================================")
+#         print(" SISTEMA DE GESTIÓN DE PRODUCCIÓN TEXTIL ")
+#         print("=========================================")
+#         print("1. Usuarios")
+#         print("2.Clientes ")
+#         print("3. Productos")
+#         print("4. Pedidos")
+#         print("5.Ordenes Producción")
+#         print("6. Salir de la Aplicación")
 
-        try:
-            opcion = int(input("\nSelecciona un submódulo (1-6): "))
-            match opcion:
-                case 1:
-                    submenu("Usuarios", ver_usuarios, insertar_usuario, actualizar_usuario, eliminar_usuario)
-                case 2:
-                    submenu("Clientes", ver_clientes, insertar_cliente, actualizar_cliente, eliminar_cliente)
-                case 3:
-                    submenu("Productos", ver_productos, insertar_producto, actualizar_producto, eliminar_producto)
-                case 4:
+#         try:
+#             opcion = int(input("\nSelecciona un submódulo (1-6): "))
+#             match opcion:
+#                 case 1:
+#                     submenu("Usuarios", ver_usuarios, insertar_usuario, actualizar_usuario, eliminar_usuario)
+#                 case 2:
+#                     submenu("Clientes", ver_clientes, insertar_cliente, actualizar_cliente, eliminar_cliente)
+#                 case 3:
+#                     submenu("Productos", ver_productos, insertar_producto, actualizar_producto, eliminar_producto)
+#                 case 4:
                  
-                    submenu("Pedidos", ver_pedidos, insertar_pedido, actualizar_pedido, eliminar_pedido)
-                case 5:
-                    submenu("Órdenes de Producción", ver_ordenes_produccion, insertar_orden_produccion, actualizar_orden_produccion,eliminar_orden_produccion)
-                case 6:
-                    print("Cerrando sesión en SGT Integrador... ¡Hasta luego, bro!")
-                    break
-                case _:
-                    print("Opción fuera de rango. Elige entre 1 y 6.")
-        except ValueError:
-            print("Entrada no válida. Elige una opción del menú numérico.")
+#                     submenu("Pedidos", ver_pedidos, insertar_pedido, actualizar_pedido, eliminar_pedido)
+#                 case 5:
+#                     submenu("Órdenes de Producción", ver_ordenes_produccion, insertar_orden_produccion, actualizar_orden_produccion,eliminar_orden_produccion)
+#                 case 6:
+#                     print("Cerrando sesión en SGT Integrador... ¡Hasta luego, bro!")
+#                     break
+#                 case _:
+#                     print("Opción fuera de rango. Elige entre 1 y 6.")
+#         except ValueError:
+#             print("Entrada no válida. Elige una opción del menú numérico.")
 
 if __name__ == "__main__":
-    main()
+    ft.app(target=ui.main_window.main_window)
