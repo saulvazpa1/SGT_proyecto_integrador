@@ -5,30 +5,90 @@ from dao.producto_dao import ProductoDAO
 
 
 def _obtener_categorias():
-    """Trae (categoria_id, categoria_nombre) directo de la tabla categorias real."""
+    """ (categoria_id, categoria_nombre)"""
     conexion = Conexion.obtener_conexion()
     cursor = conexion.cursor()
     cursor.execute("SELECT categoria_id, categoria_nombre FROM categorias ORDER BY categoria_nombre")
     filas = cursor.fetchall()
     cursor.close()
-   
+    conexion.close()
     return filas
+
+
+def _crear_control_stock(valor_inicial, page):
+    """
+    
+    Devuelve (control_visual, campo_de_texto) -- usa campo_de_texto.value para leer/escribir el número.
+    """
+    campo_valor = ft.TextField(
+        value=str(valor_inicial or "0"),
+        width=70,
+        text_align=ft.TextAlign.CENTER,
+        border_radius=6,
+    )
+
+    def _leer_valor():
+        try:
+            return int(campo_valor.value)
+        except (TypeError, ValueError):
+            return 0
+
+    def decrementar(e):
+        nuevo = max(0, _leer_valor() - 1)  # el stock no puede ser negativo
+        campo_valor.value = str(nuevo)
+        if page:
+            page.update()
+
+    def incrementar(e):
+        campo_valor.value = str(_leer_valor() + 1)
+        if page:
+            page.update()
+
+    control_visual = ft.Column(
+        controls=[
+            ft.Text("Stock:", size=12, color=ft.Colors.BLUE_GREY_700),
+            ft.Row(
+                controls=[
+                    ft.IconButton(
+                        icon=ft.Icons.REMOVE_CIRCLE_OUTLINE,
+                        icon_size=22,
+                        tooltip="Quitar uno",
+                        on_click=decrementar,
+                    ),
+                    campo_valor,
+                    ft.IconButton(
+                        icon=ft.Icons.ADD_CIRCLE_OUTLINE,
+                        icon_size=22,
+                        tooltip="Agregar uno",
+                        on_click=incrementar,
+                    ),
+                ],
+                spacing=5,
+            ),
+        ],
+        spacing=2,
+        width=320,
+    )
+
+    return control_visual, campo_valor
 
 
 def producto_form(regresar, producto=None, page=None):
     editando = producto is not None
 
-    
     val_nombre = getattr(producto, "producto_nombre", "") if editando else ""
     val_precio = str(getattr(producto, "producto_precio", "")) if editando else ""
-    val_stock = str(getattr(producto, "producto_stock", "")) if editando else ""
+    val_stock = str(getattr(producto, "producto_stock", "")) if editando else "0"
     val_unidad = getattr(producto, "producto_unidad_medida", "") if editando else ""
     val_color = getattr(producto, "producto_color", "") if editando else ""
-    val_cat_id = str(getattr(producto, "categoria_id", "")) if editando and getattr(producto, "categoria_id", None) else None
+    val_categoria_nombre = getattr(producto, "producto_categoria", "") if editando else ""
     val_desc = getattr(producto, "producto_descripcion", "") if editando else ""
 
-    categorias = _obtener_categorias()  
+    categorias = _obtener_categorias()
     id_a_nombre = {str(cid): nombre for cid, nombre in categorias}
+    
+    nombre_a_id = {nombre: str(cid) for cid, nombre in categorias}
+    val_cat_id = nombre_a_id.get(val_categoria_nombre) if editando else None
 
     nombre_input = ft.TextField(
         label="Nombre del producto:",
@@ -41,16 +101,11 @@ def producto_form(regresar, producto=None, page=None):
         label="Precio:",
         width=320,
         border_radius=6,
-        prefix=ft.Text("$"),  
+        prefix=ft.Text("$"),
         value=val_precio,
     )
 
-    stock_input = ft.TextField(
-        label="Stock:",
-        width=320,
-        border_radius=6,
-        value=val_stock,
-    )
+    stock_control, stock_input = _crear_control_stock(val_stock, page)
 
     UNIDADES_DISPONIBLES = [
         "Pieza",
@@ -64,7 +119,6 @@ def producto_form(regresar, producto=None, page=None):
         "Paquete",
     ]
 
-    
     if val_unidad and val_unidad not in UNIDADES_DISPONIBLES:
         UNIDADES_DISPONIBLES = [val_unidad] + UNIDADES_DISPONIBLES
 
@@ -107,7 +161,7 @@ def producto_form(regresar, producto=None, page=None):
     mensaje = ft.Text("", color=ft.Colors.GREEN)
 
     def guardar_producto(e):
-        p_page = e.page or page
+        p_page = page or e.page
 
         nombre = (nombre_input.value or "").strip()
         precio = (precio_input.value or "").strip()
@@ -153,6 +207,7 @@ def producto_form(regresar, producto=None, page=None):
         try:
             dao = ProductoDAO()
 
+           
             if editando:
                 producto_actualizado = Producto(
                     producto_id=producto.producto_id,
@@ -163,7 +218,6 @@ def producto_form(regresar, producto=None, page=None):
                     producto_descripcion=descripcion,
                     producto_unidad_medida=unidad,
                     producto_color=color,
-                    categoria_id=int(categoria_id_seleccionada),
                 )
                 dao.actualizar(producto_actualizado)
                 mensaje.value = f"Producto '{nombre}' actualizado"
@@ -184,7 +238,6 @@ def producto_form(regresar, producto=None, page=None):
                 producto_descripcion=descripcion,
                 producto_unidad_medida=unidad,
                 producto_color=color,
-                categoria_id=int(categoria_id_seleccionada),
             )
             dao.insertar(nuevo_producto)
 
@@ -192,8 +245,8 @@ def producto_form(regresar, producto=None, page=None):
             mensaje.color = ft.Colors.GREEN
             nombre_input.value = ""
             precio_input.value = ""
-            stock_input.value = ""
-            unidad_input.value = ""
+            stock_input.value = "0"
+            unidad_input.value = None
             color_input.value = ""
             categoria_dropdown.value = None
             descripcion_input.value = ""
@@ -205,7 +258,6 @@ def producto_form(regresar, producto=None, page=None):
         if p_page:
             p_page.update()
 
-    
     encabezado = ft.Container(
         bgcolor=ft.Colors.LIGHT_BLUE_500,
         padding=ft.Padding.symmetric(horizontal=20, vertical=14),
@@ -228,7 +280,6 @@ def producto_form(regresar, producto=None, page=None):
         ),
     )
 
-   
     columna_izquierda = ft.Column(
         controls=[
             nombre_input,
@@ -241,7 +292,7 @@ def producto_form(regresar, producto=None, page=None):
     columna_derecha = ft.Column(
         controls=[
             precio_input,
-            stock_input,
+            stock_control,
             color_input,
         ],
         spacing=15,
@@ -269,7 +320,6 @@ def producto_form(regresar, producto=None, page=None):
         ),
     )
 
-    
     pie = ft.Container(
         padding=ft.Padding.only(left=30, right=30, bottom=20, top=5),
         content=ft.Row(

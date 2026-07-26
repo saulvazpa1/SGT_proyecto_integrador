@@ -5,7 +5,7 @@ from dao.usuario_dao import UsuarioDAO
 
 
 def _obtener_roles():
-    """Trae (rol_id, rol_nombre) directo de la tabla roles real, sin inventar números."""
+    """ (rol_id, rol_nombre) """
     conexion = Conexion.obtener_conexion()
     cursor = conexion.cursor()
     cursor.execute("SELECT rol_id, rol_nombre FROM roles ORDER BY rol_nombre")

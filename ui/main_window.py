@@ -3,6 +3,8 @@ from ui.usuario_list import usuarios_list
 from ui.dashboard_admin import dashboard_admin
 from ui.rol_list import roles_list
 from ui.producto_list import productos_list
+from ui.pedido_list import pedidos_list
+from ui.orden_produccion_list import produccion_list
 
 
 def main_window(page: ft.Page):
@@ -80,6 +82,13 @@ def main_window(page: ft.Page):
     def mostrar_productos(e=None):
             contenido.content = productos_list(page)   
             page.update()
+    def mostrar_pedido(e=None):
+        contenido.content = pedidos_list(page)   
+        page.update()
+    def mostrar_orden_produccion(e=None):
+        contenido.content = produccion_list(page)   
+        page.update()
+        
 
     # Menú lateral
     menu_lateral = ft.Container(
@@ -123,11 +132,13 @@ def main_window(page: ft.Page):
                     "Pedidos",
                     icon=ft.Icons.SHOPPING_CART,
                     width=180,
+                    on_click=mostrar_pedido,
                 ),
                 ft.ElevatedButton(
                     "Producción",
                     icon=ft.Icons.PRECISION_MANUFACTURING,
                     width=180,
+                     on_click=mostrar_orden_produccion
                 ),
             ],
             spacing=15,

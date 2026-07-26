@@ -10,9 +10,9 @@ def productos_list(page: ft.Page):
     pagina_actual = 1
     filas_por_pagina = 5
 
-    TODAS_KEY = "__TODAS__"  
+    TODAS_KEY = "__TODAS__"
 
-    categorias_disponibles = _obtener_categorias()  
+    categorias_disponibles = _obtener_categorias()
 
     tabla = ft.DataTable(
         columns=[
@@ -76,7 +76,6 @@ def productos_list(page: ft.Page):
                 cargar_desde_bd()
                 aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
             except Exception as ex:
-                
                 page.pop_dialog()
                 mensaje.value = f"Error al eliminar producto: {ex}"
                 page.update()
@@ -220,7 +219,7 @@ def productos_list(page: ft.Page):
             tipo_filtro=e.control.value
         )
 
-    filtro.on_change = cambiar_filtro 
+    filtro.on_select = cambiar_filtro
 
     # Carga inicial
     cargar_desde_bd()

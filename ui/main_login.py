@@ -3,9 +3,9 @@ import subprocess
 import sys
 
 from ui.vendedor import vendedor
-from ui.produccion_dashboard import produccion
+from ui.orden_produccion_form import orden_produccion_form
 from dao.usuario_dao import UsuarioDAO
-from ui.dashboard_admin import dashboard_admin# O el nombre de tu archivo de dashboard
+from ui.dashboard_admin import dashboard_admin
 
 
 def main_login(page: ft.Page):
@@ -72,7 +72,7 @@ def main_login(page: ft.Page):
                 vendedor(page)
             elif usuario.rol_id == 3:
                 page.clean()
-                produccion(page)
+                orden_produccion_form(page)
         else:
             mensaje.value = "Correo o contraseña incorrectos"
             mensaje.color = "red"

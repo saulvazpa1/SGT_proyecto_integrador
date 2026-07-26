@@ -15,18 +15,37 @@ class OrdenProduccionDAO:
         
         ordenes_produccion = [] 
         for registro in registros:  
-            # Usamos el asterisco '*' para desempaquetar el registro directo en los 15 parámetros de tu modelo
+           
             orden = OrdenProduccion(*registro)
             ordenes_produccion.append(orden)
 
         cursor.close()
         conexion.close()
         return ordenes_produccion
-        
-        
-        
-    
 
+    # 
+    def obtener_por_id(self, produccion_id):
+        conexion = Conexion.obtener_conexion()
+        cursor = conexion.cursor()
+
+        cursor.execute(
+            """
+            SELECT produccion_id, pedido_id, producto_id, encargado_produccion_id,
+                   produccion_cantidad, produccion_estado, fecha_inicio, fecha_entrega,
+                   tela_tipo, tela_ancho, tela_largo, patron_largo, patron_ancho,
+                   retazo_sobrante, tela_total_utilizada
+            FROM ordenes_produccion
+            WHERE produccion_id = %s
+            """,
+            (produccion_id,)
+        )
+        registro = cursor.fetchone()
+        cursor.close()
+        conexion.close()
+
+        if registro is None:
+            return None
+        return OrdenProduccion(*registro)
 
     def insertar(self, orden):
         conexion = Conexion.obtener_conexion()

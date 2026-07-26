@@ -43,7 +43,7 @@ def usuarios_list(page: ft.Page):
             ft.dropdown.Option("Todos"),
             ft.dropdown.Option("Administrador"),
             ft.dropdown.Option("Vendedor"),
-            ft.dropdown.Option("Producción"),
+            ft.dropdown.Option("Encargado de produccion"),
         ],
     )
 
@@ -196,7 +196,7 @@ def usuarios_list(page: ft.Page):
                 continue
             if opcion_filtro == "Vendedor" and rol_nombre != "Vendedor":
                 continue
-            if opcion_filtro == "Producción" and rol_nombre != "Producción":
+            if opcion_filtro == "Encargado de produccion" and rol_nombre != "Encargado de produccion":
                 continue
 
             # 2. Filtro por texto
