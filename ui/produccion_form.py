@@ -138,117 +138,11 @@ def orden_produccion_form(regresar, orden=None, page=None):
         value=orden.fecha_entrega.strftime("%Y-%m-%d") if editando and orden.fecha_entrega else "",
     )
 
-    # --- Sección de tela y patrón ---
-    tela_tipo_input = ft.TextField(
-        label="Tipo de tela:",
-        width=210,
-        border_radius=6,
-        value=orden.tela_tipo if editando and orden.tela_tipo else "",
-    )
-    tela_ancho_input = ft.TextField(
-        label="Ancho de tela (m):",
-        width=210,
-        border_radius=6,
-        value=str(orden.tela_ancho) if editando and orden.tela_ancho is not None else "",
-    )
-    tela_largo_input = ft.TextField(
-        label="Largo de tela (m):",
-        width=210,
-        border_radius=6,
-        value=str(orden.tela_largo) if editando and orden.tela_largo is not None else "",
-    )
-    patron_largo_input = ft.TextField(
-        label="Largo del patrón (m):",
-        width=210,
-        border_radius=6,
-        value=str(orden.patron_largo) if editando and orden.patron_largo is not None else "",
-    )
-    patron_ancho_input = ft.TextField(
-        label="Ancho del patrón (m):",
-        width=210,
-        border_radius=6,
-        value=str(orden.patron_ancho) if editando and orden.patron_ancho is not None else "",
-    )
-    tela_total_input = ft.TextField(
-        label="Tela total utilizada (m²):",
-        width=210,
-        border_radius=6,
-        value=str(orden.tela_total_utilizada) if editando and orden.tela_total_utilizada is not None else "",
-    )
-    retazo_input = ft.TextField(
-        label="Retazo sobrante (m²):",
-        width=210,
-        border_radius=6,
-        value=str(orden.retazo_sobrante) if editando and orden.retazo_sobrante is not None else "",
-    )
-
+    
     mensaje = ft.Text("", color=ft.Colors.GREEN)
 
-    def calcular_tela(e):
-        """Calcula tela total utilizada y retazo sobrante a partir del patrón, la cantidad y la tela disponible."""
-        try:
-            cantidad = float(cantidad_input.value or 0)
-            p_largo = float(patron_largo_input.value or 0)
-            p_ancho = float(patron_ancho_input.value or 0)
-            t_ancho = float(tela_ancho_input.value or 0)
-            t_largo = float(tela_largo_input.value or 0)
-        except ValueError:
-            mensaje.value = "Para calcular, llena cantidad, patrón y tela con números válidos"
-            mensaje.color = ft.Colors.RED
-            if page:
-                page.update()
-            return
-
-        total_utilizada = round(p_largo * p_ancho * cantidad, 2)
-        tela_disponible = round(t_ancho * t_largo, 2)
-        sobrante = round(tela_disponible - total_utilizada, 2)
-        sobrante_final = max(sobrante, 0)
-
-        tela_total_input.value = str(total_utilizada)
-        retazo_input.value = str(sobrante_final)
-
-        if sobrante < 0:
-            faltante = abs(sobrante)
-            mensaje.value = (
-                f"Se necesitan {total_utilizada} m² de tela para {int(cantidad)} pieza(s), "
-                f"pero solo tienes {tela_disponible} m² disponibles "
-                f"(faltan {faltante} m²)."
-            )
-            mensaje.color = ft.Colors.RED
-        else:
-            mensaje.value = (
-                f"Con {tela_disponible} m² de tela disponible, esta orden usa "
-                f"{total_utilizada} m² para {int(cantidad)} pieza(s) y sobran {sobrante_final} m²."
-            )
-            mensaje.color = ft.Colors.GREEN
-
-        if page:
-            page.update()
-
-    seccion_tela = ft.Container(
-        padding=15,
-        bgcolor=ft.Colors.BLUE_GREY_50,
-        border_radius=8,
-        content=ft.Column(
-            controls=[
-                ft.Row(
-                    controls=[
-                        ft.Text("Tela y patrón (opcional)", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_GREY_800),
-                        ft.TextButton(
-                            "Calcular tela usada y sobrante",
-                            icon=ft.Icons.CALCULATE,
-                            on_click=calcular_tela,
-                        ),
-                    ],
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                ),
-                ft.Row(controls=[tela_tipo_input, tela_ancho_input, tela_largo_input], wrap=True, spacing=10),
-                ft.Row(controls=[patron_largo_input, patron_ancho_input], wrap=True, spacing=10),
-                ft.Row(controls=[tela_total_input, retazo_input], wrap=True, spacing=10),
-            ],
-            spacing=10,
-        ),
-    )
+    
+    
 
     def guardar_orden(e):
         p_page = page or e.page
@@ -294,13 +188,7 @@ def orden_produccion_form(regresar, orden=None, page=None):
                 produccion_estado=estado_dropdown.value,
                 fecha_inicio=fecha_inicio_val,
                 fecha_entrega=fecha_entrega_val,
-                tela_tipo=tela_tipo_input.value or None,
-                tela_ancho=a_flotante(tela_ancho_input.value),
-                tela_largo=a_flotante(tela_largo_input.value),
-                patron_largo=a_flotante(patron_largo_input.value),
-                patron_ancho=a_flotante(patron_ancho_input.value),
-                retazo_sobrante=a_flotante(retazo_input.value),
-                tela_total_utilizada=a_flotante(tela_total_input.value),
+                
             )
 
             if editando:
@@ -324,13 +212,7 @@ def orden_produccion_form(regresar, orden=None, page=None):
             encargado_dropdown.value = None
             cantidad_input.value = ""
             fecha_entrega_input.value = ""
-            tela_tipo_input.value = ""
-            tela_ancho_input.value = ""
-            tela_largo_input.value = ""
-            patron_largo_input.value = ""
-            patron_ancho_input.value = ""
-            tela_total_input.value = ""
-            retazo_input.value = ""
+           
 
         except Exception as error:
             mensaje.value = f"Error al guardar la orden: {error}"
@@ -384,7 +266,7 @@ def orden_produccion_form(regresar, orden=None, page=None):
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     vertical_alignment=ft.CrossAxisAlignment.START,
                 ),
-                seccion_tela,
+                
                 mensaje,
             ],
             spacing=15,

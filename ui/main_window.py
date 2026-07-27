@@ -4,7 +4,7 @@ from ui.dashboard_admin import dashboard_admin
 from ui.rol_list import roles_list
 from ui.producto_list import productos_list
 from ui.pedido_list import pedidos_list
-from ui.orden_produccion_list import produccion_list
+from ui.produccion_list import produccion_list
 
 
 def main_window(page: ft.Page):

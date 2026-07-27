@@ -1,6 +1,6 @@
 import flet as ft
 from dao.ordenes_produccion_dao import OrdenProduccionDAO
-from ui.orden_produccion_form import orden_produccion_form
+from ui.produccion_form import orden_produccion_form
 
 
 def _color_estado(estado):
@@ -43,7 +43,7 @@ def produccion_list(page: ft.Page):
             ft.DataColumn(ft.Text("Estado")),
             ft.DataColumn(ft.Text("Inicio")),
             ft.DataColumn(ft.Text("Entrega")),
-            ft.DataColumn(ft.Text("Acciones")),
+           
         ],
         rows=[],
     )
@@ -153,21 +153,7 @@ def produccion_list(page: ft.Page):
                 ft.DataCell(_chip_estado(orden.produccion_estado)),
                 ft.DataCell(ft.Text(str(orden.fecha_inicio))),
                 ft.DataCell(ft.Text(str(orden.fecha_entrega) if orden.fecha_entrega else "—")),
-                ft.DataCell(
-                    ft.Row([
-                        ft.IconButton(
-                            icon=ft.Icons.EDIT,
-                            tooltip="Editar",
-                            on_click=lambda e, pid=orden.produccion_id: abrir_editar(pid),
-                        ),
-                        ft.IconButton(
-                            icon=ft.Icons.DELETE,
-                            icon_color=ft.Colors.RED,
-                            tooltip="Eliminar",
-                            on_click=lambda e, pid=orden.produccion_id: confirmar_eliminar(pid),
-                        ),
-                    ])
-                ),
+                
             ]
         )
 
@@ -213,17 +199,13 @@ def produccion_list(page: ft.Page):
         )
         page.show_dialog(dialogo)
 
-    boton_agregar = ft.ElevatedButton(
-        "Nueva orden",
-        icon=ft.Icons.ADD,
-        on_click=abrir_agregar,
-    )
+    
 
     return ft.Column(
         controls=[
             ft.Text("Producción", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro, boton_agregar],
+                controls=[buscador, filtro,],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             ),
             tabla,

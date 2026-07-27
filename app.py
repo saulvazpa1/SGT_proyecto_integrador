@@ -31,6 +31,7 @@ import flet as ft
 from ui.dashboard_vendedor import dashboard_vendedor
 
 from ui.main_window_vendedor import main_window_vendedor
+from ui.main_window_produccion import main_window_vendedor
 
 #Funciones v 2.0
 def ver_materiales():
