@@ -8,7 +8,7 @@ from ui.pedido_pendiente import pedidos_pendientes
 from ui.produccion_list import produccion_list
 
 
-def main_window_produccion(page: ft.Page):
+def main_window_produccion(page: ft.Page, on_logout=None):
     page.title = "Sistema Gestor de Inventario Textil - Producción"
     page.window_width = 1100
     page.window_height = 700
@@ -48,7 +48,10 @@ def main_window_produccion(page: ft.Page):
     def cerrar_sesion(e=None):
             def confirmar_cierre(e):
                 page.pop_dialog()
-                page.window.close()
+                if on_logout:
+                    on_logout()
+                else:
+                    page.window.destroy()
     
             def cancelar_cierre(e):
                 page.pop_dialog()
