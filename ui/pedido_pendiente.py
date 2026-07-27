@@ -1,14 +1,16 @@
 import flet as ft
 from dao.pedido_dao import PedidoDAO
-from ui.pedido_form import pedido_form
 
 
-def pedidos_list(page: ft.Page):
+def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
+    """
+    Panel de órdenes de producción: muestra únicamente los pedidos
+    cuyo estado coincide con `estado_objetivo` (por defecto "Pendiente").
+    Es una vista de solo lectura pensada para el área de producción.
+    """
 
     todos_los_pedidos = []
     pedidos_filtrados = []
-
-    TODOS_KEY = "__TODOS__"
 
     tabla = ft.DataTable(
         show_checkbox_column=False,
@@ -28,49 +30,18 @@ def pedidos_list(page: ft.Page):
     mensaje = ft.Text("", color=ft.Colors.GREEN)
 
     buscador = ft.TextField(
-        label="Buscar pedido",
+        label="Buscar en pendientes",
         hint_text="Busca por cliente, vendedor o producto...",
         prefix_icon=ft.Icons.SEARCH,
         width=350,
         value="",
     )
 
-    filtro = ft.Dropdown(
-        label="Filtrar por estado",
-        width=220,
-        value=TODOS_KEY,
-        options=[ft.dropdown.Option(key=TODOS_KEY, text="Todos")],
+    contador = ft.Text(
+        f"0 pedidos {estado_objetivo.lower()}",
+        size=14,
+        color=ft.Colors.BLUE_GREY_600,
     )
-
-    def cargar_desde_bd():
-        nonlocal todos_los_pedidos
-        try:
-            todos_los_pedidos = PedidoDAO().obtener_todos()
-
-            estados_unicos = sorted({str(p.pedido_estado) for p in todos_los_pedidos})
-            filtro.options = [
-                ft.dropdown.Option(key=TODOS_KEY, text="Todos"),
-                *[ft.dropdown.Option(key=estado, text=estado) for estado in estados_unicos],
-            ]
-        except Exception as ex:
-            mensaje.value = f"Error BD: {ex}"
-            mensaje.color = ft.Colors.RED
-
-    def abrir_agregar(e):
-        def cerrar_dialogo(texto_exito=None):
-            page.pop_dialog()
-            cargar_desde_bd()
-            aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
-            if texto_exito:
-                mensaje.value = texto_exito
-                mensaje.color = ft.Colors.GREEN
-                page.update()
-
-        dialogo = ft.AlertDialog(
-            modal=True,
-            content=pedido_form(cerrar_dialogo, page=page),
-        )
-        page.show_dialog(dialogo)
 
     def construir_fila(pedido):
         try:
@@ -91,14 +62,13 @@ def pedidos_list(page: ft.Page):
             ]
         )
 
-    def aplicar_filtro(texto="", tipo_filtro=TODOS_KEY):
+    def aplicar_filtro(texto=""):
         nonlocal pedidos_filtrados
         texto_busqueda = (texto or "").strip().lower()
-        opcion_filtro = tipo_filtro or TODOS_KEY
 
         resultado = []
         for pedido in todos_los_pedidos:
-            if opcion_filtro != TODOS_KEY and str(pedido.pedido_estado) != opcion_filtro:
+            if str(pedido.pedido_estado) != estado_objetivo:
                 continue
 
             campos = " ".join([
@@ -112,40 +82,48 @@ def pedidos_list(page: ft.Page):
 
         pedidos_filtrados = resultado
         tabla.rows = [construir_fila(p) for p in pedidos_filtrados]
+        contador.value = f"{len(pedidos_filtrados)} pedidos {estado_objetivo.lower()}"
 
         if page:
             page.update()
 
-    buscador.on_change = lambda e: aplicar_filtro(
-        texto=e.control.value,
-        tipo_filtro=filtro.value
+    def cargar_desde_bd():
+        nonlocal todos_los_pedidos
+        try:
+            todos_los_pedidos = PedidoDAO().obtener_todos()
+            mensaje.value = ""
+        except Exception as ex:
+            mensaje.value = f"Error BD: {ex}"
+            mensaje.color = ft.Colors.RED
+
+    def refrescar(e=None):
+        cargar_desde_bd()
+        aplicar_filtro(texto=buscador.value)
+        if e is not None:
+            mensaje.value = "Panel actualizado"
+            mensaje.color = ft.Colors.GREEN
+            page.update()
+
+    buscador.on_change = lambda e: aplicar_filtro(texto=e.control.value)
+
+    boton_refrescar = ft.ElevatedButton(
+        "Actualizar",
+        icon=ft.Icons.REFRESH,
+        on_click=refrescar,
     )
 
-    def cambiar_filtro(e):
-        aplicar_filtro(
-            texto=buscador.value,
-            tipo_filtro=e.control.value
-        )
-
-    filtro.on_select = cambiar_filtro
-
-    cargar_desde_bd()
-    aplicar_filtro(texto="", tipo_filtro=TODOS_KEY)
-
-    boton_agregar = ft.ElevatedButton(
-        "Agregar pedido",
-        icon=ft.Icons.ADD,
-        on_click=abrir_agregar,
-    )
+    # Carga inicial
+    refrescar()
 
     return ft.Column(
         controls=[
-            ft.Text("Pedidos", size=24, weight=ft.FontWeight.BOLD),
+            ft.Text("Panel de producción — Pedidos pendientes", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro, boton_agregar],
+                controls=[buscador, boton_refrescar],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 spacing=20,
             ),
+            contador,
             tabla,
             mensaje,
         ],

@@ -5,7 +5,9 @@ import sys
 from ui.vendedor import vendedor
 #from ui.produccion_form import das
 from dao.usuario_dao import UsuarioDAO
-from ui.dashboard_admin import dashboard_admin
+from ui.main_window import main_window
+from ui.main_window_vendedor import main_window_vendedor
+from ui.main_window_produccion import main_window_produccion
 
 
 def main_login(page: ft.Page):
@@ -46,6 +48,11 @@ def main_login(page: ft.Page):
 
     mensaje = ft.Text(color="red")
 
+    def volver_al_login():
+        print(">>> volver_al_login ejecutado")
+        page.clean()
+        main_login(page)
+
     def iniciar(e):
         usuario_dao = UsuarioDAO()
 
@@ -53,6 +60,7 @@ def main_login(page: ft.Page):
             correo.value,
             password.value
         )
+    
 
         if usuario:
             print("Rol:", usuario.rol_id)
@@ -63,16 +71,16 @@ def main_login(page: ft.Page):
             if usuario.rol_id == 1:
                 page.clean()
                
-                res = dashboard_admin(page)
+                res = main_window(page, on_logout=volver_al_login)
                 if isinstance(res, ft.Control):
                     page.add(res)
 
             elif usuario.rol_id == 2:
                 page.clean()
-                vendedor(page)
+                main_window_vendedor(page, on_logout=volver_al_login)
             elif usuario.rol_id == 3:
                 page.clean()
-                #ordenes_produccion_form(page)
+                main_window_vendedor(page, on_logout=volver_al_login)
         else:
             mensaje.value = "Correo o contraseña incorrectos"
             mensaje.color = "red"

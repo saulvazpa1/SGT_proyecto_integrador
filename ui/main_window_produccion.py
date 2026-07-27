@@ -3,11 +3,12 @@ from ui.dashboard_vendedor import dashboard_vendedor
 from ui.cliente_list import clientes_list
 from ui.pedido_list import pedidos_list
 from ui.producto_catalogo_vendedor import catalogo_productos_vendedor
+from ui.pedido_pendiente import pedidos_pendientes
 
 from ui.produccion_list import produccion_list
 
 
-def main_window_vendedor(page: ft.Page):
+def main_window_produccion(page: ft.Page):
     page.title = "Sistema Gestor de Inventario Textil - Producción"
     page.window_width = 1100
     page.window_height = 700
@@ -41,34 +42,35 @@ def main_window_vendedor(page: ft.Page):
         page.update()
 
     def mostrar_pedidos_pendientes(e=None):
-        contenido.content = mostrar_pedidos_pendientes(page)
-        page.update()
+       contenido.content =pedidos_pendientes(page)
+       page.update()
 
     def cerrar_sesion(e=None):
-        def confirmar_cierre(e):
-            page.close(dialogo_confirmacion)
-            page.window.close()
-
-        def cancelar_cierre(e):
-            page.close(dialogo_confirmacion)
-
-        dialogo_confirmacion = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Cerrar sesión"),
-            content=ft.Text("¿Seguro que deseas cerrar sesión y salir de la aplicación?"),
-            actions=[
-                ft.TextButton("Cancelar", on_click=cancelar_cierre),
-                ft.ElevatedButton(
-                    "Cerrar sesión",
-                    icon=ft.Icons.LOGOUT,
-                    bgcolor=ft.Colors.RED,
-                    color=ft.Colors.WHITE,
-                    on_click=confirmar_cierre,
-                ),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-        page.open(dialogo_confirmacion)
+            def confirmar_cierre(e):
+                page.pop_dialog()
+                page.window.close()
+    
+            def cancelar_cierre(e):
+                page.pop_dialog()
+    
+            dialogo_confirmacion = ft.AlertDialog(
+                modal=True,
+                title=ft.Text("Cerrar sesión"),
+                content=ft.Text("¿Seguro que deseas cerrar sesión y salir de la aplicación?"),
+                actions=[
+                    ft.TextButton("Cancelar", on_click=cancelar_cierre),
+                    ft.ElevatedButton(
+                        "Cerrar sesión",
+                        icon=ft.Icons.LOGOUT,
+                        bgcolor=ft.Colors.RED,
+                        color=ft.Colors.WHITE,
+                        on_click=confirmar_cierre,
+                    ),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END,
+            )
+            page.show_dialog(dialogo_confirmacion)
+    
 
     #  Barra Superior 
     barra_superior = ft.Container(

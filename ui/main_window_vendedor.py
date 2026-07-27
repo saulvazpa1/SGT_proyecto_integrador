@@ -5,7 +5,7 @@ from ui.pedido_list import pedidos_list
 from ui.producto_catalogo_vendedor import catalogo_productos_vendedor
 
 
-def main_window_vendedor(page: ft.Page):
+def main_window_vendedor(page: ft.Page, on_logout=None):
     page.title = "Sistema Gestor de Inventario Textil"
     page.window_width = 1100
     page.window_height = 700
@@ -16,8 +16,6 @@ def main_window_vendedor(page: ft.Page):
         padding=30,
         expand=True,
     )
-
-    # --- 1. Definición de funciones ---
 
     def inicio():
         return ft.Column(
@@ -43,32 +41,34 @@ def main_window_vendedor(page: ft.Page):
         page.update()
 
     def cerrar_sesion(e=None):
-        def confirmar_cierre(e):
-            page.close(dialogo_confirmacion)
-            page.window.close()
-
-        def cancelar_cierre(e):
-            page.close(dialogo_confirmacion)
-
-        dialogo_confirmacion = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Cerrar sesión"),
-            content=ft.Text("¿Seguro que deseas cerrar sesión y salir de la aplicación?"),
-            actions=[
-                ft.TextButton("Cancelar", on_click=cancelar_cierre),
-                ft.ElevatedButton(
-                    "Cerrar sesión",
-                    icon=ft.Icons.LOGOUT,
-                    bgcolor=ft.Colors.RED,
-                    color=ft.Colors.WHITE,
-                    on_click=confirmar_cierre,
-                ),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-        page.open(dialogo_confirmacion)
-
-    # --- 2. Barra Superior ---
+            def confirmar_cierre(e):
+                page.pop_dialog()
+                if on_logout:
+                    on_logout()
+                else:
+                    page.window.destroy()
+    
+            def cancelar_cierre(e):
+                page.pop_dialog()
+    
+            dialogo_confirmacion = ft.AlertDialog(
+                modal=True,
+                title=ft.Text("Cerrar sesión"),
+                content=ft.Text("¿Seguro que deseas cerrar sesión y salir de la aplicación?"),
+                actions=[
+                    ft.TextButton("Cancelar", on_click=cancelar_cierre),
+                    ft.ElevatedButton(
+                        "Cerrar sesión",
+                        icon=ft.Icons.LOGOUT,
+                        bgcolor=ft.Colors.RED,
+                        color=ft.Colors.WHITE,
+                        on_click=confirmar_cierre,
+                    ),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END,
+            )
+            page.show_dialog(dialogo_confirmacion)
+    
 
     barra_superior = ft.Container(
         height=65,
@@ -105,8 +105,6 @@ def main_window_vendedor(page: ft.Page):
             ],
         ),
     )
-
-    # --- 3. Menú Lateral con Cerrar Sesión hasta abajo ---
 
     menu_lateral = ft.Container(
         width=220,
@@ -145,7 +143,6 @@ def main_window_vendedor(page: ft.Page):
                     width=180,
                     on_click=mostrar_catalogo,
                 ),
-                # El Container vacio con expand=True empuja los elementos siguientes hacia el fondo
                 ft.Container(expand=True),
                 ft.Divider(color=ft.Colors.BLUE_GREY_700),
                 ft.ElevatedButton(
@@ -161,8 +158,6 @@ def main_window_vendedor(page: ft.Page):
             expand=True,
         ),
     )
-
-    # --- 4. Layout General ---
 
     layout = ft.Row(
         controls=[

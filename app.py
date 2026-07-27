@@ -22,6 +22,8 @@ from dao.pedido_dao import PedidoDAO
 from models.pedido import Pedido
 from models.producto import Producto
 from ui.main_login import main_login
+from ui.main_window import main_window
+from ui.main_window_produccion import main_window_produccion
 #from ui.dashborad_admin import mostrar_dashboard
 
 
@@ -31,7 +33,7 @@ import flet as ft
 from ui.dashboard_vendedor import dashboard_vendedor
 
 from ui.main_window_vendedor import main_window_vendedor
-from ui.main_window_produccion import main_window_vendedor
+
 
 #Funciones v 2.0
 def ver_materiales():
@@ -724,4 +726,4 @@ def submenu(modulo, f_ver, f_ins, f_act=None, f_elim=None, es_movimiento=False):
 #             print("Entrada no válida. Elige una opción del menú numérico.")
 
 if __name__ == "__main__":
-    ft.app(target=main_window_vendedor)
+   ft.app(target=main_login)

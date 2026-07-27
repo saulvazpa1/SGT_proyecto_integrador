@@ -7,7 +7,7 @@ from ui.pedido_list import pedidos_list
 from ui.produccion_list import produccion_list
 
 
-def main_window(page: ft.Page):
+def main_window(page: ft.Page, on_logout=None):
     page.title = "Sistema Gestor de Inventario Textil"
     page.window_width = 1100
     page.window_height = 700
@@ -88,6 +88,36 @@ def main_window(page: ft.Page):
     def mostrar_orden_produccion(e=None):
         contenido.content = produccion_list(page)   
         page.update()
+
+    def cerrar_sesion(e=None):
+        def confirmar_cierre(e):
+            print(">>> confirmar_cierre ejecutado, on_logout es:", on_logout)
+            page.pop_dialog()
+            if on_logout:
+                on_logout()
+            else:
+                page.window.destroy()
+        def cancelar_cierre(e):
+            page.pop_dialog()
+
+        dialogo_confirmacion = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Cerrar sesión"),
+            content=ft.Text("¿Seguro que deseas cerrar sesión y salir de la aplicación?"),
+            actions=[
+                ft.TextButton("Cancelar", on_click=cancelar_cierre),
+                ft.ElevatedButton(
+                    "Cerrar sesión",
+                    icon=ft.Icons.LOGOUT,
+                    bgcolor=ft.Colors.RED,
+                    color=ft.Colors.WHITE,
+                    on_click=confirmar_cierre,
+                ),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.show_dialog(dialogo_confirmacion)
+
         
 
     # Menú lateral
@@ -140,6 +170,16 @@ def main_window(page: ft.Page):
                     width=180,
                      on_click=mostrar_orden_produccion
                 ),
+                ft.Container(expand=True),
+                    ft.Divider(color=ft.Colors.BLUE_GREY_700),
+                     ft.ElevatedButton(
+                    "Cerrar sesión",
+                    icon=ft.Icons.LOGOUT,
+                    width=180,
+                    bgcolor=ft.Colors.RED_700,
+                    color=ft.Colors.WHITE,
+                    on_click=cerrar_sesion,
+                 ),
             ],
             spacing=15,
         ),
