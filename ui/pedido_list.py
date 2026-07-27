@@ -1,5 +1,6 @@
 import flet as ft
 from dao.pedido_dao import PedidoDAO
+from ui.pedido_form import pedido_form
 
 
 def pedidos_list(page: ft.Page):
@@ -10,6 +11,7 @@ def pedidos_list(page: ft.Page):
     TODOS_KEY = "__TODOS__"
 
     tabla = ft.DataTable(
+        show_checkbox_column=False,
         columns=[
             ft.DataColumn(ft.Text("ID")),
             ft.DataColumn(ft.Text("Cliente")),
@@ -23,7 +25,7 @@ def pedidos_list(page: ft.Page):
         rows=[],
     )
 
-    mensaje = ft.Text("", color=ft.Colors.RED)
+    mensaje = ft.Text("", color=ft.Colors.GREEN)
 
     buscador = ft.TextField(
         label="Buscar pedido",
@@ -44,9 +46,7 @@ def pedidos_list(page: ft.Page):
         nonlocal todos_los_pedidos
         try:
             todos_los_pedidos = PedidoDAO().obtener_todos()
-            mensaje.value = ""
 
-           
             estados_unicos = sorted({str(p.pedido_estado) for p in todos_los_pedidos})
             filtro.options = [
                 ft.dropdown.Option(key=TODOS_KEY, text="Todos"),
@@ -54,6 +54,23 @@ def pedidos_list(page: ft.Page):
             ]
         except Exception as ex:
             mensaje.value = f"Error BD: {ex}"
+            mensaje.color = ft.Colors.RED
+
+    def abrir_agregar(e):
+        def cerrar_dialogo(texto_exito=None):
+            page.pop_dialog()
+            cargar_desde_bd()
+            aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+            if texto_exito:
+                mensaje.value = texto_exito
+                mensaje.color = ft.Colors.GREEN
+                page.update()
+
+        dialogo = ft.AlertDialog(
+            modal=True,
+            content=pedido_form(cerrar_dialogo, page=page),
+        )
+        page.show_dialog(dialogo)
 
     def construir_fila(pedido):
         try:
@@ -65,7 +82,6 @@ def pedidos_list(page: ft.Page):
             cells=[
                 ft.DataCell(ft.Text(str(pedido.pedido_id))),
                 ft.DataCell(ft.Text(str(pedido.cliente_id))),
-               
                 ft.DataCell(ft.Text(str(pedido.vendedor_id))),
                 ft.DataCell(ft.Text(str(pedido.producto_id))),
                 ft.DataCell(ft.Text(str(pedido.pedido_cantidad))),
@@ -111,18 +127,23 @@ def pedidos_list(page: ft.Page):
             tipo_filtro=e.control.value
         )
 
-   
     filtro.on_select = cambiar_filtro
 
     cargar_desde_bd()
     aplicar_filtro(texto="", tipo_filtro=TODOS_KEY)
 
+    boton_agregar = ft.ElevatedButton(
+        "Agregar pedido",
+        icon=ft.Icons.ADD,
+        on_click=abrir_agregar,
+    )
+
     return ft.Column(
         controls=[
             ft.Text("Pedidos", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro],
-                alignment=ft.MainAxisAlignment.START,
+                controls=[buscador, filtro, boton_agregar],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 spacing=20,
             ),
             tabla,

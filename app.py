@@ -28,7 +28,9 @@ from ui.main_login import main_login
 
 import ui.main_window
 import flet as ft
+from ui.dashboard_vendedor import dashboard_vendedor
 
+from ui.main_window_vendedor import main_window_vendedor
 
 #Funciones v 2.0
 def ver_materiales():
@@ -721,4 +723,4 @@ def submenu(modulo, f_ver, f_ins, f_act=None, f_elim=None, es_movimiento=False):
 #             print("Entrada no válida. Elige una opción del menú numérico.")
 
 if __name__ == "__main__":
-    ft.app(target=ui.main_window.main_window)
+    ft.app(target=main_window_vendedor)
