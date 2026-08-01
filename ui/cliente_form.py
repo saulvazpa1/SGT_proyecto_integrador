@@ -27,7 +27,7 @@ def cliente_form(regresar, cliente=None, page=None):
         value=getattr(cliente, "cliente_telefono", "") if editando else "",
     )
 
-    # --- Campos de domicilio ---
+  
     calle_input = ft.TextField(
         label="Calle:",
         width=210,
