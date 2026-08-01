@@ -3,10 +3,16 @@ from ui.dashboard_vendedor import dashboard_vendedor
 from ui.cliente_list import clientes_list
 from ui.pedido_list import pedidos_list
 from ui.producto_catalogo_vendedor import catalogo_productos_vendedor
+from ui.colores import *
 
 
 def main_window_vendedor(page: ft.Page, on_logout=None):
     page.title = "Sistema Gestor de Inventario Textil"
+    page.bgcolor = FONDO
+    page.theme_mode = ft.ThemeMode.LIGHT
+    page.theme = ft.Theme(
+        font_family="Segoe UI"
+    )
     page.window_width = 1100
     page.window_height = 700
     page.padding = 0
@@ -72,7 +78,7 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
 
     barra_superior = ft.Container(
         height=65,
-        bgcolor=ft.Colors.WHITE,
+        bgcolor=ft.Colors.GREY_100,
         padding=20,
         content=ft.Row(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -85,23 +91,36 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
                     color=ft.Colors.BLUE_GREY_900,
                 ),
                 ft.Row(
+                    spacing=12,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
                         ft.IconButton(
-                            icon=ft.Icons.NOTIFICATIONS,
+                            icon=ft.Icons.NOTIFICATIONS_OUTLINED,
                             tooltip="Notificaciones",
+                            icon_size=25,
+                            icon_color=ft.Colors.BLUE_GREY_700,
+                            style=ft.ButtonStyle(
+                                shape=ft.CircleBorder(),
+                                padding=8,
+                            ),
                         ),
                         ft.CircleAvatar(
-                            content=ft.Text("V"),
+                            radius=18,
                             bgcolor=ft.Colors.BLUE,
                             color=ft.Colors.WHITE,
-                            radius=18,
+                            content=ft.Text(
+                                "V",
+                                weight=ft.FontWeight.BOLD,
+                            ),
                         ),
                         ft.Text(
                             "Vendedor",
+                            size=20,
                             weight=ft.FontWeight.BOLD,
+                            color=ft.Colors.BLUE_GREY_900,
                         ),
                     ],
-                ),
+                )
             ],
         ),
     )

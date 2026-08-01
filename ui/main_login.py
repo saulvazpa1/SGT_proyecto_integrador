@@ -9,9 +9,17 @@ from ui.main_window import main_window
 from ui.main_window_vendedor import main_window_vendedor
 from ui.main_window_produccion import main_window_produccion
 
+from ui.colores import *
+
 
 def main_login(page: ft.Page):
     page.title = "SGPT - Inicio de sesión"
+    page.bgcolor = FONDO
+    page.theme_mode = ft.ThemeMode.LIGHT
+
+    page.theme = ft.Theme(
+        font_family="Segoe UI"
+    )
     page.window.width = 1000
     page.window.height = 600
     page.window.resizable = False
@@ -31,7 +39,7 @@ def main_login(page: ft.Page):
     
     correo = ft.TextField(
         label="Correo",
-        hint_text="Ejemplo@gmail.com",
+        hint_text="ejemplo@gmail.com",
         width=340,
         height=55,
         prefix_icon=ft.Icons.EMAIL
@@ -97,10 +105,19 @@ def main_login(page: ft.Page):
         width=340,
         height=50,
         style=ft.ButtonStyle(
-            bgcolor="#1E88E5",
+            bgcolor=AZUL,
             shape=ft.RoundedRectangleBorder(radius=8)
         ),
     )
+    ft.ElevatedButton(
+    "Guardar",
+    bgcolor=AZUL,
+    color=BLANCO,
+    style=ft.ButtonStyle(
+        elevation=3,
+        shape=ft.RoundedRectangleBorder(radius=8)
+    )
+)
 
     formulario = ft.Column(
         controls=[
@@ -113,6 +130,12 @@ def main_login(page: ft.Page):
                 "Bienvenido",
                 size=32,
                 weight=ft.FontWeight.BOLD
+            ),
+            ft.Text(
+                "Ingresa tus datos para acceder al sistema",
+                size=16,
+                color=ft.Colors.GREY_500,
+                weight=ft.FontWeight.NORMAL
             ),
             correo,
             password,

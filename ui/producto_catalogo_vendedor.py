@@ -1,6 +1,7 @@
 import flet as ft
 from dao.producto_dao import ProductoDAO
 from ui.producto_form import _obtener_categorias
+from ui.colores import *
 
 
 def catalogo_productos_vendedor(page: ft.Page):
@@ -17,12 +18,48 @@ def catalogo_productos_vendedor(page: ft.Page):
     tabla = ft.DataTable(
         show_checkbox_column=False,
         columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("Nombre")),
-            ft.DataColumn(ft.Text("Categoría")),
-            ft.DataColumn(ft.Text("Precio")),
-            ft.DataColumn(ft.Text("Stock")),
-            ft.DataColumn(ft.Text("Color")),
+            ft.DataColumn(
+                ft.Text(
+                    "ID",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Nombre",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Categoría",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Precio",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Stock",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Color",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
         ],
         rows=[],
     )

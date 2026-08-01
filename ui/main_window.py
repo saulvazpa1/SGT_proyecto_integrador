@@ -5,14 +5,20 @@ from ui.rol_list import roles_list
 from ui.producto_list import productos_list
 from ui.pedido_list import pedidos_list
 from ui.produccion_list import produccion_list
+from ui.colores import *
 
 
 def main_window(page: ft.Page, on_logout=None):
     page.title = "Sistema Gestor de Inventario Textil"
+    page.bgcolor = FONDO
+    page.theme_mode = ft.ThemeMode.LIGHT
+    page.theme = ft.Theme(
+        font_family="Segoe UI"
+    )
     page.window_width = 1100
     page.window_height = 700
     page.padding = 0
-    page.bgcolor = ft.Colors.BLUE_GREY_50
+    page.bgcolor = ft.Colors.WHITE
 
    
     contenido = ft.Container(
@@ -23,7 +29,7 @@ def main_window(page: ft.Page, on_logout=None):
     # Barra superior de la aplicación
     barra_superior = ft.Container(
         height=65,
-        bgcolor=ft.Colors.WHITE,
+        bgcolor=ft.Colors.GREY_100,
         padding=20,
         content=ft.Row(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -123,7 +129,7 @@ def main_window(page: ft.Page, on_logout=None):
     # Menú lateral
     menu_lateral = ft.Container(
         width=220,
-        bgcolor=ft.Colors.BLUE_GREY_900,
+        bgcolor=MENU,
         padding=20,
         content=ft.Column(
             controls=[

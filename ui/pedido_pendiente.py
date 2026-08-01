@@ -1,5 +1,6 @@
 import flet as ft
 from dao.pedido_dao import PedidoDAO
+from ui.colores import *
 
 
 def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
@@ -15,14 +16,62 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
     tabla = ft.DataTable(
         show_checkbox_column=False,
         columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("Cliente")),
-            ft.DataColumn(ft.Text("Vendedor")),
-            ft.DataColumn(ft.Text("Producto")),
-            ft.DataColumn(ft.Text("Cantidad")),
-            ft.DataColumn(ft.Text("Total")),
-            ft.DataColumn(ft.Text("Estado")),
-            ft.DataColumn(ft.Text("Fecha")),
+            ft.DataColumn(
+                ft.Text(
+                    "ID",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Cliente",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Vendedor",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Producto",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Cantidad",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Total",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Estado",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Fecha",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
         ],
         rows=[],
     )
@@ -108,6 +157,8 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
 
     boton_refrescar = ft.ElevatedButton(
         "Actualizar",
+        bgcolor=AZUL,
+        color=ft.Colors.WHITE,
         icon=ft.Icons.REFRESH,
         on_click=refrescar,
     )
