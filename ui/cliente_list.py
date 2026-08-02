@@ -1,6 +1,7 @@
 import flet as ft
 from dao.cliente_dao import ClienteDAO
 from ui.cliente_form import cliente_form
+from ui.colores import *
 
 
 def clientes_list(page: ft.Page):
@@ -12,13 +13,52 @@ def clientes_list(page: ft.Page):
 
     tabla = ft.DataTable(
         show_checkbox_column=False,
+        column_spacing=45,
+        horizontal_margin=20,
+        divider_thickness=1,
         columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("Nombre")),
-            ft.DataColumn(ft.Text("Teléfono")),
-            ft.DataColumn(ft.Text("Correo")),
-            ft.DataColumn(ft.Text("Domicilio")),
-            ft.DataColumn(ft.Text("Acciones")),
+            ft.DataColumn(
+                ft.Text(
+                    "ID",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                    )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Nombre",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Teléfono",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Correo",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Domicilio",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Acciones",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+                ),
         ],
         rows=[],
     )
@@ -29,7 +69,7 @@ def clientes_list(page: ft.Page):
         label="Buscar cliente",
         hint_text="Escribe el nombre del cliente...",
         prefix_icon=ft.Icons.SEARCH,
-        width=350,
+        width=300,
         value="",
     )
 
@@ -115,20 +155,28 @@ def clientes_list(page: ft.Page):
                 ft.DataCell(ft.Text(str(getattr(cliente, "cliente_correo", "")))),
                 ft.DataCell(ft.Text(domicilio_texto)),
                 ft.DataCell(
-                    ft.Row([
-                        ft.IconButton(
-                            icon=ft.Icons.EDIT,
-                            tooltip="Editar",
-                            on_click=lambda e, c=cliente: abrir_editar(c),
-                        ),
-                        ft.IconButton(
-                            icon=ft.Icons.DELETE,
-                            icon_color=ft.Colors.RED,
-                            tooltip="Eliminar",
-                            on_click=lambda e, c=cliente: confirmar_eliminar(c),
-                        ),
-                    ])
-                ),
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=5,
+                        controls=[
+                            ft.IconButton(
+                                icon=ft.Icons.EDIT,
+                                tooltip="Editar",
+                                icon_color=ft.Colors.BLUE,
+                                icon_size=20,
+                                on_click=lambda e, c=cliente: abrir_editar(c),
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.DELETE,
+                                tooltip="Eliminar",
+                                icon_color=ft.Colors.RED,
+                                icon_size=20,
+                                on_click=lambda e, c=cliente: confirmar_eliminar(c),
+                            ),
+                        ],
+                    )
+                )
             ]
         )
 
@@ -215,7 +263,14 @@ def clientes_list(page: ft.Page):
 
     boton_agregar = ft.ElevatedButton(
         "Agregar cliente",
+        bgcolor=AZUL,
+        color=ft.Colors.WHITE,
         icon=ft.Icons.ADD,
+        height=45,
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=25),
+            padding=20,
+        ),
         on_click=abrir_agregar,
     )
 
@@ -223,8 +278,12 @@ def clientes_list(page: ft.Page):
         controls=[
             ft.Text("Gestión de Clientes", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, boton_agregar],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[
+                    buscador,
+                    boton_agregar,
+                ],
             ),
             tabla,
             ft.Row(

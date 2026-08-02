@@ -35,14 +35,62 @@ def produccion_list(page: ft.Page):
 
     tabla = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("Pedido")),
-            ft.DataColumn(ft.Text("Producto")),
-            ft.DataColumn(ft.Text("Encargado")),
-            ft.DataColumn(ft.Text("Cantidad")),
-            ft.DataColumn(ft.Text("Estado")),
-            ft.DataColumn(ft.Text("Inicio")),
-            ft.DataColumn(ft.Text("Entrega")),
+            ft.DataColumn(
+                ft.Text(
+                    "ID",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Pedido",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Producto",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Encargado",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Cantidad",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Estado",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Inicio",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Entrega",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
            
         ],
         rows=[],

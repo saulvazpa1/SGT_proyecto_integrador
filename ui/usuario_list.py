@@ -1,6 +1,7 @@
 import flet as ft
 from dao.usuario_dao import UsuarioDAO
 from ui.usuario_form import usuario_form
+from ui.colores import *
 
 
 def usuarios_list(page: ft.Page):
@@ -14,13 +15,55 @@ def usuarios_list(page: ft.Page):
 
     tabla = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("Nombre")),
-            ft.DataColumn(ft.Text("Teléfono")),
-            ft.DataColumn(ft.Text("Correo")),
-            ft.DataColumn(ft.Text("Contraseña")),
-            ft.DataColumn(ft.Text("Rol")),
-            ft.DataColumn(ft.Text("Acciones")),
+            ft.DataColumn(
+                ft.Text(
+                    "ID",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Nombre",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Teléfono",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,            
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Correo",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+               )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Contraseña",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Rol",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Acciones",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
         ],
         rows=[],
     )
@@ -243,6 +286,8 @@ def usuarios_list(page: ft.Page):
 
     boton_agregar = ft.ElevatedButton(
         "Agregar usuario",
+        bgcolor=AZUL,
+        color=ft.Colors.WHITE,
         icon=ft.Icons.ADD,
         on_click=abrir_agregar,
     )

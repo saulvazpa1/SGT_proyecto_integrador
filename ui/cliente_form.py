@@ -1,6 +1,8 @@
 import flet as ft
 from models.cliente import Cliente
 from dao.cliente_dao import ClienteDAO
+from ui.colores import *
+
 
 
 def cliente_form(regresar, cliente=None, page=None):
@@ -10,6 +12,11 @@ def cliente_form(regresar, cliente=None, page=None):
         label="Nombre:",
         width=320,
         border_radius=6,
+        filled=True,
+        bgcolor=BLANCO,
+        border_color=BORDE,
+        focused_border_color=AZUL,
+        cursor_color=AZUL,
         value=getattr(cliente, "cliente_nombre", "") if editando else "",
     )
 
@@ -17,6 +24,11 @@ def cliente_form(regresar, cliente=None, page=None):
         label="Correo (opcional):",
         width=320,
         border_radius=6,
+        filled=True,
+        bgcolor=BLANCO,
+        border_color=BORDE,
+        focused_border_color=AZUL,
+        cursor_color=AZUL,
         value=getattr(cliente, "cliente_correo", "") if editando else "",
     )
 
@@ -24,6 +36,11 @@ def cliente_form(regresar, cliente=None, page=None):
         label="Teléfono:",
         width=320,
         border_radius=6,
+        filled=True,
+        bgcolor=BLANCO,
+        border_color=BORDE,
+        focused_border_color=AZUL,
+        cursor_color=AZUL,
         value=getattr(cliente, "cliente_telefono", "") if editando else "",
     )
 
@@ -32,6 +49,11 @@ def cliente_form(regresar, cliente=None, page=None):
         label="Calle:",
         width=210,
         border_radius=6,
+        filled=True,
+        bgcolor=BLANCO,
+        border_color=BORDE,
+        focused_border_color=AZUL,
+        cursor_color=AZUL,
         value=getattr(cliente, "cliente_calle", "") if editando else "",
     )
 
@@ -39,6 +61,11 @@ def cliente_form(regresar, cliente=None, page=None):
         label="Número:",
         width=210,
         border_radius=6,
+        filled=True,
+        bgcolor=BLANCO,
+        border_color=BORDE,
+        focused_border_color=AZUL,
+        cursor_color=AZUL,
         value=str(getattr(cliente, "cliente_numero", "")) if editando else "",
     )
 
@@ -46,6 +73,11 @@ def cliente_form(regresar, cliente=None, page=None):
         label="Municipio:",
         width=210,
         border_radius=6,
+        filled=True,
+        bgcolor=BLANCO,
+        border_color=BORDE,
+        focused_border_color=AZUL,
+        cursor_color=AZUL,
         value=getattr(cliente, "cliente_municipio", "") if editando else "",
     )
 
@@ -53,6 +85,11 @@ def cliente_form(regresar, cliente=None, page=None):
         label="Estado:",
         width=210,
         border_radius=6,
+        filled=True,
+        bgcolor=BLANCO,
+        border_color=BORDE,
+        focused_border_color=AZUL,
+        cursor_color=AZUL,
         value=getattr(cliente, "cliente_estado", "") if editando else "",
     )
 
@@ -60,6 +97,11 @@ def cliente_form(regresar, cliente=None, page=None):
         label="Código postal:",
         width=210,
         border_radius=6,
+        filled=True,
+        bgcolor=BLANCO,
+        border_color=BORDE,
+        focused_border_color=AZUL,
+        cursor_color=AZUL,
         value=str(getattr(cliente, "cliente_codigopostal", "")) if editando else "",
     )
 
@@ -150,7 +192,7 @@ def cliente_form(regresar, cliente=None, page=None):
             p_page.update()
 
     encabezado = ft.Container(
-        bgcolor=ft.Colors.LIGHT_BLUE_500,
+        bgcolor=AZUL,
         padding=ft.Padding.symmetric(horizontal=20, vertical=14),
         border_radius=ft.BorderRadius.only(top_left=10, top_right=10),
         content=ft.Row(
@@ -187,7 +229,7 @@ def cliente_form(regresar, cliente=None, page=None):
                 ft.Text(
                     "Modifica los datos del cliente" if editando else "Captura los datos del nuevo cliente",
                     size=14,
-                    color=ft.Colors.BLUE_GREY_600,
+                    color=AZUL,
                 ),
                 columna_datos,
                 seccion_domicilio,
@@ -212,7 +254,7 @@ def cliente_form(regresar, cliente=None, page=None):
                 ft.ElevatedButton(
                     "Guardar cambios" if editando else "Registrar cliente",
                     icon=ft.Icons.SAVE,
-                    bgcolor=ft.Colors.LIGHT_BLUE_500,
+                    bgcolor=AZUL,
                     color=ft.Colors.WHITE,
                     on_click=guardar_cliente,
                 ),
@@ -223,6 +265,7 @@ def cliente_form(regresar, cliente=None, page=None):
 
     return ft.Container(
         width=720,
+        height=620,
         bgcolor=ft.Colors.WHITE,
         border_radius=10,
         shadow=ft.BoxShadow(
@@ -232,11 +275,15 @@ def cliente_form(regresar, cliente=None, page=None):
             offset=ft.Offset(0, 4),
         ),
         content=ft.Column(
+            expand=True,
+            spacing=0,
             controls=[
                 encabezado,
-                cuerpo,
+                ft.Container(
+                    expand=True,
+                    content=cuerpo,
+                ),
                 pie,
             ],
-            spacing=0,
         ),
     )

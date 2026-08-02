@@ -8,9 +8,27 @@ def roles_list(page: ft.Page):
 
     tabla = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("Nombre del rol")),
-            ft.DataColumn(ft.Text("Permisos")),
+            ft.DataColumn(
+                ft.Text(
+                    "ID",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Nombre del rol",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,                   
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Permisos",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
         ],
         rows=[],
     )

@@ -1,3 +1,5 @@
+#<<<<<<< HEAD
+#=======
 from database.conexion import Conexion    # Carpeta/archivo/clase 
 from models.usuario import Usuario
 from models.cliente import Cliente
@@ -5,6 +7,7 @@ from models.material import Material
 from models.entrada_material import EntradaMaterial
 from database.conexion import Conexion  
 from models.orden_produccion import OrdenProduccion
+from ui.colores import *
 
 
 
@@ -726,7 +729,8 @@ def submenu(modulo, f_ver, f_ins, f_act=None, f_elim=None, es_movimiento=False):
 #             print("Entrada no válida. Elige una opción del menú numérico.")
 
 if __name__ == "__main__":
-   ft.app(target=main_login)
-   #ft.app(target=main_window)
+   #ft.app(target=main_login)
+   ft.app(target=main_window)
    #ft.app(target=main_window_vendedor)
    #ft.app(target=main_window_produccion)
+  

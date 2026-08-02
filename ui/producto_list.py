@@ -1,6 +1,7 @@
 import flet as ft
 from dao.producto_dao import ProductoDAO
 from ui.producto_form import producto_form, _obtener_categorias
+from ui.colores import *
 
 
 def productos_list(page: ft.Page):
@@ -16,12 +17,48 @@ def productos_list(page: ft.Page):
 
     tabla = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("Nombre")),
-            ft.DataColumn(ft.Text("Categoría")),
-            ft.DataColumn(ft.Text("Precio")),
-            ft.DataColumn(ft.Text("Stock")),
-            ft.DataColumn(ft.Text("Color")),
+            ft.DataColumn(
+                ft.Text(
+                    "ID",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,                    
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Nombre",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,                    
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Categoría",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,                    
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Precio",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Stock",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
+                    "Color",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
             ft.DataColumn(ft.Text("Acciones")),
         ],
         rows=[],
@@ -239,6 +276,8 @@ def productos_list(page: ft.Page):
 
     boton_agregar = ft.ElevatedButton(
         "Agregar producto",
+        bgcolor=AZUL,
+        color=ft.Colors.WHITE,
         icon=ft.Icons.ADD,
         on_click=abrir_agregar,
     )

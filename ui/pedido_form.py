@@ -3,6 +3,7 @@ import flet as ft
 from database.conexion import Conexion
 from models.pedido import Pedido
 from dao.pedido_dao import PedidoDAO
+from ui.colores import *
 
 
 ESTADOS_SUGERIDOS = ["Pendiente", "En proceso", "Completado", "Cancelado"]
@@ -213,7 +214,7 @@ def pedido_form(regresar, pedido=None, page=None):
             p_page.update()
 
     encabezado = ft.Container(
-        bgcolor=ft.Colors.LIGHT_BLUE_500,
+        bgcolor=AZUL,
         padding=ft.Padding.symmetric(horizontal=20, vertical=14),
         border_radius=ft.BorderRadius.only(top_left=10, top_right=10),
         content=ft.Row(
@@ -274,7 +275,7 @@ def pedido_form(regresar, pedido=None, page=None):
                 ft.ElevatedButton(
                     "Guardar cambios" if editando else "Registrar pedido",
                     icon=ft.Icons.SAVE,
-                    bgcolor=ft.Colors.LIGHT_BLUE_500,
+                    bgcolor=AZUL,
                     color=ft.Colors.WHITE,
                     on_click=guardar_pedido,
                 ),
