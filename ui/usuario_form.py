@@ -4,7 +4,6 @@ from models.usuario import Usuario
 from dao.usuario_dao import UsuarioDAO
 from ui.colores import *
 
-
 def _obtener_roles():
     """ (rol_id, rol_nombre) """
     conexion = Conexion.obtener_conexion()
@@ -15,6 +14,7 @@ def _obtener_roles():
     conexion.close()
     return filas 
 
+
 def usuario_form(regresar, usuario=None):
     editando = usuario is not None
 
@@ -22,42 +22,48 @@ def usuario_form(regresar, usuario=None):
     nombre_a_id = {nombre: str(rid) for rid, nombre in roles}
 
     nombre_input = ft.TextField(
-        label="Nombre:",
+        label="Nombre",
+        hint_text="Ej: Juan",
         width=320,
         border_radius=6,
         value=usuario.usuario_nombre if editando else "",
     )
 
     apellidop_input = ft.TextField(
-        label="Apellido paterno:",
+        label="Apellido paterno",
+        hint_text="Ej: Pérez",
         width=320,
         border_radius=6,
         value=getattr(usuario, "usuario_apellidop", "") if editando else "",
     )
 
     apellidom_input = ft.TextField(
-        label="Apellido materno (opcional):",
+        label="Apellido materno",
+        hint_text="Opcional (Ej: López)",
         width=320,
         border_radius=6,
         value=getattr(usuario, "usuario_apellidom", "") if editando else "",
     )
 
     telefono_input = ft.TextField(
-        label="Teléfono:",
+        label="Teléfono",
+        hint_text="Ej. 10 dígitos",
         width=320,
         border_radius=6,
         value=usuario.usuario_telefono if editando else "",
     )
 
     correo_input = ft.TextField(
-        label="Correo:",
+        label="Correo electrónico",
+        hint_text="Ej: correo@ejemplo.com",
         width=320,
         border_radius=6,
         value=usuario.usuario_correo if editando else "",
     )
 
     password_input = ft.TextField(
-        label="Contraseña:" if not editando else "Nueva contraseña (déjalo vacío para no cambiarla):",
+        label="Contraseña" if not editando else "Nueva contraseña",
+        hint_text="Mínimo 8 caracteres" if not editando else "Déjalo vacío si no cambiarás la contraseña",
         width=320,
         border_radius=6,
         password=True,
@@ -65,14 +71,14 @@ def usuario_form(regresar, usuario=None):
         value="",
     )
 
-    
     valor_inicial_rol = None
     if editando:
         nombre_rol_actual = str(getattr(usuario, "rol_id", ""))
         valor_inicial_rol = nombre_a_id.get(nombre_rol_actual)
 
     rol_dropdown = ft.Dropdown(
-        label="Rol:",
+        label="Rol",
+        hint_text="Selecciona un rol",
         width=320,
         value=valor_inicial_rol,
         options=[
@@ -108,7 +114,6 @@ def usuario_form(regresar, usuario=None):
             dao = UsuarioDAO()
 
             if editando:
-                
                 password_final = password if password else getattr(usuario, "usuario_password", "")
 
                 usuario_actualizado = Usuario(
@@ -143,7 +148,8 @@ def usuario_form(regresar, usuario=None):
 
             mensaje.value = f"Usuario '{nombre}' ha sido registrado"
             mensaje.color = ft.Colors.GREEN
-            # limpiar campos para poder agregar otro
+
+            # limpiar campos
             nombre_input.value = ""
             apellidop_input.value = ""
             apellidom_input.value = ""
@@ -158,7 +164,6 @@ def usuario_form(regresar, usuario=None):
 
         e.page.update()
 
-   
     encabezado = ft.Container(
         bgcolor=ft.Colors.LIGHT_BLUE_500,
         padding=ft.Padding.symmetric(horizontal=20, vertical=14),
@@ -181,7 +186,6 @@ def usuario_form(regresar, usuario=None):
         ),
     )
 
-    
     columna_izquierda = ft.Column(
         controls=[
             nombre_input,
@@ -213,7 +217,6 @@ def usuario_form(regresar, usuario=None):
                 ft.Row(
                     controls=[columna_izquierda, columna_derecha],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    vertical_alignment=ft.CrossAxisAlignment.START,
                 ),
                 mensaje,
             ],
@@ -222,7 +225,6 @@ def usuario_form(regresar, usuario=None):
         ),
     )
 
-    
     pie = ft.Container(
         padding=ft.Padding.only(left=30, right=30, bottom=20, top=5),
         content=ft.Row(
@@ -256,11 +258,7 @@ def usuario_form(regresar, usuario=None):
             offset=ft.Offset(0, 4),
         ),
         content=ft.Column(
-            controls=[
-                encabezado,
-                cuerpo,
-                pie,
-            ],
+            controls=[encabezado, cuerpo, pie],
             spacing=0,
         ),
     )
