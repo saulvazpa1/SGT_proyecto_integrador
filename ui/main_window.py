@@ -26,6 +26,8 @@ def main_window(page: ft.Page, on_logout=None):
         expand=True,
     )
 
+    menu_activo = "Inicio"
+
     # Barra superior de la aplicación
     barra_superior = ft.Container(
         height=65,
@@ -63,6 +65,44 @@ def main_window(page: ft.Page, on_logout=None):
         ),
     )
 
+    def item_menu(texto, icono, accion):
+        activo = menu_activo == texto
+
+        return ft.Container(
+            height=48,
+            on_click=accion,
+            ink=True,
+            content=ft.Row(
+                spacing=0,
+                controls=[
+                    ft.Container(
+                        width=4,
+                        bgcolor=ft.Colors.BLUE if activo else ft.Colors.TRANSPARENT,
+                        border_radius=5,
+                    ),
+                    ft.Container(
+                        expand=True,
+                        bgcolor=ft.Colors.BLUE_50 if activo else None,
+                        padding=12,
+                        content=ft.Row(
+                            spacing=12,
+                            controls=[
+                                ft.Icon(
+                                    icono,
+                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
+                                ),
+                                ft.Text(
+                                    texto,
+                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
+                                    weight=ft.FontWeight.BOLD if activo else ft.FontWeight.NORMAL,
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+    )
+
     # Vistas disponibles
     def inicio():
         return ft.Column(
@@ -73,26 +113,45 @@ def main_window(page: ft.Page, on_logout=None):
 
     # Funciones de navegación
     def mostrar_inicio(e=None):
+        nonlocal menu_activo
+        menu_activo = "Inicio"
         contenido.content = inicio()
+        reconstruir_menu()
         page.update()
 
     def mostrar_usuarios(e=None):
-      
+        nonlocal menu_activo
+        menu_activo = "Usuarios"
         contenido.content = usuarios_list(page)
+        reconstruir_menu()
         page.update()
 
     def mostrar_roles(e=None):
-        contenido.content = roles_list(page)   
+        nonlocal menu_activo
+        menu_activo = "Roles"
+        contenido.content = roles_list(page)
+        reconstruir_menu()
         page.update()
 
     def mostrar_productos(e=None):
-            contenido.content = productos_list(page)   
-            page.update()
-    def mostrar_pedido(e=None):
-        contenido.content = pedidos_list(page)   
+        nonlocal menu_activo
+        menu_activo = "Productos"
+        contenido.content = productos_list(page)
+        reconstruir_menu()
         page.update()
+
+    def mostrar_pedido(e=None):
+        nonlocal menu_activo
+        menu_activo = "Pedidos"
+        contenido.content = pedidos_list(page)
+        reconstruir_menu()
+        page.update()
+
     def mostrar_orden_produccion(e=None):
-        contenido.content = produccion_list(page)   
+        nonlocal menu_activo
+        menu_activo = "Producción"
+        contenido.content = produccion_list(page)
+        reconstruir_menu()
         page.update()
 
     def cerrar_sesion(e=None):
@@ -129,67 +188,41 @@ def main_window(page: ft.Page, on_logout=None):
     # Menú lateral
     menu_lateral = ft.Container(
         width=220,
-        bgcolor=MENU,
+        bgcolor=ft.Colors.WHITE,
         padding=20,
         content=ft.Column(
-            controls=[
-                ft.Image(
-                    src="logo.png",
-                    width=120,
-                    height=60,
-                    fit="contain",
-                ),
-                ft.Divider(color=ft.Colors.BLUE_GREY_700),
-                ft.ElevatedButton(
-                    "Inicio",
-                    icon=ft.Icons.HOME,
-                    width=180,
-                    on_click=mostrar_inicio,
-                ),
-                ft.ElevatedButton(
-                    "Usuarios",
-                    icon=ft.Icons.PEOPLE,
-                    width=180,
-                    on_click=mostrar_usuarios,
-                ),
-                ft.ElevatedButton(
-                    "Roles",
-                    icon=ft.Icons.SECURITY,
-                    width=180,
-                    on_click=mostrar_roles,
-                ),
-                ft.ElevatedButton(
-                    "Productos",
-                    icon=ft.Icons.INVENTORY,
-                    width=180,
-                    on_click=mostrar_productos,
-                ),
-                ft.ElevatedButton(
-                    "Pedidos",
-                    icon=ft.Icons.SHOPPING_CART,
-                    width=180,
-                    on_click=mostrar_pedido,
-                ),
-                ft.ElevatedButton(
-                    "Producción",
-                    icon=ft.Icons.PRECISION_MANUFACTURING,
-                    width=180,
-                     on_click=mostrar_orden_produccion
-                ),
-                ft.Container(expand=True),
-                    ft.Divider(color=ft.Colors.BLUE_GREY_700),
-                     ft.ElevatedButton(
-                    "Cerrar sesión",
-                    icon=ft.Icons.LOGOUT,
-                    width=180,
-                    bgcolor=ft.Colors.RED_700,
-                    color=ft.Colors.WHITE,
-                    on_click=cerrar_sesion,
-                 ),
-            ],
-            spacing=15,
+            spacing=8,
+            expand=True,
         ),
     )
+
+    def reconstruir_menu():
+        menu_lateral.content.controls = [
+            ft.Image(
+                src="logo.png",
+                width=120,
+                height=60,
+                fit="contain",
+            ),
+
+            ft.Divider(),
+
+            item_menu("Inicio", ft.Icons.HOME_OUTLINED, mostrar_inicio),
+            item_menu("Usuarios", ft.Icons.PEOPLE_OUTLINE, mostrar_usuarios),
+            item_menu("Roles", ft.Icons.SECURITY_OUTLINED, mostrar_roles),
+            item_menu("Productos", ft.Icons.INVENTORY_2_OUTLINED, mostrar_productos),
+            item_menu("Pedidos", ft.Icons.SHOPPING_CART_OUTLINED, mostrar_pedido),
+            item_menu("Producción", ft.Icons.PRECISION_MANUFACTURING, mostrar_orden_produccion),
+
+            ft.Container(expand=True),
+
+            ft.Divider(),
+
+            item_menu("Cerrar sesión", ft.Icons.LOGOUT, cerrar_sesion),
+    ]
+
+    reconstruir_menu()
+
 
     # Layout general dividiendo menú y vista activa
     layout = ft.Row(

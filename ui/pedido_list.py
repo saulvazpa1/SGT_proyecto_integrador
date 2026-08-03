@@ -3,7 +3,6 @@ from dao.pedido_dao import PedidoDAO
 from ui.pedido_form import pedido_form
 from ui.colores import *
 
-
 def pedidos_list(page: ft.Page):
 
     todos_los_pedidos = []
@@ -121,6 +120,94 @@ def pedidos_list(page: ft.Page):
         )
         page.show_dialog(dialogo)
 
+    filas_por_pagina = 10
+    pagina_actual = 1
+
+    def total_paginas():
+        if not pedidos_filtrados:
+            return 1
+        paginas = len(pedidos_filtrados) // filas_por_pagina
+        if len(pedidos_filtrados) % filas_por_pagina:
+            paginas += 1
+        return max(paginas, 1)
+
+
+    paginador = ft.Row(
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=8,
+    )
+
+
+    def render_pagina():
+        inicio = (pagina_actual - 1) * filas_por_pagina
+        fin = inicio + filas_por_pagina
+
+        tabla.rows = [
+            construir_fila(p)
+            for p in pedidos_filtrados[inicio:fin]
+        ]
+
+        paginador.controls.clear()
+
+        # Flecha izquierda
+        paginador.controls.append(
+            ft.IconButton(
+                icon=ft.Icons.CHEVRON_LEFT,
+                disabled=pagina_actual == 1,
+                on_click=ir_pagina_anterior,
+            )
+        )
+
+        # Botones de páginas
+        for i in range(1, total_paginas() + 1):
+            paginador.controls.append(
+                ft.Container(
+                    width=36,
+                    height=36,
+                    border_radius=8,
+                    bgcolor=AZUL if i == pagina_actual else "#D9DCE3",
+                    alignment=ft.Alignment(0, 0),
+                    ink=True,
+                    on_click=lambda e, p=i: cambiar_pagina(p),
+                    content=ft.Text(
+                        str(i),
+                        color="white" if i == pagina_actual else "black",
+                        weight=ft.FontWeight.BOLD,
+                    ),
+                )
+            )
+
+        # Flecha derecha
+        paginador.controls.append(
+            ft.IconButton(
+                icon=ft.Icons.CHEVRON_RIGHT,
+                disabled=pagina_actual == total_paginas(),
+                on_click=ir_pagina_siguiente,
+            )
+        )
+
+        page.update()
+
+
+    def ir_pagina_anterior(e):
+        nonlocal pagina_actual
+        if pagina_actual > 1:
+            pagina_actual -= 1
+            render_pagina()
+
+
+    def ir_pagina_siguiente(e):
+        nonlocal pagina_actual
+        if pagina_actual < total_paginas():
+            pagina_actual += 1
+            render_pagina()
+
+
+    def cambiar_pagina(numero):
+        nonlocal pagina_actual
+        pagina_actual = numero
+        render_pagina()
+
     def construir_fila(pedido):
         try:
             total_texto = f"${float(pedido.pedido_total):,.2f}"
@@ -159,11 +246,11 @@ def pedidos_list(page: ft.Page):
             if not texto_busqueda or texto_busqueda in campos:
                 resultado.append(pedido)
 
-        pedidos_filtrados = resultado
-        tabla.rows = [construir_fila(p) for p in pedidos_filtrados]
+        nonlocal pagina_actual
 
-        if page:
-            page.update()
+        pedidos_filtrados = resultado
+        pagina_actual = 1
+        render_pagina()
 
     buscador.on_change = lambda e: aplicar_filtro(
         texto=e.control.value,
@@ -198,6 +285,7 @@ def pedidos_list(page: ft.Page):
                 spacing=20,
             ),
             tabla,
+            paginador,
             mensaje,
         ],
         spacing=20,
