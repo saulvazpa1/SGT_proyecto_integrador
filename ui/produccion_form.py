@@ -3,6 +3,8 @@ import flet as ft
 from database.conexion import Conexion
 from models.orden_produccion import OrdenProduccion
 from dao.ordenes_produccion_dao import OrdenProduccionDAO
+from ui.notificaciones import agregar_notificacion
+from ui.componentes import mostrar_notificacion
 
 
 ESTADOS_SUGERIDOS = [
@@ -44,7 +46,8 @@ def _obtener_productos():
 
 def _obtener_encargados():
     """
-   
+    Usuarios con rol 'Encargado de Producción' si existe ese rol;
+    si no encuentra ninguno con ese rol exacto, regresa todos los usuarios
     (para no dejar el formulario sin opciones).
     """
     conexion = Conexion.obtener_conexion()
@@ -138,11 +141,170 @@ def orden_produccion_form(regresar, orden=None, page=None):
         value=orden.fecha_entrega.strftime("%Y-%m-%d") if editando and orden.fecha_entrega else "",
     )
 
-    
+    # --- Sección de tela y patrón ---
+    tela_tipo_input = ft.TextField(
+        label="Tipo de tela:",
+        width=210,
+        border_radius=6,
+        value=orden.tela_tipo if editando and orden.tela_tipo else "",
+    )
+    tela_ancho_input = ft.TextField(
+        label="Ancho de tela (m):",
+        width=210,
+        border_radius=6,
+        value=str(orden.tela_ancho) if editando and orden.tela_ancho is not None else "",
+    )
+    tela_largo_input = ft.TextField(
+        label="Largo de tela (m):",
+        width=210,
+        border_radius=6,
+        value=str(orden.tela_largo) if editando and orden.tela_largo is not None else "",
+    )
+    patron_largo_input = ft.TextField(
+        label="Largo del patrón (m):",
+        width=210,
+        border_radius=6,
+        value=str(orden.patron_largo) if editando and orden.patron_largo is not None else "",
+    )
+    patron_ancho_input = ft.TextField(
+        label="Ancho del patrón (m):",
+        width=210,
+        border_radius=6,
+        value=str(orden.patron_ancho) if editando and orden.patron_ancho is not None else "",
+    )
+    tela_total_input = ft.TextField(
+        label="Tela total utilizada (m²):",
+        width=210,
+        border_radius=6,
+        value=str(orden.tela_total_utilizada) if editando and orden.tela_total_utilizada is not None else "",
+    )
+    retazo_input = ft.TextField(
+        label="Retazo sobrante (m²):",
+        width=210,
+        border_radius=6,
+        value=str(orden.retazo_sobrante) if editando and orden.retazo_sobrante is not None else "",
+    )
+    margen_desperdicio_input = ft.TextField(
+        label="Margen de desperdicio (%):",
+        width=210,
+        border_radius=6,
+        value="10",
+    )
+
     mensaje = ft.Text("", color=ft.Colors.GREEN)
 
-    
-    
+    def calcular_tela(e):
+        """
+        Calcula la tela necesaria simulando cómo se acomodan los patrones sobre
+        la tela (por filas y columnas, sin rotar piezas), más un margen de
+        desperdicio para costuras/orillas/errores de corte.
+        """
+        try:
+            cantidad = int(float(cantidad_input.value or 0))
+            p_largo = float(patron_largo_input.value or 0)
+            p_ancho = float(patron_ancho_input.value or 0)
+            t_ancho = float(tela_ancho_input.value or 0)
+            t_largo = float(tela_largo_input.value or 0)
+            margen_pct = float(margen_desperdicio_input.value or 0)
+        except ValueError:
+            mensaje.value = "Para calcular, llena cantidad, patrón, tela y margen con números válidos"
+            mensaje.color = ft.Colors.RED
+            if page:
+                page.update()
+            return
+
+        if cantidad <= 0 or p_largo <= 0 or p_ancho <= 0 or t_ancho <= 0:
+            mensaje.value = "Cantidad, patrón y ancho de tela deben ser mayores a 0"
+            mensaje.color = ft.Colors.RED
+            if page:
+                page.update()
+            return
+
+        # ¿Cuántas piezas caben una junto a otra a lo ancho de la tela?
+        piezas_por_fila = int(t_ancho // p_ancho)
+        if piezas_por_fila < 1:
+            mensaje.value = (
+                f"El ancho de la tela ({t_ancho} m) es menor al ancho del patrón "
+                f"({p_ancho} m) — no cabe ni una pieza así acomodada."
+            )
+            mensaje.color = ft.Colors.RED
+            if page:
+                page.update()
+            return
+
+        # ¿Cuántas filas se necesitan para juntar la cantidad pedida?
+        filas_necesarias = -(-cantidad // piezas_por_fila)  # redondeo hacia arriba
+        largo_necesario_sin_margen = round(filas_necesarias * p_largo, 2)
+
+        margen_factor = 1 + (margen_pct / 100)
+        largo_necesario_con_margen = round(largo_necesario_sin_margen * margen_factor, 2)
+
+        # área que realmente se ocupa sobre la tela (ancho completo de la tela x el largo necesario)
+        area_utilizada = round(t_ancho * largo_necesario_con_margen, 2)
+
+        tela_disponible = round(t_ancho * t_largo, 2) if t_largo > 0 else None
+
+        tela_total_input.value = str(area_utilizada)
+
+        espacios_sobrantes_ultima_fila = (piezas_por_fila * filas_necesarias) - cantidad
+
+        if tela_disponible is None:
+            retazo_input.value = ""
+            mensaje.value = (
+                f"Caben {piezas_por_fila} pieza(s) por fila. Para {cantidad} pieza(s) se necesitan "
+                f"{filas_necesarias} fila(s) ≈ {largo_necesario_con_margen} m de largo de tela "
+                f"(incluye {margen_pct}% de margen). Captura el 'Largo de tela' disponible para "
+                f"saber cuánto sobra."
+            )
+            mensaje.color = ft.Colors.GREEN
+        else:
+            sobrante = round(tela_disponible - area_utilizada, 2)
+            retazo_input.value = str(max(sobrante, 0))
+
+            if sobrante < 0:
+                mensaje.value = (
+                    f"Caben {piezas_por_fila} pieza(s) por fila. Para {cantidad} pieza(s) se necesitan "
+                    f"{filas_necesarias} fila(s) ≈ {largo_necesario_con_margen} m de largo "
+                    f"(con {margen_pct}% de margen) = {area_utilizada} m², pero solo tienes "
+                    f"{tela_disponible} m² disponibles (faltan {abs(sobrante)} m²)."
+                )
+                mensaje.color = ft.Colors.RED
+            else:
+                mensaje.value = (
+                    f"Caben {piezas_por_fila} pieza(s) por fila en {filas_necesarias} fila(s) "
+                    f"(sobran {espacios_sobrantes_ultima_fila} espacio(s) en la última fila). "
+                    f"Se usan {area_utilizada} m² de {tela_disponible} m² disponibles "
+                    f"(incluye {margen_pct}% de margen) — sobran {max(sobrante, 0)} m²."
+                )
+                mensaje.color = ft.Colors.GREEN
+
+        if page:
+            page.update()
+
+    seccion_tela = ft.Container(
+        padding=15,
+        bgcolor=ft.Colors.BLUE_GREY_50,
+        border_radius=8,
+        content=ft.Column(
+            controls=[
+                ft.Row(
+                    controls=[
+                        ft.Text("Tela y patrón (opcional)", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_GREY_800),
+                        ft.TextButton(
+                            "Calcular tela usada y sobrante",
+                            icon=ft.Icons.CALCULATE,
+                            on_click=calcular_tela,
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                ),
+                ft.Row(controls=[tela_tipo_input, tela_ancho_input, tela_largo_input], wrap=True, spacing=10),
+                ft.Row(controls=[patron_largo_input, patron_ancho_input, margen_desperdicio_input], wrap=True, spacing=10),
+                ft.Row(controls=[tela_total_input, retazo_input], wrap=True, spacing=10),
+            ],
+            spacing=10,
+        ),
+    )
 
     def guardar_orden(e):
         p_page = page or e.page
@@ -188,31 +350,44 @@ def orden_produccion_form(regresar, orden=None, page=None):
                 produccion_estado=estado_dropdown.value,
                 fecha_inicio=fecha_inicio_val,
                 fecha_entrega=fecha_entrega_val,
-                
+                tela_tipo=tela_tipo_input.value or None,
+                tela_ancho=a_flotante(tela_ancho_input.value),
+                tela_largo=a_flotante(tela_largo_input.value),
+                patron_largo=a_flotante(patron_largo_input.value),
+                patron_ancho=a_flotante(patron_ancho_input.value),
+                retazo_sobrante=a_flotante(retazo_input.value),
+                tela_total_utilizada=a_flotante(tela_total_input.value),
             )
 
             if editando:
                 orden_actualizada = OrdenProduccion(produccion_id=orden.produccion_id, **datos_comunes)
                 dao.actualizar(orden_actualizada)
-                mensaje.value = "Orden de producción actualizada"
-                mensaje.color = ft.Colors.GREEN
-                if p_page:
-                    p_page.update()
+
+                texto_notificacion = f"Orden #{orden.produccion_id} actualizada"
+                agregar_notificacion(texto_notificacion)
+
                 regresar()
+
+                if p_page:
+                    mostrar_notificacion(p_page, "Orden de producción actualizada", texto_notificacion, "exito")
+
                 return
 
             nuevo_id = dao.obtener_ultimo_id() + 1
             nueva_orden = OrdenProduccion(produccion_id=nuevo_id, **datos_comunes)
             dao.insertar(nueva_orden)
 
-            mensaje.value = "Orden de producción registrada"
-            mensaje.color = ft.Colors.GREEN
-            pedido_dropdown.value = None
-            producto_dropdown.value = None
-            encargado_dropdown.value = None
-            cantidad_input.value = ""
-            fecha_entrega_input.value = ""
-           
+            nombre_producto = dict(productos).get(int(producto_dropdown.value), "un producto")
+            texto_notificacion = f"Orden #{nuevo_id} registrada — {nombre_producto}"
+            agregar_notificacion(texto_notificacion)
+
+         
+            regresar()
+
+            if p_page:
+                mostrar_notificacion(p_page, "Nueva orden de producción", texto_notificacion, "exito")
+
+            return
 
         except Exception as error:
             mensaje.value = f"Error al guardar la orden: {error}"
@@ -252,6 +427,7 @@ def orden_produccion_form(regresar, orden=None, page=None):
         spacing=15,
     )
 
+    
     cuerpo = ft.Container(
         padding=ft.Padding.symmetric(horizontal=30, vertical=20),
         content=ft.Column(
@@ -266,21 +442,29 @@ def orden_produccion_form(regresar, orden=None, page=None):
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     vertical_alignment=ft.CrossAxisAlignment.START,
                 ),
-                
+                seccion_tela,
                 mensaje,
             ],
             spacing=15,
-            scroll=ft.ScrollMode.AUTO,
         ),
-        height=420,
     )
 
     pie = ft.Container(
-        padding=ft.Padding.only(left=30, right=30, bottom=20, top=5),
+        padding=ft.Padding.only(left=30, right=30, bottom=20, top=10),
+        bgcolor=ft.Colors.WHITE,
+        border=ft.Border.only(top=ft.BorderSide(1, ft.Colors.BLUE_GREY_100)),
         content=ft.Row(
             alignment=ft.MainAxisAlignment.END,
             controls=[
-                ft.OutlinedButton("Cancelar", icon=ft.Icons.CLOSE, on_click=lambda e: regresar()),
+                ft.OutlinedButton(
+                    "Cancelar",
+                    icon=ft.Icons.CLOSE,
+                    style=ft.ButtonStyle(
+                        color=ft.Colors.BLUE_GREY_700,
+                        side=ft.BorderSide(1, ft.Colors.BLUE_GREY_300),
+                    ),
+                    on_click=lambda e: regresar(),
+                ),
                 ft.ElevatedButton(
                     "Guardar cambios" if editando else "Registrar orden",
                     icon=ft.Icons.SAVE,
@@ -293,10 +477,24 @@ def orden_produccion_form(regresar, orden=None, page=None):
         ),
     )
 
+   
+    alto_disponible = (page.height - 120) if (page and page.height) else 640
+    alto_dialogo = max(420, min(alto_disponible, 680))
+
+    cuerpo_con_scroll = ft.Container(
+        content=ft.Column(controls=[cuerpo], scroll=ft.ScrollMode.AUTO, expand=True),
+        expand=True,
+    )
+
     return ft.Container(
         width=760,
+        height=alto_dialogo,
         bgcolor=ft.Colors.WHITE,
         border_radius=10,
         shadow=ft.BoxShadow(spread_radius=1, blur_radius=15, color=ft.Colors.BLACK26, offset=ft.Offset(0, 4)),
-        content=ft.Column(controls=[encabezado, cuerpo, pie], spacing=0),
+        content=ft.Column(
+            controls=[encabezado, cuerpo_con_scroll, pie],
+            spacing=0,
+            expand=True,
+        ),
     )

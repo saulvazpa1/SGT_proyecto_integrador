@@ -2,6 +2,7 @@ import flet as ft
 from dao.usuario_dao import UsuarioDAO
 from ui.usuario_form import usuario_form
 from ui.colores import *
+from ui.componentes import mostrar_notificacion
 
 
 def usuarios_list(page: ft.Page):
@@ -10,8 +11,6 @@ def usuarios_list(page: ft.Page):
     usuarios_filtrados = []
     pagina_actual = 1
     filas_por_pagina = 5
-
-    
 
     tabla = ft.DataTable(
         columns=[
@@ -68,8 +67,6 @@ def usuarios_list(page: ft.Page):
         rows=[],
     )
 
-    mensaje = ft.Text("", color=ft.Colors.RED)
-
     buscador = ft.TextField(
         label="Buscar usuario",
         hint_text="Escribe el nombre del usuario...",
@@ -95,15 +92,16 @@ def usuarios_list(page: ft.Page):
         try:
             dao = UsuarioDAO()
             todos_los_usuarios = dao.obtener_todos()
-            mensaje.value = ""
         except Exception as ex:
-            mensaje.value = f"Error BD: {ex}"
+            mostrar_notificacion(page, "Error de conexión", str(ex), "error")
 
     def abrir_editar(usuario):
-        def cerrar_editar():
+        def cerrar_editar(texto_exito=None):
             page.pop_dialog()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+            if texto_exito:
+                mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
 
         dialogo = ft.AlertDialog(
             modal=True,
@@ -113,14 +111,16 @@ def usuarios_list(page: ft.Page):
 
     def confirmar_eliminar(usuario):
         def eliminar_confirmado(e):
+            nombre_usuario = getattr(usuario, "usuario_nombre", "")
             try:
                 UsuarioDAO().eliminar(usuario.usuario_id)
                 page.pop_dialog()
                 cargar_desde_bd()
                 aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+                mostrar_notificacion(page, "Se eliminó correctamente", f"El usuario '{nombre_usuario}' fue eliminado", "exito")
             except Exception as ex:
-                mensaje.value = f"Error al eliminar usuario: {ex}"
-                page.update()
+                page.pop_dialog()
+                mostrar_notificacion(page, "Error al eliminar", str(ex), "error")
 
         def cancelar_eliminar(e):
             page.pop_dialog()
@@ -224,7 +224,6 @@ def usuarios_list(page: ft.Page):
         disabled=True,
     )
 
-   
     def aplicar_filtro(texto="", tipo_filtro="Todos"):
         nonlocal usuarios_filtrados, pagina_actual
         texto_busqueda = (texto or "").strip().lower()
@@ -252,7 +251,6 @@ def usuarios_list(page: ft.Page):
         pagina_actual = 1
         render_pagina()
 
-   
     buscador.on_change = lambda e: aplicar_filtro(
         texto=e.control.value,
         tipo_filtro=filtro.value
@@ -264,7 +262,6 @@ def usuarios_list(page: ft.Page):
             tipo_filtro=e.control.value
         )
 
-    
     filtro.on_select = cambiar_filtro
 
     # Carga inicial
@@ -273,10 +270,12 @@ def usuarios_list(page: ft.Page):
 
     # Botón Agregar
     def abrir_agregar(e):
-        def cerrar_dialogo():
+        def cerrar_dialogo(texto_exito=None):
             page.pop_dialog()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+            if texto_exito:
+                mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
 
         dialogo = ft.AlertDialog(
             modal=True,
@@ -304,7 +303,6 @@ def usuarios_list(page: ft.Page):
                 controls=[boton_anterior, texto_pagina, boton_siguiente],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
-            mensaje,
         ],
         spacing=20,
         expand=True,

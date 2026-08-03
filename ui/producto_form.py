@@ -2,10 +2,12 @@ import flet as ft
 from database.conexion import Conexion
 from models.producto import Producto
 from dao.producto_dao import ProductoDAO
+from ui.notificaciones import agregar_notificacion
+from ui.componentes import mostrar_notificacion
 
 
 def _obtener_categorias():
-    """ (categoria_id, categoria_nombre)"""
+    """Trae (categoria_id, categoria_nombre) directo de la tabla categorias real."""
     conexion = Conexion.obtener_conexion()
     cursor = conexion.cursor()
     cursor.execute("SELECT categoria_id, categoria_nombre FROM categorias ORDER BY categoria_nombre")
@@ -17,7 +19,7 @@ def _obtener_categorias():
 
 def _crear_control_stock(valor_inicial, page):
     """
-    
+    Control de Stock incrementable: botones -/+ alrededor de un campo numérico.
     Devuelve (control_visual, campo_de_texto) -- usa campo_de_texto.value para leer/escribir el número.
     """
     campo_valor = ft.TextField(
@@ -34,7 +36,7 @@ def _crear_control_stock(valor_inicial, page):
             return 0
 
     def decrementar(e):
-        nuevo = max(0, _leer_valor() - 1)  # el stock no puede ser negativo
+        nuevo = max(0, _leer_valor() - 1) 
         campo_valor.value = str(nuevo)
         if page:
             page.update()
@@ -86,7 +88,7 @@ def producto_form(regresar, producto=None, page=None):
 
     categorias = _obtener_categorias()
     id_a_nombre = {str(cid): nombre for cid, nombre in categorias}
-    
+   
     nombre_a_id = {nombre: str(cid) for cid, nombre in categorias}
     val_cat_id = nombre_a_id.get(val_categoria_nombre) if editando else None
 
@@ -207,7 +209,6 @@ def producto_form(regresar, producto=None, page=None):
         try:
             dao = ProductoDAO()
 
-           
             if editando:
                 producto_actualizado = Producto(
                     producto_id=producto.producto_id,
@@ -220,6 +221,11 @@ def producto_form(regresar, producto=None, page=None):
                     producto_color=color,
                 )
                 dao.actualizar(producto_actualizado)
+
+                texto = f"Producto '{nombre}' actualizado"
+                agregar_notificacion(texto)
+                mostrar_notificacion(p_page, "Producto actualizado", texto, "exito")
+
                 mensaje.value = f"Producto '{nombre}' actualizado"
                 mensaje.color = ft.Colors.GREEN
                 if p_page:
@@ -240,6 +246,10 @@ def producto_form(regresar, producto=None, page=None):
                 producto_color=color,
             )
             dao.insertar(nuevo_producto)
+
+            texto = f"Producto '{nombre}' registrado (stock: {stock_num})"
+            agregar_notificacion(texto)
+            mostrar_notificacion(p_page, "Nuevo producto", texto, "exito")
 
             mensaje.value = f"Producto '{nombre}' ha sido registrado"
             mensaje.color = ft.Colors.GREEN

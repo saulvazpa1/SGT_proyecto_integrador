@@ -6,27 +6,30 @@ from models.usuario import Usuario
 
 class UsuarioDAO:
 
-    # Consulta a la vista para traer el nombre del rol en texto
     def obtener_todos(self):
         conexion = Conexion.obtener_conexion()
         cursor = conexion.cursor()
 
-        # Usamos la vista de pgAdmin
-        cursor.execute("SELECT * FROM vista_usuarios_roles")
+        cursor.execute("""
+            SELECT u.usuario_id, u.usuario_nombre, u.usuario_apellidop, u.usuario_apellidom,
+                   u.usuario_telefono, u.usuario_correo, u.usuario_password, r.rol_nombre
+            FROM usuarios u
+            JOIN roles r ON u.rol_id = r.rol_id
+            ORDER BY u.usuario_nombre
+        """)
         registros = cursor.fetchall()
-        
+
         usuarios = []
         for reg in registros:
-           
             usuario = Usuario(
                 usuario_id=reg[0],
-                usuario_nombre=reg[1],       
-                usuario_apellidop="",         
-                usuario_apellidom="",
-                usuario_telefono=reg[2],
-                usuario_correo=reg[3],
-                usuario_password="",          
-                rol_id=reg[4]                 
+                usuario_nombre=reg[1],
+                usuario_apellidop=reg[2],
+                usuario_apellidom=reg[3],
+                usuario_telefono=reg[4],
+                usuario_correo=reg[5],
+                usuario_password=reg[6],
+                rol_id=reg[7]
             )
             usuarios.append(usuario)
 

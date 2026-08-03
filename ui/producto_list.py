@@ -2,6 +2,7 @@ import flet as ft
 from dao.producto_dao import ProductoDAO
 from ui.producto_form import producto_form, _obtener_categorias
 from ui.colores import *
+from ui.componentes import mostrar_notificacion
 
 
 def productos_list(page: ft.Page):
@@ -54,6 +55,13 @@ def productos_list(page: ft.Page):
             ),
             ft.DataColumn(
                 ft.Text(
+                    "Unidad",
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                )
+            ),
+            ft.DataColumn(
+                ft.Text(
                     "Color",
                     weight=ft.FontWeight.BOLD,
                     size=16,
@@ -63,8 +71,6 @@ def productos_list(page: ft.Page):
         ],
         rows=[],
     )
-
-    mensaje = ft.Text("", color=ft.Colors.RED)
 
     buscador = ft.TextField(
         label="Buscar producto",
@@ -88,15 +94,16 @@ def productos_list(page: ft.Page):
         nonlocal todos_los_productos
         try:
             todos_los_productos = ProductoDAO().obtener_todos()
-            mensaje.value = ""
         except Exception as ex:
-            mensaje.value = f"Error BD: {ex}"
+            mostrar_notificacion(page, "Error de conexión", str(ex), "error")
 
     def abrir_editar(producto):
-        def cerrar_editar():
+        def cerrar_editar(texto_exito=None):
             page.pop_dialog()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+            if texto_exito:
+                mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
 
         dialogo = ft.AlertDialog(
             modal=True,
@@ -106,16 +113,16 @@ def productos_list(page: ft.Page):
 
     def confirmar_eliminar(producto):
         def eliminar_confirmado(e):
+            nombre_producto = getattr(producto, "producto_nombre", "")
             try:
                 ProductoDAO().eliminar(producto.producto_id)
-                mensaje.value = ""
                 page.pop_dialog()
                 cargar_desde_bd()
                 aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+                mostrar_notificacion(page, "Se eliminó correctamente", f"El producto '{nombre_producto}' fue eliminado", "exito")
             except Exception as ex:
                 page.pop_dialog()
-                mensaje.value = f"Error al eliminar producto: {ex}"
-                page.update()
+                mostrar_notificacion(page, "Error al eliminar", str(ex), "error")
 
         def cancelar_eliminar(e):
             page.pop_dialog()
@@ -146,6 +153,7 @@ def productos_list(page: ft.Page):
         nombre = getattr(producto, "producto_nombre", "")
         precio = getattr(producto, "producto_precio", 0)
         stock = getattr(producto, "producto_stock", "")
+        unidad = getattr(producto, "producto_unidad_medida", "")
         color = getattr(producto, "producto_color", "")
 
         try:
@@ -160,6 +168,7 @@ def productos_list(page: ft.Page):
                 ft.DataCell(ft.Text(str(categoria))),
                 ft.DataCell(ft.Text(precio_texto)),
                 ft.DataCell(ft.Text(str(stock))),
+                ft.DataCell(ft.Text(str(unidad))),
                 ft.DataCell(ft.Text(str(color))),
                 ft.DataCell(
                     ft.Row([
@@ -263,10 +272,12 @@ def productos_list(page: ft.Page):
     aplicar_filtro(texto="", tipo_filtro=TODAS_KEY)
 
     def abrir_agregar(e):
-        def cerrar_dialogo():
+        def cerrar_dialogo(texto_exito=None):
             page.pop_dialog()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+            if texto_exito:
+                mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
 
         dialogo = ft.AlertDialog(
             modal=True,
@@ -294,7 +305,6 @@ def productos_list(page: ft.Page):
                 controls=[boton_anterior, texto_pagina, boton_siguiente],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
-            mensaje,
         ],
         spacing=20,
         expand=True,

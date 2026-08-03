@@ -4,6 +4,8 @@ from ui.cliente_list import clientes_list
 from ui.pedido_list import pedidos_list
 from ui.producto_catalogo_vendedor import catalogo_productos_vendedor
 from ui.colores import *
+from ui.notificaciones_list import mostrar_panel_notificaciones
+from ui.notificaciones import contar_no_leidas
 
 
 def main_window_vendedor(page: ft.Page, on_logout=None):
@@ -23,6 +25,54 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
         expand=True,
     )
 
+    #  Notificaciones:
+    badge_no_leidas = ft.Container(
+        top=2,
+        right=2,
+        width=16,
+        height=16,
+        border_radius=8,
+        bgcolor=ft.Colors.RED_600,
+        alignment=ft.Alignment.CENTER,
+        content=ft.Text("0", size=10, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD),
+        visible=False,
+    )
+
+    def actualizar_badge_notificaciones():
+        try:
+            cantidad = contar_no_leidas()
+        except Exception:
+            cantidad = 0
+
+        if cantidad > 0:
+            badge_no_leidas.content.value = str(cantidad) if cantidad <= 9 else "9+"
+            badge_no_leidas.visible = True
+        else:
+            badge_no_leidas.visible = False
+        page.update()
+
+    def click_notificaciones(e=None):
+        mostrar_panel_notificaciones(page, al_cerrar=actualizar_badge_notificaciones)
+
+    boton_notificaciones = ft.Stack(
+        width=40,
+        height=40,
+        controls=[
+            ft.IconButton(
+                icon=ft.Icons.NOTIFICATIONS_OUTLINED,
+                tooltip="Notificaciones",
+                icon_size=25,
+                icon_color=ft.Colors.BLUE_GREY_700,
+                style=ft.ButtonStyle(
+                    shape=ft.CircleBorder(),
+                    padding=8,
+                ),
+                on_click=click_notificaciones,
+            ),
+            badge_no_leidas,
+        ],
+    )
+
     def inicio():
         return ft.Column(
             controls=[dashboard_vendedor(page)],
@@ -30,21 +80,26 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
             expand=True,
         )
 
+    # FIX: ahora TODAS las funciones de navegación refrescan el badge, no solo Pedidos.
     def mostrar_inicio(e=None):
         contenido.content = inicio()
         page.update()
+        actualizar_badge_notificaciones()
 
     def mostrar_clientes(e=None):
         contenido.content = clientes_list(page)
         page.update()
+        actualizar_badge_notificaciones()
 
     def mostrar_pedidos(e=None):
         contenido.content = pedidos_list(page)
         page.update()
+        actualizar_badge_notificaciones()
 
     def mostrar_catalogo(e=None):
         contenido.content = catalogo_productos_vendedor(page)
         page.update()
+        actualizar_badge_notificaciones()
 
     def cerrar_sesion(e=None):
             def confirmar_cierre(e):
@@ -94,16 +149,7 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
                     spacing=12,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
-                        ft.IconButton(
-                            icon=ft.Icons.NOTIFICATIONS_OUTLINED,
-                            tooltip="Notificaciones",
-                            icon_size=25,
-                            icon_color=ft.Colors.BLUE_GREY_700,
-                            style=ft.ButtonStyle(
-                                shape=ft.CircleBorder(),
-                                padding=8,
-                            ),
-                        ),
+                        boton_notificaciones,
                         ft.CircleAvatar(
                             radius=18,
                             bgcolor=ft.Colors.BLUE,

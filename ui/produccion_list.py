@@ -1,6 +1,8 @@
 import flet as ft
 from dao.ordenes_produccion_dao import OrdenProduccionDAO
 from ui.produccion_form import orden_produccion_form
+from ui.notificaciones import agregar_notificacion
+from ui.componentes import mostrar_notificacion
 
 
 def _color_estado(estado):
@@ -28,6 +30,9 @@ def _chip_estado(estado):
 
 def produccion_list(page: ft.Page):
 
+    rol_id_actual = getattr(page, "rol_id_actual", None)
+    puede_gestionar = rol_id_actual != 1
+
     todas_las_ordenes = []
     ordenes_filtradas = []
 
@@ -35,63 +40,15 @@ def produccion_list(page: ft.Page):
 
     tabla = ft.DataTable(
         columns=[
-            ft.DataColumn(
-                ft.Text(
-                    "ID",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Pedido",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Producto",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Encargado",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Cantidad",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Estado",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Inicio",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Entrega",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-           
+            ft.DataColumn(ft.Text("ID", weight=ft.FontWeight.BOLD, size=16)),
+            ft.DataColumn(ft.Text("Pedido", weight=ft.FontWeight.BOLD, size=16)),
+            ft.DataColumn(ft.Text("Producto", weight=ft.FontWeight.BOLD, size=16)),
+            ft.DataColumn(ft.Text("Encargado", weight=ft.FontWeight.BOLD, size=16)),
+            ft.DataColumn(ft.Text("Cantidad", weight=ft.FontWeight.BOLD, size=16)),
+            ft.DataColumn(ft.Text("Estado", weight=ft.FontWeight.BOLD, size=16)),
+            ft.DataColumn(ft.Text("Inicio", weight=ft.FontWeight.BOLD, size=16)),
+            ft.DataColumn(ft.Text("Entrega", weight=ft.FontWeight.BOLD, size=16)),
+            ft.DataColumn(ft.Text("Acciones", weight=ft.FontWeight.BOLD, size=16)),
         ],
         rows=[],
     )
@@ -130,6 +87,8 @@ def produccion_list(page: ft.Page):
             mensaje.value = f"Error BD: {ex}"
 
     def abrir_editar(produccion_id):
+        if not puede_gestionar:
+            return
         try:
             orden_completa = OrdenProduccionDAO().obtener_por_id(produccion_id)
         except Exception as ex:
@@ -154,12 +113,19 @@ def produccion_list(page: ft.Page):
         page.show_dialog(dialogo)
 
     def confirmar_eliminar(produccion_id):
+        if not puede_gestionar:
+            return
+
         def eliminar_confirmado(e):
             try:
                 OrdenProduccionDAO().eliminar(produccion_id)
                 page.pop_dialog()
                 cargar_desde_bd()
                 aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+
+                texto = f"Orden #{produccion_id} eliminada"
+                agregar_notificacion(texto)
+                mostrar_notificacion(page, "Orden eliminada", texto, "error")
             except Exception as ex:
                 page.pop_dialog()
                 mensaje.value = f"Error al eliminar: {ex}"
@@ -190,7 +156,6 @@ def produccion_list(page: ft.Page):
         page.show_dialog(dialogo_confirmacion)
 
     def construir_fila(orden):
-        
         return ft.DataRow(
             cells=[
                 ft.DataCell(ft.Text(str(orden.produccion_id))),
@@ -201,7 +166,35 @@ def produccion_list(page: ft.Page):
                 ft.DataCell(_chip_estado(orden.produccion_estado)),
                 ft.DataCell(ft.Text(str(orden.fecha_inicio))),
                 ft.DataCell(ft.Text(str(orden.fecha_entrega) if orden.fecha_entrega else "—")),
-                
+                ft.DataCell(
+                    ft.Row(
+                        [
+                            ft.IconButton(
+                                icon=ft.Icons.EDIT,
+                                icon_color=ft.Colors.BLUE_700,
+                                bgcolor=ft.Colors.BLUE_50,
+                                tooltip="Editar",
+                                style=ft.ButtonStyle(
+                                    shape=ft.RoundedRectangleBorder(radius=8),
+                                ),
+                                on_click=lambda e, pid=orden.produccion_id: abrir_editar(pid),
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.DELETE,
+                                icon_color=ft.Colors.RED_700,
+                                bgcolor=ft.Colors.RED_50,
+                                tooltip="Eliminar",
+                                style=ft.ButtonStyle(
+                                    shape=ft.RoundedRectangleBorder(radius=8),
+                                ),
+                                on_click=lambda e, pid=orden.produccion_id: confirmar_eliminar(pid),
+                            ),
+                        ] if puede_gestionar else [
+                            ft.Icon(ft.Icons.VISIBILITY, color=ft.Colors.BLUE_GREY_300, tooltip="Solo lectura"),
+                        ],
+                        spacing=8,
+                    )
+                ),
             ]
         )
 
@@ -236,6 +229,9 @@ def produccion_list(page: ft.Page):
     aplicar_filtro(texto="", tipo_filtro=TODOS_KEY)
 
     def abrir_agregar(e):
+        if not puede_gestionar:
+            return
+
         def cerrar_dialogo():
             page.pop_dialog()
             cargar_desde_bd()
@@ -247,13 +243,41 @@ def produccion_list(page: ft.Page):
         )
         page.show_dialog(dialogo)
 
-    
+    controles_derecha = [buscador, filtro]
+
+    if puede_gestionar:
+        boton_agregar = ft.ElevatedButton(
+            "Nueva orden",
+            icon=ft.Icons.ADD,
+            bgcolor=ft.Colors.LIGHT_BLUE_500,
+            color=ft.Colors.WHITE,
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=8),
+            ),
+            on_click=abrir_agregar,
+        )
+        controles_derecha.append(boton_agregar)
+    else:
+        controles_derecha.append(
+            ft.Container(
+                padding=ft.Padding.symmetric(horizontal=12, vertical=8),
+                bgcolor=ft.Colors.BLUE_GREY_50,
+                border_radius=8,
+                content=ft.Row(
+                    controls=[
+                        ft.Icon(ft.Icons.LOCK_OUTLINE, size=16, color=ft.Colors.BLUE_GREY_400),
+                        ft.Text("Solo lectura", size=13, color=ft.Colors.BLUE_GREY_500),
+                    ],
+                    spacing=6,
+                ),
+            )
+        )
 
     return ft.Column(
         controls=[
             ft.Text("Producción", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro,],
+                controls=controles_derecha,
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             ),
             tabla,

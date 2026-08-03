@@ -2,7 +2,6 @@ import flet as ft
 from database.conexion import Conexion
 from models.usuario import Usuario
 from dao.usuario_dao import UsuarioDAO
-from ui.colores import *
 
 
 def _obtener_roles():
@@ -65,7 +64,6 @@ def usuario_form(regresar, usuario=None):
         value="",
     )
 
-    
     valor_inicial_rol = None
     if editando:
         nombre_rol_actual = str(getattr(usuario, "rol_id", ""))
@@ -81,7 +79,7 @@ def usuario_form(regresar, usuario=None):
         ],
     )
 
-    mensaje = ft.Text("", color=ft.Colors.GREEN)
+    mensaje = ft.Text("", color=ft.Colors.RED)
 
     def guardar_usuario(e):
         nombre = nombre_input.value
@@ -108,7 +106,6 @@ def usuario_form(regresar, usuario=None):
             dao = UsuarioDAO()
 
             if editando:
-                
                 password_final = password if password else getattr(usuario, "usuario_password", "")
 
                 usuario_actualizado = Usuario(
@@ -122,10 +119,7 @@ def usuario_form(regresar, usuario=None):
                     rol_id=int(rol_id_seleccionado),
                 )
                 dao.actualizar(usuario_actualizado)
-                mensaje.value = f"Usuario '{nombre}' actualizado"
-                mensaje.color = ft.Colors.GREEN
-                e.page.update()
-                regresar()
+                regresar(f"Usuario '{nombre}' actualizado correctamente")
                 return
 
             nuevo_id = dao.obtener_ultimo_id() + 1
@@ -140,17 +134,8 @@ def usuario_form(regresar, usuario=None):
                 rol_id=int(rol_id_seleccionado),
             )
             dao.insertar(nuevo_usuario)
-
-            mensaje.value = f"Usuario '{nombre}' ha sido registrado"
-            mensaje.color = ft.Colors.GREEN
-            # limpiar campos para poder agregar otro
-            nombre_input.value = ""
-            apellidop_input.value = ""
-            apellidom_input.value = ""
-            telefono_input.value = ""
-            correo_input.value = ""
-            password_input.value = ""
-            rol_dropdown.value = None
+            regresar(f"Usuario '{nombre}' registrado correctamente")
+            return
 
         except Exception as error:
             mensaje.value = f"Error al guardar el usuario: {error}"
@@ -158,7 +143,6 @@ def usuario_form(regresar, usuario=None):
 
         e.page.update()
 
-   
     encabezado = ft.Container(
         bgcolor=ft.Colors.LIGHT_BLUE_500,
         padding=ft.Padding.symmetric(horizontal=20, vertical=14),
@@ -181,7 +165,6 @@ def usuario_form(regresar, usuario=None):
         ),
     )
 
-    
     columna_izquierda = ft.Column(
         controls=[
             nombre_input,
@@ -222,7 +205,6 @@ def usuario_form(regresar, usuario=None):
         ),
     )
 
-    
     pie = ft.Container(
         padding=ft.Padding.only(left=30, right=30, bottom=20, top=5),
         content=ft.Row(

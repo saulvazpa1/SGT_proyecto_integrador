@@ -2,6 +2,7 @@ import flet as ft
 from dao.pedido_dao import PedidoDAO
 from ui.pedido_form import pedido_form
 from ui.colores import *
+from ui.componentes import mostrar_notificacion
 
 
 def pedidos_list(page: ft.Page):
@@ -74,8 +75,6 @@ def pedidos_list(page: ft.Page):
         rows=[],
     )
 
-    mensaje = ft.Text("", color=ft.Colors.GREEN)
-
     buscador = ft.TextField(
         label="Buscar pedido",
         hint_text="Busca por cliente, vendedor o producto...",
@@ -102,8 +101,7 @@ def pedidos_list(page: ft.Page):
                 *[ft.dropdown.Option(key=estado, text=estado) for estado in estados_unicos],
             ]
         except Exception as ex:
-            mensaje.value = f"Error BD: {ex}"
-            mensaje.color = ft.Colors.RED
+            mostrar_notificacion(page, "Error de conexión", str(ex), "error")
 
     def abrir_agregar(e):
         def cerrar_dialogo(texto_exito=None):
@@ -111,9 +109,7 @@ def pedidos_list(page: ft.Page):
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
             if texto_exito:
-                mensaje.value = texto_exito
-                mensaje.color = ft.Colors.GREEN
-                page.update()
+                mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
 
         dialogo = ft.AlertDialog(
             modal=True,
@@ -198,7 +194,6 @@ def pedidos_list(page: ft.Page):
                 spacing=20,
             ),
             tabla,
-            mensaje,
         ],
         spacing=20,
         expand=True,
