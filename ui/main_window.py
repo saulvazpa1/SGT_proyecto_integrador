@@ -114,7 +114,7 @@ def main_window(page: ft.Page, on_logout=None):
         )
 
     # Funciones de navegación
-    # FIX: ahora TODAS refrescan el badge de notificaciones, no solo una.
+    
     def mostrar_inicio(e=None):
         contenido.content = inicio()
         page.update()
