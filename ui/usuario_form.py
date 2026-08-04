@@ -2,7 +2,6 @@ import flet as ft
 from database.conexion import Conexion
 from models.usuario import Usuario
 from dao.usuario_dao import UsuarioDAO
-from ui.colores import *
 
 def _obtener_roles():
     """ (rol_id, rol_nombre) """
@@ -87,7 +86,7 @@ def usuario_form(regresar, usuario=None):
         ],
     )
 
-    mensaje = ft.Text("", color=ft.Colors.GREEN)
+    mensaje = ft.Text("", color=ft.Colors.RED)
 
     def guardar_usuario(e):
         nombre = nombre_input.value
@@ -127,10 +126,7 @@ def usuario_form(regresar, usuario=None):
                     rol_id=int(rol_id_seleccionado),
                 )
                 dao.actualizar(usuario_actualizado)
-                mensaje.value = f"Usuario '{nombre}' actualizado"
-                mensaje.color = ft.Colors.GREEN
-                e.page.update()
-                regresar()
+                regresar(f"Usuario '{nombre}' actualizado correctamente")
                 return
 
             nuevo_id = dao.obtener_ultimo_id() + 1
@@ -157,6 +153,8 @@ def usuario_form(regresar, usuario=None):
             correo_input.value = ""
             password_input.value = ""
             rol_dropdown.value = None
+            regresar(f"Usuario '{nombre}' registrado correctamente")
+            return
 
         except Exception as error:
             mensaje.value = f"Error al guardar el usuario: {error}"

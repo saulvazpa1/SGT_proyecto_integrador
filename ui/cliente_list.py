@@ -1,7 +1,7 @@
 import flet as ft
 from dao.cliente_dao import ClienteDAO
 from ui.cliente_form import cliente_form
-from ui.colores import *
+from ui.componentes import mostrar_notificacion
 
 
 def clientes_list(page: ft.Page):
@@ -13,63 +13,22 @@ def clientes_list(page: ft.Page):
 
     tabla = ft.DataTable(
         show_checkbox_column=False,
-        column_spacing=45,
-        horizontal_margin=20,
-        divider_thickness=1,
         columns=[
-            ft.DataColumn(
-                ft.Text(
-                    "ID",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                    )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Nombre",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Teléfono",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Correo",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Domicilio",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Acciones",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-                ),
+            ft.DataColumn(ft.Text("ID")),
+            ft.DataColumn(ft.Text("Nombre")),
+            ft.DataColumn(ft.Text("Teléfono")),
+            ft.DataColumn(ft.Text("Correo")),
+            ft.DataColumn(ft.Text("Domicilio")),
+            ft.DataColumn(ft.Text("Acciones")),
         ],
         rows=[],
     )
-
-    mensaje = ft.Text("", color=ft.Colors.GREEN)
 
     buscador = ft.TextField(
         label="Buscar cliente",
         hint_text="Escribe el nombre del cliente...",
         prefix_icon=ft.Icons.SEARCH,
-        width=300,
+        width=350,
         value="",
     )
 
@@ -78,8 +37,7 @@ def clientes_list(page: ft.Page):
         try:
             todos_los_clientes = ClienteDAO().obtener_todos()
         except Exception as ex:
-            mensaje.value = f"Error BD: {ex}"
-            mensaje.color = ft.Colors.RED
+            mostrar_notificacion(page, "Error de conexión", str(ex), "error")
 
     def abrir_editar(cliente):
         def cerrar_editar(texto_exito=None):
@@ -87,9 +45,7 @@ def clientes_list(page: ft.Page):
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value)
             if texto_exito:
-                mensaje.value = texto_exito
-                mensaje.color = ft.Colors.GREEN
-                page.update()
+                mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
 
         dialogo = ft.AlertDialog(
             modal=True,
@@ -105,14 +61,10 @@ def clientes_list(page: ft.Page):
                 page.pop_dialog()
                 cargar_desde_bd()
                 aplicar_filtro(texto=buscador.value)
-                mensaje.value = f"Cliente '{nombre_cliente}' eliminado correctamente"
-                mensaje.color = ft.Colors.GREEN
-                page.update()
+                mostrar_notificacion(page, "Se eliminó correctamente", f"El cliente '{nombre_cliente}' fue eliminado", "exito")
             except Exception as ex:
                 page.pop_dialog()
-                mensaje.value = f"Error al eliminar cliente: {ex}"
-                mensaje.color = ft.Colors.RED
-                page.update()
+                mostrar_notificacion(page, "Error al eliminar", str(ex), "error")
 
         def cancelar_eliminar(e):
             page.pop_dialog()
@@ -155,28 +107,20 @@ def clientes_list(page: ft.Page):
                 ft.DataCell(ft.Text(str(getattr(cliente, "cliente_correo", "")))),
                 ft.DataCell(ft.Text(domicilio_texto)),
                 ft.DataCell(
-                    ft.Row(
-                        alignment=ft.Alignment(0, 0),
-                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                        spacing=5,
-                        controls=[
-                            ft.IconButton(
-                                icon=ft.Icons.EDIT,
-                                tooltip="Editar",
-                                icon_color=ft.Colors.BLUE,
-                                icon_size=20,
-                                on_click=lambda e, c=cliente: abrir_editar(c),
-                            ),
-                            ft.IconButton(
-                                icon=ft.Icons.DELETE,
-                                tooltip="Eliminar",
-                                icon_color=ft.Colors.RED,
-                                icon_size=20,
-                                on_click=lambda e, c=cliente: confirmar_eliminar(c),
-                            ),
-                        ],
-                    )
-                )
+                    ft.Row([
+                        ft.IconButton(
+                            icon=ft.Icons.EDIT,
+                            tooltip="Editar",
+                            on_click=lambda e, c=cliente: abrir_editar(c),
+                        ),
+                        ft.IconButton(
+                            icon=ft.Icons.DELETE,
+                            icon_color=ft.Colors.RED,
+                            tooltip="Eliminar",
+                            on_click=lambda e, c=cliente: confirmar_eliminar(c),
+                        ),
+                    ])
+                ),
             ]
         )
 
@@ -289,9 +233,7 @@ def clientes_list(page: ft.Page):
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value)
             if texto_exito:
-                mensaje.value = texto_exito
-                mensaje.color = ft.Colors.GREEN
-                page.update()
+                mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
 
         dialogo = ft.AlertDialog(
             modal=True,
@@ -301,14 +243,7 @@ def clientes_list(page: ft.Page):
 
     boton_agregar = ft.ElevatedButton(
         "Agregar cliente",
-        bgcolor=AZUL,
-        color=ft.Colors.WHITE,
         icon=ft.Icons.ADD,
-        height=45,
-        style=ft.ButtonStyle(
-            shape=ft.RoundedRectangleBorder(radius=25),
-            padding=20,
-        ),
         on_click=abrir_agregar,
     )
 
@@ -316,16 +251,16 @@ def clientes_list(page: ft.Page):
         controls=[
             ft.Text("Gestión de Clientes", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
+                controls=[buscador, boton_agregar],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                controls=[
-                    buscador,
-                    boton_agregar,
-                ],
             ),
             tabla,
             paginador,
             mensaje,
+            ft.Row(
+                controls=[boton_anterior, texto_pagina, boton_siguiente],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
         ],
         spacing=20,
         expand=True,

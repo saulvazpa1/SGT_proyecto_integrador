@@ -159,7 +159,7 @@ def dashboard_admin(page=None):
     vendedores = sum(1 for u in usuarios if getattr(u, "rol_id", None) == 2)
     produccion = sum(1 for u in usuarios if getattr(u, "rol_id", None) == 3)
 
-    # --- Tarjetas KPI ---
+    # Tarjetas KPI
     tarjetas = ft.Row(
         controls=[
             _tarjeta_kpi("Total Usuarios", total_usuarios, "Registrados en BD", ft.Colors.BLUE_400),
@@ -171,7 +171,7 @@ def dashboard_admin(page=None):
         spacing=20,
     )
 
-    # --- Gráfica de barras ---
+    #  Gráfica de barras 
     grafica_barras = _grafica_barras(
         "Crecimiento de Usuarios",
         categorias=["Ene", "Feb", "Mar"],
@@ -179,7 +179,7 @@ def dashboard_admin(page=None):
         serie2=[10, 15, 20],
     )
 
-    # --- Gráfica de pastel por Distribución de Roles ---
+    #  Gráfica de pastel por Distribución de Roles 
     secciones_roles = []
     if admins > 0:
         secciones_roles.append((admins, ft.Colors.PURPLE_300, "Admin"))

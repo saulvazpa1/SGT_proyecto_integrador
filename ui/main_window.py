@@ -1,11 +1,14 @@
 import flet as ft
 from ui.usuario_list import usuarios_list
 from ui.dashboard_admin import dashboard_admin
-from ui.rol_list import roles_list
+from ui.rol_list import rol_list
 from ui.producto_list import productos_list
 from ui.pedido_list import pedidos_list
 from ui.produccion_list import produccion_list
+from ui.notificaciones_list import mostrar_panel_notificaciones
 from ui.colores import *
+from ui.componentes import mostrar_notificacion
+from ui.notificaciones import contar_no_leidas
 
 
 def main_window(page: ft.Page, on_logout=None):
@@ -28,6 +31,47 @@ def main_window(page: ft.Page, on_logout=None):
 
     menu_activo = "Inicio"
 
+    badge_no_leidas = ft.Container(
+        top=2,
+        right=2,
+        width=16,
+        height=16,
+        border_radius=8,
+        bgcolor=ft.Colors.RED_600,
+        alignment=ft.Alignment.CENTER,
+        content=ft.Text("0", size=10, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD),
+        visible=False,
+    )
+
+    def actualizar_badge_notificaciones():
+        try:
+            cantidad = contar_no_leidas()
+        except Exception:
+            cantidad = 0
+
+        if cantidad > 0:
+            badge_no_leidas.content.value = str(cantidad) if cantidad <= 9 else "9+"
+            badge_no_leidas.visible = True
+        else:
+            badge_no_leidas.visible = False
+        page.update()
+
+    def click_notificaciones(e=None):
+        mostrar_panel_notificaciones(page, al_cerrar=actualizar_badge_notificaciones)
+
+    boton_notificaciones = ft.Stack(
+        width=40,
+        height=40,
+        controls=[
+            ft.IconButton(
+                icon=ft.Icons.NOTIFICATIONS,
+                tooltip="Notificaciones",
+                on_click=click_notificaciones,
+            ),
+            badge_no_leidas,
+        ],
+    )
+
     # Barra superior de la aplicación
     barra_superior = ft.Container(
         height=65,
@@ -45,10 +89,7 @@ def main_window(page: ft.Page, on_logout=None):
                 ),
                 ft.Row(
                     controls=[
-                        ft.IconButton(
-                            icon=ft.Icons.NOTIFICATIONS,
-                            tooltip="Notificaciones",
-                        ),
+                        boton_notificaciones,
                         ft.CircleAvatar(
                             content=ft.Text("A"),
                             bgcolor=ft.Colors.BLUE,
@@ -112,12 +153,14 @@ def main_window(page: ft.Page, on_logout=None):
         )
 
     # Funciones de navegación
+    # FIX: ahora TODAS refrescan el badge de notificaciones, no solo una.
     def mostrar_inicio(e=None):
         nonlocal menu_activo
         menu_activo = "Inicio"
         contenido.content = inicio()
         reconstruir_menu()
         page.update()
+        actualizar_badge_notificaciones()
 
     def mostrar_usuarios(e=None):
         nonlocal menu_activo
@@ -125,13 +168,16 @@ def main_window(page: ft.Page, on_logout=None):
         contenido.content = usuarios_list(page)
         reconstruir_menu()
         page.update()
+        actualizar_badge_notificaciones()
 
     def mostrar_roles(e=None):
         nonlocal menu_activo
         menu_activo = "Roles"
         contenido.content = roles_list(page)
         reconstruir_menu()
+        contenido.content = rol_list(page)
         page.update()
+        actualizar_badge_notificaciones()
 
     def mostrar_productos(e=None):
         nonlocal menu_activo
@@ -152,7 +198,19 @@ def main_window(page: ft.Page, on_logout=None):
         menu_activo = "Producción"
         contenido.content = produccion_list(page)
         reconstruir_menu()
+        contenido.content = productos_list(page)
         page.update()
+        actualizar_badge_notificaciones()
+
+    def mostrar_pedido(e=None):
+        contenido.content = pedidos_list(page)
+        page.update()
+        actualizar_badge_notificaciones()
+
+    def mostrar_orden_produccion(e=None):
+        contenido.content = produccion_list(page)
+        page.update()
+        actualizar_badge_notificaciones()
 
     def cerrar_sesion(e=None):
         def confirmar_cierre(e):

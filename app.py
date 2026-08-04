@@ -730,7 +730,7 @@ def submenu(modulo, f_ver, f_ins, f_act=None, f_elim=None, es_movimiento=False):
 
 if __name__ == "__main__":
    #ft.app(target=main_login)
-   #ft.app(target=main_window)
-   ft.app(target=main_window_produccion)
+   ft.app(target=main_window)
    #ft.app(target=main_window_vendedor)
-#>>>>>>> cf5108d8e093c92e6c3d74544b9926f93ed244e1
+   #ft.app(target=main_window_produccion)
+  

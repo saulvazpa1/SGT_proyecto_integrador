@@ -108,7 +108,7 @@ def pedido_form(regresar, pedido=None, page=None):
         value=str(pedido.pedido_total) if editando else "",
     )
 
-    mensaje = ft.Text("", color=ft.Colors.GREEN)
+    mensaje = ft.Text("", color=ft.Colors.RED)
 
     def calcular_total(e):
         producto_id = producto_dropdown.value

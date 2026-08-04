@@ -58,6 +58,9 @@ def main_login(page: ft.Page):
 
     def volver_al_login():
         print(">>> volver_al_login ejecutado")
+        page.rol_id_actual = None
+        page.usuario_id_actual = None
+        page.usuario_nombre_actual = None
         page.clean()
         main_login(page)
 
@@ -76,6 +79,11 @@ def main_login(page: ft.Page):
             mensaje.value = f"Bienvenido {usuario.usuario_nombre}"
             mensaje.color = "green"
 
+          
+            page.rol_id_actual = usuario.rol_id
+            page.usuario_id_actual = usuario.usuario_id
+            page.usuario_nombre_actual = usuario.usuario_nombre
+
             if usuario.rol_id == 1:
                 page.clean()
                
@@ -88,7 +96,7 @@ def main_login(page: ft.Page):
                 main_window_vendedor(page, on_logout=volver_al_login)
             elif usuario.rol_id == 3:
                 page.clean()
-                main_window_vendedor(page, on_logout=volver_al_login)
+                main_window_produccion(page, on_logout=volver_al_login)
         else:
             mensaje.value = "Correo o contraseña incorrectos"
             mensaje.color = "red"
