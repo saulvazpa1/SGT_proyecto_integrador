@@ -25,6 +25,45 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
         expand=True,
     )
 
+    menu_activo = "Inicio"
+
+    def item_menu(texto, icono, accion):
+        activo = menu_activo == texto
+
+        return ft.Container(
+            height=48,
+            on_click=accion,
+            ink=True,
+            content=ft.Row(
+                spacing=0,
+                controls=[
+                    ft.Container(
+                        width=4,
+                        bgcolor=ft.Colors.BLUE if activo else ft.Colors.TRANSPARENT,
+                        border_radius=5,
+                    ),
+                    ft.Container(
+                        expand=True,
+                        bgcolor=ft.Colors.BLUE_50 if activo else None,
+                        padding=12,
+                        content=ft.Row(
+                            spacing=12,
+                            controls=[
+                                ft.Icon(
+                                    icono,
+                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
+                                ),
+                                ft.Text(
+                                    texto,
+                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
+                                    weight=ft.FontWeight.BOLD if activo else ft.FontWeight.NORMAL,
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        )
     #  Notificaciones:
     badge_no_leidas = ft.Container(
         top=2,
@@ -75,29 +114,42 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
 
     def inicio():
         return ft.Column(
-            controls=[dashboard_vendedor(page)],
-            spacing=20,
-            expand=True,
-        )
+        controls=[
+            dashboard_vendedor(page)
+        ],
+        expand=True
+    )
 
     # FIX: ahora TODAS las funciones de navegación refrescan el badge, no solo Pedidos.
     def mostrar_inicio(e=None):
+        nonlocal menu_activo
+        menu_activo = "Inicio"
         contenido.content = inicio()
+        reconstruir_menu()
         page.update()
         actualizar_badge_notificaciones()
 
     def mostrar_clientes(e=None):
+        nonlocal menu_activo
+        menu_activo = "Clientes"
         contenido.content = clientes_list(page)
+        reconstruir_menu()
         page.update()
         actualizar_badge_notificaciones()
 
     def mostrar_pedidos(e=None):
+        nonlocal menu_activo
+        menu_activo = "Pedidos"
         contenido.content = pedidos_list(page)
+        reconstruir_menu()
         page.update()
         actualizar_badge_notificaciones()
 
     def mostrar_catalogo(e=None):
+        nonlocal menu_activo
+        menu_activo = "Catálogo"
         contenido.content = catalogo_productos_vendedor(page)
+        reconstruir_menu()
         page.update()
         actualizar_badge_notificaciones()
 
@@ -173,56 +225,60 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
 
     menu_lateral = ft.Container(
         width=220,
-        bgcolor=ft.Colors.BLUE_GREY_900,
+        bgcolor=FONDO,
         padding=20,
         content=ft.Column(
-            controls=[
-                ft.Image(
-                    src="logo.png",
-                    width=120,
-                    height=60,
-                    fit="contain",
-                ),
-                ft.Divider(color=ft.Colors.BLUE_GREY_700),
-                ft.ElevatedButton(
-                    "Inicio",
-                    icon=ft.Icons.HOME,
-                    width=180,
-                    on_click=mostrar_inicio,
-                ),
-                ft.ElevatedButton(
-                    "Clientes",
-                    icon=ft.Icons.PERSON,
-                    width=180,
-                    on_click=mostrar_clientes,
-                ),
-                ft.ElevatedButton(
-                    "Pedidos",
-                    icon=ft.Icons.SHOPPING_CART,
-                    width=180,
-                    on_click=mostrar_pedidos,
-                ),
-                ft.ElevatedButton(
-                    "Catálogo de Productos",
-                    icon=ft.Icons.INVENTORY,
-                    width=180,
-                    on_click=mostrar_catalogo,
-                ),
-                ft.Container(expand=True),
-                ft.Divider(color=ft.Colors.BLUE_GREY_700),
-                ft.ElevatedButton(
-                    "Cerrar sesión",
-                    icon=ft.Icons.LOGOUT,
-                    width=180,
-                    bgcolor=ft.Colors.RED_700,
-                    color=ft.Colors.WHITE,
-                    on_click=cerrar_sesion,
-                ),
-            ],
-            spacing=15,
+            spacing=8,
             expand=True,
         ),
     )
+
+    def reconstruir_menu():
+        menu_lateral.content.controls = [
+            ft.Image(
+                src="logo.png",
+                width=120,
+                height=60,
+                fit="contain",
+            ),
+
+            ft.Divider(),
+
+            item_menu(
+                "Inicio",
+                ft.Icons.HOME_OUTLINED,
+                mostrar_inicio,
+            ),
+
+            item_menu(
+                "Clientes",
+                ft.Icons.PERSON_OUTLINE,
+                mostrar_clientes,
+            ),
+
+            item_menu(
+                "Pedidos",
+                ft.Icons.SHOPPING_CART_OUTLINED,
+                mostrar_pedidos,
+            ),
+
+            item_menu(
+                "Catálogo",
+                ft.Icons.INVENTORY_2_OUTLINED,
+                mostrar_catalogo,
+            ),
+
+            ft.Container(expand=True),
+
+            ft.Divider(),
+
+            item_menu(
+                "Cerrar sesión",
+                ft.Icons.LOGOUT,
+                cerrar_sesion,
+            ),
+        ]
+    reconstruir_menu()
 
     layout = ft.Row(
         controls=[

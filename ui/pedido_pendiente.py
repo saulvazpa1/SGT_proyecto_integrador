@@ -4,74 +4,24 @@ from ui.colores import *
 
 
 def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
-    """
-    Panel de órdenes de producción: muestra únicamente los pedidos
-    cuyo estado coincide con `estado_objetivo` (por defecto "Pendiente").
-    Es una vista de solo lectura pensada para el área de producción.
-    """
 
     todos_los_pedidos = []
     pedidos_filtrados = []
 
+    pagina_actual = 1
+    filas_por_pagina = 5
+
     tabla = ft.DataTable(
         show_checkbox_column=False,
         columns=[
-            ft.DataColumn(
-                ft.Text(
-                    "ID",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Cliente",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Vendedor",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Producto",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Cantidad",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Total",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Estado",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Fecha",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
+            ft.DataColumn(ft.Text("ID", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Cliente", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Vendedor", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Producto", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Cantidad", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Total", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Estado", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Fecha", weight=ft.FontWeight.BOLD)),
         ],
         rows=[],
     )
@@ -83,7 +33,6 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
         hint_text="Busca por cliente, vendedor o producto...",
         prefix_icon=ft.Icons.SEARCH,
         width=350,
-        value="",
     )
 
     contador = ft.Text(
@@ -92,10 +41,25 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
         color=ft.Colors.BLUE_GREY_600,
     )
 
+    paginador = ft.Row(
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=10,
+    )
+
+    # ---------------- FUNCIONES ---------------- #
+
+    def total_paginas():
+        if not pedidos_filtrados:
+            return 1
+        paginas = len(pedidos_filtrados) // filas_por_pagina
+        if len(pedidos_filtrados) % filas_por_pagina:
+            paginas += 1
+        return paginas
+
     def construir_fila(pedido):
         try:
             total_texto = f"${float(pedido.pedido_total):,.2f}"
-        except (TypeError, ValueError):
+        except:
             total_texto = f"${pedido.pedido_total}"
 
         return ft.DataRow(
@@ -111,30 +75,79 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
             ]
         )
 
+    def render_pagina():
+        inicio = (pagina_actual - 1) * filas_por_pagina
+        fin = inicio + filas_por_pagina
+
+        tabla.rows = [
+            construir_fila(p)
+            for p in pedidos_filtrados[inicio:fin]
+        ]
+
+        paginador.controls.clear()
+
+        
+        paginador.controls.append(
+            ft.IconButton(
+                icon=ft.Icons.CHEVRON_LEFT,
+                disabled=pagina_actual == 1,
+                on_click=lambda e: cambiar_pagina(pagina_actual - 1),
+            )
+        )
+
+        for i in range(1, total_paginas() + 1):
+            activo = i == pagina_actual
+
+            paginador.controls.append(
+                ft.Container(
+                    width=40,
+                    height=40,
+                    border_radius=10,
+                    bgcolor=ft.Colors.BLUE if activo else ft.Colors.GREY_200,
+                    alignment=ft.Alignment(0, 0),
+                    on_click=lambda e, p=i: cambiar_pagina(p),
+                    content=ft.Text(
+                        str(i),
+                        color="white" if activo else "black",
+                        weight=ft.FontWeight.BOLD,
+                    ),
+                )
+            )
+
+        paginador.controls.append(
+            ft.IconButton(
+                icon=ft.Icons.CHEVRON_RIGHT,
+                disabled=pagina_actual == total_paginas(),
+                on_click=lambda e: cambiar_pagina(pagina_actual + 1),
+            )
+        )
+
+        page.update()
+
+    def cambiar_pagina(numero):
+        nonlocal pagina_actual
+        pagina_actual = numero
+        render_pagina()
+
     def aplicar_filtro(texto=""):
-        nonlocal pedidos_filtrados
-        texto_busqueda = (texto or "").strip().lower()
+        nonlocal pedidos_filtrados, pagina_actual
+
+        texto_busqueda = (texto or "").lower()
 
         resultado = []
         for pedido in todos_los_pedidos:
             if str(pedido.pedido_estado) != estado_objetivo:
                 continue
 
-            campos = " ".join([
-                str(pedido.cliente_id),
-                str(pedido.vendedor_id),
-                str(pedido.producto_id),
-            ]).lower()
+            campos = f"{pedido.cliente_id} {pedido.vendedor_id} {pedido.producto_id}".lower()
 
             if not texto_busqueda or texto_busqueda in campos:
                 resultado.append(pedido)
 
         pedidos_filtrados = resultado
-        tabla.rows = [construir_fila(p) for p in pedidos_filtrados]
+        pagina_actual = 1
         contador.value = f"{len(pedidos_filtrados)} pedidos {estado_objetivo.lower()}"
-
-        if page:
-            page.update()
+        render_pagina()
 
     def cargar_desde_bd():
         nonlocal todos_los_pedidos
@@ -148,12 +161,13 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
     def refrescar(e=None):
         cargar_desde_bd()
         aplicar_filtro(texto=buscador.value)
-        if e is not None:
+        if e:
             mensaje.value = "Panel actualizado"
             mensaje.color = ft.Colors.GREEN
-            page.update()
 
-    buscador.on_change = lambda e: aplicar_filtro(texto=e.control.value)
+    # ---------------- EVENTOS ---------------- #
+
+    buscador.on_change = lambda e: aplicar_filtro(e.control.value)
 
     boton_refrescar = ft.ElevatedButton(
         "Actualizar",
@@ -163,7 +177,8 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
         on_click=refrescar,
     )
 
-    # Carga inicial
+    # ---------------- INIT ---------------- #
+
     refrescar()
 
     return ft.Column(
@@ -172,10 +187,10 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
             ft.Row(
                 controls=[buscador, boton_refrescar],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                spacing=20,
             ),
             contador,
             tabla,
+            paginador,  # 👈 AQUÍ
             mensaje,
         ],
         spacing=20,

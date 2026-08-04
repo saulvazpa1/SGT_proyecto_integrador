@@ -186,6 +186,28 @@ def usuarios_list(page: ft.Page):
             paginas += 1
         return max(paginas, 1)
 
+    def construir_paginador():
+        contenedor_paginas.controls.clear()
+
+        total = total_paginas()
+
+        for i in range(1, total + 1):
+            contenedor_paginas.controls.append(
+                ft.Container(
+                    content=ft.Text(
+                        str(i),
+                        color=ft.Colors.WHITE if i == pagina_actual else ft.Colors.BLACK
+                    ),
+                    bgcolor=ft.Colors.BLUE if i == pagina_actual else ft.Colors.GREY_300,
+                    padding=10,
+                    border_radius=8,
+                    alignment=ft.Alignment(0, 0),
+                    width=40,
+                    height=40,
+                    on_click=lambda e, p=i: ir_a_pagina(p),
+                )
+            )
+
     def render_pagina():
         inicio = (pagina_actual - 1) * filas_por_pagina
         fin = inicio + filas_por_pagina
@@ -195,8 +217,8 @@ def usuarios_list(page: ft.Page):
         boton_anterior.disabled = pagina_actual <= 1
         boton_siguiente.disabled = pagina_actual >= total_paginas()
 
-        if page:
-            page.update()
+        construir_paginador()
+        page.update()
 
     def ir_pagina_anterior(e):
         nonlocal pagina_actual
@@ -209,6 +231,11 @@ def usuarios_list(page: ft.Page):
         if pagina_actual < total_paginas():
             pagina_actual += 1
             render_pagina()
+
+    def ir_a_pagina(pagina):
+        nonlocal pagina_actual
+        pagina_actual = pagina
+        render_pagina()
 
     texto_pagina = ft.Text("Página 1 de 1")
     boton_anterior = ft.IconButton(
@@ -224,6 +251,12 @@ def usuarios_list(page: ft.Page):
         disabled=True,
     )
 
+    contenedor_paginas = ft.Row(
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=5
+    )
+
+   
     def aplicar_filtro(texto="", tipo_filtro="Todos"):
         nonlocal usuarios_filtrados, pagina_actual
         texto_busqueda = (texto or "").strip().lower()
@@ -300,7 +333,11 @@ def usuarios_list(page: ft.Page):
             ),
             tabla,
             ft.Row(
-                controls=[boton_anterior, texto_pagina, boton_siguiente],
+                controls=[
+                    boton_anterior,
+                    contenedor_paginas,
+                    boton_siguiente
+                ],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
         ],
