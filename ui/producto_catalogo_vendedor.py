@@ -17,47 +17,53 @@ def catalogo_productos_vendedor(page: ft.Page):
 
     tabla = ft.DataTable(
         show_checkbox_column=False,
+        column_spacing=25,
+        horizontal_margin=10,
+        divider_thickness=1,
+        heading_row_height=55,
+        data_row_min_height=55,
+        data_row_max_height=55,
         columns=[
             ft.DataColumn(
-                ft.Text(
-                    "ID",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
+                ft.Container(
+                    width=80,
+                    alignment=ft.Alignment(0, 0),
+                    content=ft.Text("ID", weight=ft.FontWeight.BOLD, size=16),
                 )
             ),
             ft.DataColumn(
-                ft.Text(
-                    "Nombre",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
+                ft.Container(
+                    width=220,
+                    alignment=ft.Alignment(0, 0),
+                    content=ft.Text("Nombre", weight=ft.FontWeight.BOLD, size=16),
                 )
             ),
             ft.DataColumn(
-                ft.Text(
-                    "Categoría",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
+                ft.Container(
+                    width=180,
+                    alignment=ft.Alignment(0, 0),
+                    content=ft.Text("Categoría", weight=ft.FontWeight.BOLD, size=16),
                 )
             ),
             ft.DataColumn(
-                ft.Text(
-                    "Precio",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
+                ft.Container(
+                    width=120,
+                    alignment=ft.Alignment(0, 0),
+                    content=ft.Text("Precio", weight=ft.FontWeight.BOLD, size=16),
                 )
             ),
             ft.DataColumn(
-                ft.Text(
-                    "Stock",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
+                ft.Container(
+                    width=120,
+                    alignment=ft.Alignment(0, 0),
+                    content=ft.Text("Stock", weight=ft.FontWeight.BOLD, size=16),
                 )
             ),
             ft.DataColumn(
-                ft.Text(
-                    "Color",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
+                ft.Container(
+                    width=150,
+                    alignment=ft.Alignment(0, 0),
+                    content=ft.Text("Color", weight=ft.FontWeight.BOLD, size=16),
                 )
             ),
         ],
@@ -106,12 +112,48 @@ def catalogo_productos_vendedor(page: ft.Page):
 
         return ft.DataRow(
             cells=[
-                ft.DataCell(ft.Text(str(producto.producto_id))),
-                ft.DataCell(ft.Text(str(nombre))),
-                ft.DataCell(ft.Text(str(categoria))),
-                ft.DataCell(ft.Text(precio_texto)),
-                ft.DataCell(ft.Text(str(stock))),
-                ft.DataCell(ft.Text(str(color))),
+                ft.DataCell(
+                    ft.Container(
+                        width=80,
+                        alignment=ft.Alignment(0, 0),
+                        content=ft.Text(str(producto.producto_id)),
+                    )
+                ),
+                ft.DataCell(
+                    ft.Container(
+                        width=220,
+                        alignment=ft.Alignment(0, 0),
+                        content=ft.Text(str(nombre)),
+                    )
+                ),
+                ft.DataCell(
+                    ft.Container(
+                        width=180,
+                        alignment=ft.Alignment(0, 0),
+                        content=ft.Text(str(categoria)),
+                    )
+                ),
+                ft.DataCell(
+                    ft.Container(
+                        width=120,
+                        alignment=ft.Alignment(0, 0),
+                        content=ft.Text(precio_texto),
+                    )
+                ),
+                ft.DataCell(
+                    ft.Container(
+                        width=120,
+                        alignment=ft.Alignment(0, 0),
+                        content=ft.Text(str(stock)),
+                    )
+                ),
+                ft.DataCell(
+                    ft.Container(
+                        width=150,
+                        alignment=ft.Alignment(0, 0),
+                        content=ft.Text(str(color)),
+                    )
+                ),
             ]
         )
 
@@ -123,17 +165,62 @@ def catalogo_productos_vendedor(page: ft.Page):
             paginas += 1
         return max(paginas, 1)
 
+    paginador = ft.Row(
+        alignment=ft.MainAxisAlignment.CENTER,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        spacing=8,
+    )
+
     def render_pagina():
         inicio = (pagina_actual - 1) * filas_por_pagina
         fin = inicio + filas_por_pagina
-        tabla.rows = [construir_fila(p) for p in productos_filtrados[inicio:fin]]
 
-        texto_pagina.value = f"Página {pagina_actual} de {total_paginas()}"
-        boton_anterior.disabled = pagina_actual <= 1
-        boton_siguiente.disabled = pagina_actual >= total_paginas()
+        tabla.rows = [
+            construir_fila(p)
+            for p in productos_filtrados[inicio:fin]
+        ]
 
-        if page:
-            page.update()
+        paginador.controls.clear()
+
+        # Flecha izquierda
+        paginador.controls.append(
+            ft.IconButton(
+                icon=ft.Icons.CHEVRON_LEFT,
+                disabled=pagina_actual == 1,
+                on_click=ir_pagina_anterior,
+            )
+        )
+
+        # Botones de páginas
+        for i in range(1, total_paginas() + 1):
+
+            paginador.controls.append(
+                ft.Container(
+                    width=36,
+                    height=36,
+                    border_radius=8,
+                    bgcolor=AZUL if i == pagina_actual else "#D9DCE3",
+                    alignment=ft.Alignment(0, 0),
+                    ink=True,
+                    on_click=lambda e, p=i: cambiar_pagina(p),
+                    content=ft.Text(
+                        str(i),
+                        color="white" if i == pagina_actual else "black",
+                        weight=ft.FontWeight.BOLD,
+                    ),
+                )
+            )
+
+        # Flecha derecha
+        paginador.controls.append(
+            ft.IconButton(
+                icon=ft.Icons.CHEVRON_RIGHT,
+                disabled=pagina_actual == total_paginas(),
+                on_click=ir_pagina_siguiente,
+            )
+        )
+
+        page.update()
 
     def ir_pagina_anterior(e):
         nonlocal pagina_actual
@@ -147,19 +234,11 @@ def catalogo_productos_vendedor(page: ft.Page):
             pagina_actual += 1
             render_pagina()
 
-    texto_pagina = ft.Text("Página 1 de 1")
-    boton_anterior = ft.IconButton(
-        icon=ft.Icons.CHEVRON_LEFT,
-        tooltip="Página anterior",
-        on_click=ir_pagina_anterior,
-        disabled=True,
-    )
-    boton_siguiente = ft.IconButton(
-        icon=ft.Icons.CHEVRON_RIGHT,
-        tooltip="Página siguiente",
-        on_click=ir_pagina_siguiente,
-        disabled=True,
-    )
+    def cambiar_pagina(numero):
+        nonlocal pagina_actual
+        pagina_actual = numero
+        render_pagina()
+
 
     def aplicar_filtro(texto="", tipo_filtro=TODAS_KEY):
         nonlocal productos_filtrados, pagina_actual
@@ -206,10 +285,7 @@ def catalogo_productos_vendedor(page: ft.Page):
                 spacing=20,
             ),
             tabla,
-            ft.Row(
-                controls=[boton_anterior, texto_pagina, boton_siguiente],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
+            paginador,
             mensaje,
         ],
         spacing=20,

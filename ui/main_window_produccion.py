@@ -14,7 +14,6 @@ from ui.notificaciones import contar_no_leidas
 
 def main_window_produccion(page: ft.Page, on_logout=None):
     page.title = "Sistema Gestor de Inventario Textil - Producción"
-    page.bgcolor = FONDO
     page.theme_mode = ft.ThemeMode.LIGHT
     page.theme = ft.Theme(
         font_family="Segoe UI"
@@ -29,6 +28,47 @@ def main_window_produccion(page: ft.Page, on_logout=None):
         expand=True,
     )
 
+    menu_activo = "Inicio"
+
+    def item_menu(texto, icono, accion):
+        activo = menu_activo == texto
+
+        return ft.Container(
+            height=48,
+            on_click=accion,
+            ink=True,
+            content=ft.Row(
+                spacing=0,
+                controls=[
+                    ft.Container(
+                        width=4,
+                        bgcolor=ft.Colors.BLUE if activo else ft.Colors.TRANSPARENT,
+                        border_radius=5,
+                    ),
+                    ft.Container(
+                        expand=True,
+                        bgcolor=ft.Colors.BLUE_50 if activo else None,
+                        padding=12,
+                        content=ft.Row(
+                            spacing=12,
+                            controls=[
+                                ft.Icon(
+                                    icono,
+                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
+                                ),
+                                ft.Text(
+                                    texto,
+                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
+                                    weight=ft.FontWeight.BOLD if activo else ft.FontWeight.NORMAL,
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        )
+
+    
     # Notificaciones
     badge_no_leidas = ft.Container(
         top=2,
@@ -80,23 +120,34 @@ def main_window_produccion(page: ft.Page, on_logout=None):
         )
 
     def mostrar_inicio(e=None):
+        nonlocal menu_activo
+        menu_activo = "Inicio"
         contenido.content = inicio()
+        reconstruir_menu()
         page.update()
 
     def mostrar_ordenes_produccion(e=None):
-        # Muestra la vista/tabla general de producción
+        nonlocal menu_activo
+        menu_activo = "Órdenes"
         contenido.content = produccion_list(page)
+        reconstruir_menu()
         page.update()
         actualizar_badge_notificaciones()
         page.update()
 
     def mostrar_productos(e=None):
+        nonlocal menu_activo
+        menu_activo = "Productos"
         contenido.content = catalogo_productos_vendedor(page)
+        reconstruir_menu()
         page.update()
 
     def mostrar_pedidos_pendientes(e=None):
-       contenido.content =pedidos_pendientes(page)
-       page.update()
+        nonlocal menu_activo
+        menu_activo = "Pendientes"
+        contenido.content = pedidos_pendientes(page)
+        reconstruir_menu()
+        page.update()
 
     def cerrar_sesion(e=None):
             def confirmar_cierre(e):
@@ -162,66 +213,64 @@ def main_window_produccion(page: ft.Page, on_logout=None):
         ),
     )
 
-   
-
     menu_lateral = ft.Container(
-        width=240,
-        bgcolor=MENU,
+        width=220,
+        bgcolor=ft.Colors.WHITE,
         padding=20,
         content=ft.Column(
-            controls=[
-                ft.Image(
-                    src="logo.png",
-                    width=120,
-                    height=60,
-                    fit="contain",
-                ),
-                ft.Text(
-                    "PRODUCCIÓN",
-                    size=12,
-                    weight=ft.FontWeight.BOLD,
-                    color=ft.Colors.BLUE_GREY_200,
-                ),
-                ft.Divider(color=ft.Colors.BLUE_GREY_700),
-                ft.ElevatedButton(
-                    " Dashboard",
-                    icon=ft.Icons.DASHBOARD,
-                    width=200,
-                    on_click=mostrar_inicio,
-                ),
-                ft.ElevatedButton(
-                    " Órdenes Producción",
-                    icon=ft.Icons.PRECISION_MANUFACTURING,
-                    width=200,
-                    on_click=mostrar_ordenes_produccion,
-                ),
-                ft.ElevatedButton(
-                    " Productos",
-                    icon=ft.Icons.INVENTORY_2,
-                    width=200,
-                    on_click=mostrar_productos,
-                ),
-                ft.ElevatedButton(
-                    " Pedidos Pendientes",
-                    icon=ft.Icons.ASSIGNMENT_LATE,
-                    width=200,
-                    on_click=mostrar_pedidos_pendientes,
-                ),
-                ft.Container(expand=True),
-                ft.Divider(color=ft.Colors.BLUE_GREY_700),
-                ft.ElevatedButton(
-                    "Cerrar sesión",
-                    icon=ft.Icons.LOGOUT,
-                    width=200,
-                    bgcolor=ft.Colors.RED_700,
-                    color=ft.Colors.WHITE,
-                    on_click=cerrar_sesion,
-                ),
-            ],
-            spacing=12,
+            spacing=8,
             expand=True,
         ),
     )
+
+    def reconstruir_menu():
+        menu_lateral.content.controls = [
+            ft.Image(
+                src="logo.png",
+                width=120,
+                height=60,
+                fit="contain",
+            ),
+
+            ft.Divider(),
+
+            item_menu(
+                "Inicio",
+                ft.Icons.HOME_OUTLINED,
+                mostrar_inicio,
+            ),
+
+            item_menu(
+                "Órdenes",
+                ft.Icons.PRECISION_MANUFACTURING,
+                mostrar_ordenes_produccion,
+            ),
+
+            item_menu(
+                "Productos",
+                ft.Icons.INVENTORY_2_OUTLINED,
+                mostrar_productos,
+            ),
+
+            item_menu(
+                "Pendientes",
+                ft.Icons.ASSIGNMENT_LATE_OUTLINED,
+                mostrar_pedidos_pendientes,
+            ),
+
+            ft.Container(expand=True),
+
+            ft.Divider(),
+
+            item_menu(
+                "Cerrar sesión",
+                ft.Icons.LOGOUT,
+                cerrar_sesion,
+            ),
+        ]
+
+    reconstruir_menu()
+
 
     #  Layout General 
 

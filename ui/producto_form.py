@@ -94,6 +94,7 @@ def producto_form(regresar, producto=None, page=None):
 
     nombre_input = ft.TextField(
         label="Nombre del producto:",
+        hint_text="Ingresa el nombre del producto",
         width=320,
         border_radius=6,
         value=val_nombre,
@@ -135,6 +136,7 @@ def producto_form(regresar, producto=None, page=None):
 
     color_input = ft.TextField(
         label="Color:",
+        hint_text="Ingresa el color",
         width=320,
         border_radius=6,
         value=val_color,
@@ -152,6 +154,7 @@ def producto_form(regresar, producto=None, page=None):
 
     descripcion_input = ft.TextField(
         label="Descripción:",
+        hint_text="Añade una descripcción del producto",
         width=670,
         multiline=True,
         min_lines=2,

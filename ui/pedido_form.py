@@ -94,6 +94,7 @@ def pedido_form(regresar, pedido=None, page=None):
 
     cantidad_input = ft.TextField(
         label="Cantidad:",
+        hint_text="Ingresa la cantidad de productos",
         width=320,
         border_radius=6,
         value=str(pedido.pedido_cantidad) if editando else "",
