@@ -162,7 +162,7 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
         )
         page.show_dialog(dialogo_confirmacion)
 
-    filas_por_pagina = 10
+    filas_por_pagina = 5
     pagina_actual = 1
 
     def total_paginas():

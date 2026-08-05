@@ -26,7 +26,7 @@ def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS):
                             width=36,
                             height=36,
                             border_radius=8,
-                            bgcolor=color + "22",
+                            bgcolor=ft.Colors.with_opacity(0.15, color),
                             alignment=ft.Alignment.CENTER,
                             content=ft.Icon(icono, size=18, color=color),
                         ),
@@ -217,7 +217,7 @@ def dashboard_admin(page=None):
 
     admins = conteo_por_rol.get("Administrador", 0)
 
-    # ---------- TARJETAS ----------
+    #  TARJETAS-
     tarjetas = ft.Row(
         controls=[
             _tarjeta_kpi("Usuarios", total_usuarios, "Registrados en el sistema", ft.Colors.BLUE_400, ft.Icons.PEOPLE_OUTLINED),
@@ -231,7 +231,7 @@ def dashboard_admin(page=None):
         run_spacing=16,
     )
 
-    # ---------- GRÁFICA ROLES ----------
+    
     secciones_roles = [
         (cantidad, _PALETA[i % len(_PALETA)], nombre_rol)
         for i, (nombre_rol, cantidad) in enumerate(conteo_por_rol.items())
@@ -242,7 +242,7 @@ def dashboard_admin(page=None):
 
     grafica_roles = _grafica_pastel("Distribución por roles", secciones_roles)
 
-    # ---------- GRÁFICA ESTADOS ----------
+    #
     conteo_por_estado = {}
     for p in pedidos:
         estado = str(getattr(p, "pedido_estado", "") or "Sin estado").strip()
@@ -258,7 +258,6 @@ def dashboard_admin(page=None):
 
     grafica_estados = _grafica_pastel("Pedidos por estado", secciones_estado)
 
-    # ---------- TOP PRODUCTOS ----------
     ventas_por_producto = {}
     for p in pedidos:
         nombre_producto = str(getattr(p, "producto_id", "Producto"))

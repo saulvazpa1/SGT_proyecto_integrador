@@ -15,15 +15,12 @@ def main_window(page: ft.Page, on_logout=None):
     page.title = "Sistema Gestor de Inventario Textil"
     page.bgcolor = FONDO
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.theme = ft.Theme(
-        font_family="Segoe UI"
-    )
+    page.theme = ft.Theme(font_family="Segoe UI")
     page.window_width = 1100
     page.window_height = 700
     page.padding = 0
     page.bgcolor = ft.Colors.WHITE
 
-   
     contenido = ft.Container(
         padding=30,
         expand=True,
@@ -72,7 +69,7 @@ def main_window(page: ft.Page, on_logout=None):
         ],
     )
 
-    # Barra superior de la aplicación
+    # Barra superior
     barra_superior = ft.Container(
         height=65,
         bgcolor=ft.Colors.GREY_100,
@@ -96,63 +93,78 @@ def main_window(page: ft.Page, on_logout=None):
                             color=ft.Colors.WHITE,
                             radius=18,
                         ),
-                        ft.Text(
-                            "Administrador",
-                            weight=ft.FontWeight.BOLD,
-                        ),
+                        ft.Text("Administrador", weight=ft.FontWeight.BOLD),
                     ],
                 ),
             ],
         ),
     )
 
-    def item_menu(texto, icono, accion):
+    def item_menu(texto, icono, accion, es_logout=False):
         activo = menu_activo == texto
 
+        # Colores según estado
+        if es_logout:
+            color_icono = ft.Colors.RED_400
+            color_texto = ft.Colors.RED_400
+            bg = None
+            barra = ft.Colors.TRANSPARENT
+        elif activo:
+            color_icono = ft.Colors.BLUE_600
+            color_texto = ft.Colors.BLUE_700
+            bg = ft.Colors.BLUE_50
+            barra = ft.Colors.BLUE_600
+        else:
+            color_icono = ft.Colors.BLUE_GREY_600
+            color_texto = ft.Colors.BLUE_GREY_700
+            bg = None
+            barra = ft.Colors.TRANSPARENT
+
         return ft.Container(
-            height=48,
+            height=46,
+            border_radius=10,
             on_click=accion,
             ink=True,
             content=ft.Row(
                 spacing=0,
                 controls=[
+                    # Barrita lateral de activo
                     ft.Container(
                         width=4,
-                        bgcolor=ft.Colors.BLUE if activo else ft.Colors.TRANSPARENT,
-                        border_radius=5,
+                        height=28,
+                        bgcolor=barra,
+                        border_radius=4,
+                        margin=ft.Margin(left=0, top=9, right=0, bottom=9),
                     ),
                     ft.Container(
                         expand=True,
-                        bgcolor=ft.Colors.BLUE_50 if activo else None,
-                        padding=12,
+                        bgcolor=bg,
+                        border_radius=10,
+                        padding=ft.Padding.only(left=12, right=12, top=10, bottom=10),
                         content=ft.Row(
                             spacing=12,
                             controls=[
-                                ft.Icon(
-                                    icono,
-                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
-                                ),
+                                ft.Icon(icono, size=20, color=color_icono),
                                 ft.Text(
                                     texto,
-                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
-                                    weight=ft.FontWeight.BOLD if activo else ft.FontWeight.NORMAL,
+                                    size=14,
+                                    color=color_texto,
+                                    weight=ft.FontWeight.W_600 if activo else ft.FontWeight.W_500,
                                 ),
                             ],
                         ),
                     ),
                 ],
             ),
-    )
+        )
 
-    # Vistas disponibles
+    # Vistas
     def inicio():
         return ft.Column(
             controls=[dashboard_admin(page)],
             spacing=20,
             expand=True,
         )
-
-    
 
     def mostrar_inicio(e=None):
         nonlocal menu_activo
@@ -204,12 +216,12 @@ def main_window(page: ft.Page, on_logout=None):
 
     def cerrar_sesion(e=None):
         def confirmar_cierre(e):
-            print(">>> confirmar_cierre ejecutado, on_logout es:", on_logout)
             page.pop_dialog()
             if on_logout:
                 on_logout()
             else:
                 page.window.destroy()
+
         def cancelar_cierre(e):
             page.pop_dialog()
 
@@ -231,30 +243,33 @@ def main_window(page: ft.Page, on_logout=None):
         )
         page.show_dialog(dialogo_confirmacion)
 
-        
-
-    # Menú lateral
+    # ========== MENÚ LATERAL MEJORADO ==========
     menu_lateral = ft.Container(
-        width=220,
+        width=230,
         bgcolor=ft.Colors.WHITE,
-        padding=20,
+        border=ft.Border(right=ft.BorderSide(1, ft.Colors.BLUE_GREY_100)),
+        padding=ft.Padding.only(left=12, right=12, top=16, bottom=16),
         content=ft.Column(
-            spacing=8,
+            spacing=4,
             expand=True,
         ),
     )
 
     def reconstruir_menu():
         menu_lateral.content.controls = [
-            ft.Image(
+            # Logo
+           ft.Image(
                 src="logo.png",
-                width=120,
-                height=60,
+                width=130,
+                height=55,
                 fit="contain",
             ),
 
-            ft.Divider(),
+            ft.Divider(height=1, color=ft.Colors.BLUE_GREY_100),
 
+            ft.Container(height=8),
+
+            # Items del menú
             item_menu("Inicio", ft.Icons.HOME_OUTLINED, mostrar_inicio),
             item_menu("Usuarios", ft.Icons.PEOPLE_OUTLINE, mostrar_usuarios),
             item_menu("Roles", ft.Icons.SECURITY_OUTLINED, mostrar_roles),
@@ -262,17 +277,20 @@ def main_window(page: ft.Page, on_logout=None):
             item_menu("Pedidos", ft.Icons.SHOPPING_CART_OUTLINED, mostrar_pedido),
             item_menu("Producción", ft.Icons.PRECISION_MANUFACTURING, mostrar_orden_produccion),
 
+            # Empuja el cerrar sesión hacia abajo
             ft.Container(expand=True),
 
-            ft.Divider(),
+            ft.Divider(height=1, color=ft.Colors.BLUE_GREY_100),
 
-            item_menu("Cerrar sesión", ft.Icons.LOGOUT, cerrar_sesion),
-    ]
+            ft.Container(height=6),
+
+            # Cerrar sesión (estilo diferente)
+            item_menu("Cerrar sesión", ft.Icons.LOGOUT, cerrar_sesion, es_logout=True),
+        ]
 
     reconstruir_menu()
 
-
-    # Layout general dividiendo menú y vista activa
+    # Layout general
     layout = ft.Row(
         controls=[
             menu_lateral,
@@ -285,9 +303,10 @@ def main_window(page: ft.Page, on_logout=None):
             ),
         ],
         expand=True,
+        spacing=0,
     )
 
     page.add(layout)
-    
-    # Carga la vista inicial al abrir la app
+
+    # Vista inicial
     mostrar_inicio()

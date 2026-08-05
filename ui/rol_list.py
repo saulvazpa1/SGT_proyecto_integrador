@@ -23,29 +23,57 @@ def _icono_para_rol(nombre_rol):
 
 
 def _tarjeta_resumen_rol(nombre_rol, cantidad_usuarios, color, icono):
+    """Misma estética que las tarjetas KPI del dashboard"""
     return ft.Container(
         width=210,
-        padding=15,
+        padding=18,
         bgcolor=ft.Colors.WHITE,
-        border=ft.Border.all(1.5, color),
-        border_radius=10,
+        border_radius=12,
+        shadow=ft.BoxShadow(
+            spread_radius=0,
+            blur_radius=8,
+            color=ft.Colors.BLACK12,
+            offset=ft.Offset(0, 2),
+        ),
         content=ft.Column(
             controls=[
+                # Icono arriba a la izquierda (igual que dashboard)
                 ft.Row(
                     controls=[
-                        ft.Text(nombre_rol, size=13, color=ft.Colors.BLUE_GREY_700, weight=ft.FontWeight.BOLD),
-                        ft.Icon(icono, size=18, color=color),
+                        ft.Container(
+                            width=36,
+                            height=36,
+                            border_radius=8,
+                            bgcolor=ft.Colors.with_opacity(0.15, color),
+                            alignment=ft.Alignment.CENTER,
+                            content=ft.Icon(icono, size=18, color=color),
+                        ),
+                        ft.Container(expand=True),
                     ],
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
-                ft.Text(str(cantidad_usuarios), size=24, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_GREY_900),
+                ft.Container(height=10),
+                # Número grande
+                ft.Text(
+                    str(cantidad_usuarios),
+                    size=26,
+                    weight=ft.FontWeight.BOLD,
+                    color=ft.Colors.BLUE_GREY_900,
+                ),
+                # Nombre del rol
+                ft.Text(
+                    nombre_rol,
+                    size=13,
+                    weight=ft.FontWeight.W_500,
+                    color=ft.Colors.BLUE_GREY_700,
+                ),
+                # Subtítulo
                 ft.Text(
                     "usuario" if cantidad_usuarios == 1 else "usuarios",
-                    size=12,
-                    color=ft.Colors.BLUE_GREY_500,
+                    size=11,
+                    color=ft.Colors.BLUE_GREY_400,
                 ),
             ],
-            spacing=4,
+            spacing=2,
         ),
     )
 
@@ -73,12 +101,13 @@ def _chips_permisos(permisos_texto):
 
 def _fila_encabezado():
     return ft.Container(
-        padding=ft.Padding.symmetric(horizontal=10, vertical=10),
+        padding=ft.Padding.symmetric(horizontal=16, vertical=12),
+        bgcolor=ft.Colors.BLUE_GREY_50,
         content=ft.Row(
             controls=[
-                ft.Container(width=ANCHO_ID, content=ft.Text("ID", weight=ft.FontWeight.BOLD)),
-                ft.Container(width=ANCHO_ROL, content=ft.Text("Rol", weight=ft.FontWeight.BOLD)),
-                ft.Container(width=ANCHO_PERMISOS, content=ft.Text("Permisos", weight=ft.FontWeight.BOLD)),
+                ft.Container(width=ANCHO_ID, content=ft.Text("ID", weight=ft.FontWeight.BOLD, size=13)),
+                ft.Container(width=ANCHO_ROL, content=ft.Text("Rol", weight=ft.FontWeight.BOLD, size=13)),
+                ft.Container(width=ANCHO_PERMISOS, content=ft.Text("Permisos", weight=ft.FontWeight.BOLD, size=13)),
             ],
         ),
     )
@@ -87,21 +116,30 @@ def _fila_encabezado():
 def _fila_rol(rol):
     icono, color = _icono_para_rol(rol.rol_nombre)
     return ft.Container(
-        padding=ft.Padding.symmetric(horizontal=10, vertical=12),
+        padding=ft.Padding.symmetric(horizontal=16, vertical=14),
         border=ft.Border(bottom=ft.BorderSide(1, ft.Colors.BLUE_GREY_100)),
         content=ft.Row(
             controls=[
-                ft.Container(width=ANCHO_ID, content=ft.Text(str(rol.rol_id))),
+                ft.Container(
+                    width=ANCHO_ID,
+                    content=ft.Text(str(rol.rol_id), size=13, color=ft.Colors.BLUE_GREY_700),
+                ),
                 ft.Container(
                     width=ANCHO_ROL,
                     content=ft.Row(
-                        controls=[ft.Icon(icono, size=18, color=color), ft.Text(str(rol.rol_nombre))],
+                        controls=[
+                            ft.Icon(icono, size=18, color=color),
+                            ft.Text(str(rol.rol_nombre), size=13, weight=ft.FontWeight.W_500),
+                        ],
                         spacing=8,
                     ),
                 ),
-                ft.Container(width=ANCHO_PERMISOS, content=_chips_permisos(rol.rol_permisos)),
+                ft.Container(
+                    width=ANCHO_PERMISOS,
+                    content=_chips_permisos(rol.rol_permisos),
+                ),
             ],
-            vertical_alignment=ft.CrossAxisAlignment.START,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
         ),
     )
 
@@ -109,7 +147,6 @@ def _fila_rol(rol):
 def rol_list(page: ft.Page):
 
     todos_los_roles = []
-
     TODOS_KEY = "__TODOS__"
 
     mensaje = ft.Text("", color=ft.Colors.RED)
@@ -119,17 +156,19 @@ def rol_list(page: ft.Page):
         hint_text="Escribe el nombre del rol...",
         prefix_icon=ft.Icons.SEARCH,
         width=350,
+        border_radius=10,
         value="",
     )
 
     filtro = ft.Dropdown(
         label="Filtrar por rol",
         width=250,
+        border_radius=10,
         value=TODOS_KEY,
         options=[ft.dropdown.Option(key=TODOS_KEY, text="Todos")],
     )
 
-    tarjetas_container = ft.Row(spacing=20, wrap=True)
+    tarjetas_container = ft.Row(spacing=16, run_spacing=16, wrap=True)
     filas_container = ft.Column(spacing=0)
 
     def cargar_desde_bd():
@@ -193,25 +232,41 @@ def rol_list(page: ft.Page):
 
     return ft.Column(
         controls=[
-            ft.Text("Roles del sistema", size=24, weight=ft.FontWeight.BOLD),
+            ft.Text("Roles del sistema", size=24, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_GREY_900),
             ft.Text(
                 "Estos roles están definidos en la base de datos y determinan qué puede hacer cada usuario.",
                 size=13,
                 color=ft.Colors.BLUE_GREY_600,
             ),
+            ft.Container(height=4),
             tarjetas_container,
-            ft.Row(controls=[buscador, filtro], spacing=20),
+            ft.Container(height=8),
+            ft.Row(
+                controls=[buscador, filtro],
+                spacing=16,
+            ),
+            # Tabla con mejor estilo
             ft.Container(
                 border=ft.Border.all(1, ft.Colors.BLUE_GREY_100),
-                border_radius=8,
+                border_radius=12,
+                bgcolor=ft.Colors.WHITE,
+                shadow=ft.BoxShadow(
+                    spread_radius=0,
+                    blur_radius=6,
+                    color=ft.Colors.BLACK12,
+                    offset=ft.Offset(0, 2),
+                ),
                 content=ft.Column(
-                    controls=[_fila_encabezado(), ft.Divider(height=1, color=ft.Colors.BLUE_GREY_200), filas_container],
+                    controls=[
+                        _fila_encabezado(),
+                        filas_container,
+                    ],
                     spacing=0,
                 ),
             ),
             mensaje,
         ],
-        spacing=20,
+        spacing=16,
         expand=True,
         scroll=ft.ScrollMode.AUTO,
     )

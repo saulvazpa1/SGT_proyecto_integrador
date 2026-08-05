@@ -1,11 +1,7 @@
 import flet as ft
 from ui.dashboard_produccion import dashboard_produccion
-from ui.cliente_list import clientes_list
-from ui.pedido_list import pedidos_list
 from ui.producto_catalogo_vendedor import catalogo_productos_vendedor
 from ui.pedido_pendiente import pedidos_pendientes
-
-
 from ui.produccion_list import produccion_list
 from ui.colores import *
 from ui.notificaciones_list import mostrar_panel_notificaciones
@@ -15,13 +11,11 @@ from ui.notificaciones import contar_no_leidas
 def main_window_produccion(page: ft.Page, on_logout=None):
     page.title = "Sistema Gestor de Inventario Textil - Producción"
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.theme = ft.Theme(
-        font_family="Segoe UI"
-    )
+    page.theme = ft.Theme(font_family="Segoe UI")
     page.window_width = 1100
     page.window_height = 700
     page.padding = 0
-    page.bgcolor = ft.Colors.BLUE_GREY_50
+    page.bgcolor = ft.Colors.WHITE
 
     contenido = ft.Container(
         padding=30,
@@ -30,46 +24,7 @@ def main_window_produccion(page: ft.Page, on_logout=None):
 
     menu_activo = "Inicio"
 
-    def item_menu(texto, icono, accion):
-        activo = menu_activo == texto
-
-        return ft.Container(
-            height=48,
-            on_click=accion,
-            ink=True,
-            content=ft.Row(
-                spacing=0,
-                controls=[
-                    ft.Container(
-                        width=4,
-                        bgcolor=ft.Colors.BLUE if activo else ft.Colors.TRANSPARENT,
-                        border_radius=5,
-                    ),
-                    ft.Container(
-                        expand=True,
-                        bgcolor=ft.Colors.BLUE_50 if activo else None,
-                        padding=12,
-                        content=ft.Row(
-                            spacing=12,
-                            controls=[
-                                ft.Icon(
-                                    icono,
-                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
-                                ),
-                                ft.Text(
-                                    texto,
-                                    color=ft.Colors.BLUE if activo else ft.Colors.GREY_700,
-                                    weight=ft.FontWeight.BOLD if activo else ft.FontWeight.NORMAL,
-                                ),
-                            ],
-                        ),
-                    ),
-                ],
-            ),
-        )
-
-    
-    # Notificaciones
+    # Badge notificaciones
     badge_no_leidas = ft.Container(
         top=2,
         right=2,
@@ -93,6 +48,7 @@ def main_window_produccion(page: ft.Page, on_logout=None):
             badge_no_leidas.visible = True
         else:
             badge_no_leidas.visible = False
+        page.update()
 
     def click_notificaciones(e=None):
         mostrar_panel_notificaciones(page, al_cerrar=actualizar_badge_notificaciones)
@@ -110,79 +66,10 @@ def main_window_produccion(page: ft.Page, on_logout=None):
         ],
     )
 
-    actualizar_badge_notificaciones()
-
-    def inicio():
-        return ft.Column(
-            controls=[dashboard_produccion(page)],
-            spacing=20,
-            expand=True,
-        )
-
-    def mostrar_inicio(e=None):
-        nonlocal menu_activo
-        menu_activo = "Inicio"
-        contenido.content = inicio()
-        reconstruir_menu()
-        page.update()
-
-    def mostrar_ordenes_produccion(e=None):
-        nonlocal menu_activo
-        menu_activo = "Órdenes"
-        contenido.content = produccion_list(page)
-        reconstruir_menu()
-        page.update()
-        actualizar_badge_notificaciones()
-        page.update()
-
-    def mostrar_productos(e=None):
-        nonlocal menu_activo
-        menu_activo = "Productos"
-        contenido.content = catalogo_productos_vendedor(page)
-        reconstruir_menu()
-        page.update()
-
-    def mostrar_pedidos_pendientes(e=None):
-        nonlocal menu_activo
-        menu_activo = "Pendientes"
-        contenido.content = pedidos_pendientes(page)
-        reconstruir_menu()
-        page.update()
-
-    def cerrar_sesion(e=None):
-            def confirmar_cierre(e):
-                page.pop_dialog()
-                if on_logout:
-                    on_logout()
-                else:
-                    page.window.destroy()
-    
-            def cancelar_cierre(e):
-                page.pop_dialog()
-    
-            dialogo_confirmacion = ft.AlertDialog(
-                modal=True,
-                title=ft.Text("Cerrar sesión"),
-                content=ft.Text("¿Seguro que deseas cerrar sesión y salir de la aplicación?"),
-                actions=[
-                    ft.TextButton("Cancelar", on_click=cancelar_cierre),
-                    ft.ElevatedButton(
-                        "Cerrar sesión",
-                        icon=ft.Icons.LOGOUT,
-                        bgcolor=ft.Colors.RED,
-                        color=ft.Colors.WHITE,
-                        on_click=confirmar_cierre,
-                    ),
-                ],
-                actions_alignment=ft.MainAxisAlignment.END,
-            )
-            page.show_dialog(dialogo_confirmacion)
-    
-
-    #  Barra Superior 
+    # Barra superior
     barra_superior = ft.Container(
         height=65,
-        bgcolor=ft.Colors.WHITE,
+        bgcolor=ft.Colors.GREY_100,
         padding=20,
         content=ft.Row(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -203,76 +90,179 @@ def main_window_produccion(page: ft.Page, on_logout=None):
                             color=ft.Colors.WHITE,
                             radius=18,
                         ),
-                        ft.Text(
-                            "Área Producción",
-                            weight=ft.FontWeight.BOLD,
-                        ),
+                        ft.Text("Área Producción", weight=ft.FontWeight.BOLD),
                     ],
                 ),
             ],
         ),
     )
 
+    def item_menu(texto, icono, accion, es_logout=False):
+        activo = menu_activo == texto
+
+        if es_logout:
+            color_icono = ft.Colors.RED_400
+            color_texto = ft.Colors.RED_400
+            bg = None
+            barra = ft.Colors.TRANSPARENT
+        elif activo:
+            color_icono = ft.Colors.BLUE_600
+            color_texto = ft.Colors.BLUE_700
+            bg = ft.Colors.BLUE_50
+            barra = ft.Colors.BLUE_600
+        else:
+            color_icono = ft.Colors.BLUE_GREY_600
+            color_texto = ft.Colors.BLUE_GREY_700
+            bg = None
+            barra = ft.Colors.TRANSPARENT
+
+        return ft.Container(
+            height=46,
+            border_radius=10,
+            on_click=accion,
+            ink=True,
+            content=ft.Row(
+                spacing=0,
+                controls=[
+                    ft.Container(
+                        width=4,
+                        height=28,
+                        bgcolor=barra,
+                        border_radius=4,
+                        margin=ft.Margin(left=0, top=9, right=0, bottom=9),
+                    ),
+                    ft.Container(
+                        expand=True,
+                        bgcolor=bg,
+                        border_radius=10,
+                        padding=ft.Padding.only(left=12, right=12, top=10, bottom=10),
+                        content=ft.Row(
+                            spacing=12,
+                            controls=[
+                                ft.Icon(icono, size=20, color=color_icono),
+                                ft.Text(
+                                    texto,
+                                    size=14,
+                                    color=color_texto,
+                                    weight=ft.FontWeight.W_600 if activo else ft.FontWeight.W_500,
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        )
+
+    # Vistas
+    def inicio():
+        return ft.Column(
+            controls=[dashboard_produccion(page)],
+            spacing=20,
+            expand=True,
+        )
+
+    def mostrar_inicio(e=None):
+        nonlocal menu_activo
+        menu_activo = "Inicio"
+        contenido.content = inicio()
+        reconstruir_menu()
+        page.update()
+        actualizar_badge_notificaciones()
+
+    def mostrar_ordenes_produccion(e=None):
+        nonlocal menu_activo
+        menu_activo = "Órdenes"
+        contenido.content = produccion_list(page)
+        reconstruir_menu()
+        page.update()
+        actualizar_badge_notificaciones()
+
+    def mostrar_productos(e=None):
+        nonlocal menu_activo
+        menu_activo = "Productos"
+        contenido.content = catalogo_productos_vendedor(page)
+        reconstruir_menu()
+        page.update()
+        actualizar_badge_notificaciones()
+
+    def mostrar_pedidos_pendientes(e=None):
+        nonlocal menu_activo
+        menu_activo = "Pendientes"
+        contenido.content = pedidos_pendientes(page)
+        reconstruir_menu()
+        page.update()
+        actualizar_badge_notificaciones()
+
+    def cerrar_sesion(e=None):
+        def confirmar_cierre(e):
+            page.pop_dialog()
+            if on_logout:
+                on_logout()
+            else:
+                page.window.destroy()
+
+        def cancelar_cierre(e):
+            page.pop_dialog()
+
+        dialogo_confirmacion = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Cerrar sesión"),
+            content=ft.Text("¿Seguro que deseas cerrar sesión y salir de la aplicación?"),
+            actions=[
+                ft.TextButton("Cancelar", on_click=cancelar_cierre),
+                ft.ElevatedButton(
+                    "Cerrar sesión",
+                    icon=ft.Icons.LOGOUT,
+                    bgcolor=ft.Colors.RED,
+                    color=ft.Colors.WHITE,
+                    on_click=confirmar_cierre,
+                ),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.show_dialog(dialogo_confirmacion)
+
+    
     menu_lateral = ft.Container(
-        width=220,
+        width=230,
         bgcolor=ft.Colors.WHITE,
-        padding=20,
+        border=ft.Border(right=ft.BorderSide(1, ft.Colors.BLUE_GREY_100)),
+        padding=ft.Padding.only(left=12, right=12, top=16, bottom=16),
         content=ft.Column(
-            spacing=8,
+            spacing=4,
             expand=True,
         ),
     )
 
     def reconstruir_menu():
         menu_lateral.content.controls = [
-            ft.Image(
-                src="logo.png",
-                width=120,
-                height=60,
-                fit="contain",
+            ft.Container(
+                padding=ft.Padding.only(left=8, right=8, top=4, bottom=12),
+                content=ft.Image(
+                    src="logo.png",
+                    width=130,
+                    height=55,
+                    fit="contain",
+                ),
             ),
 
-            ft.Divider(),
+            ft.Divider(height=1, color=ft.Colors.BLUE_GREY_100),
+            ft.Container(height=8),
 
-            item_menu(
-                "Inicio",
-                ft.Icons.HOME_OUTLINED,
-                mostrar_inicio,
-            ),
-
-            item_menu(
-                "Órdenes",
-                ft.Icons.PRECISION_MANUFACTURING,
-                mostrar_ordenes_produccion,
-            ),
-
-            item_menu(
-                "Productos",
-                ft.Icons.INVENTORY_2_OUTLINED,
-                mostrar_productos,
-            ),
-
-            item_menu(
-                "Pendientes",
-                ft.Icons.ASSIGNMENT_LATE_OUTLINED,
-                mostrar_pedidos_pendientes,
-            ),
+            item_menu("Inicio", ft.Icons.HOME_OUTLINED, mostrar_inicio),
+            item_menu("Órdenes", ft.Icons.PRECISION_MANUFACTURING, mostrar_ordenes_produccion),
+            item_menu("Productos", ft.Icons.INVENTORY_2_OUTLINED, mostrar_productos),
+            item_menu("Pendientes", ft.Icons.ASSIGNMENT_LATE_OUTLINED, mostrar_pedidos_pendientes),
 
             ft.Container(expand=True),
 
-            ft.Divider(),
+            ft.Divider(height=1, color=ft.Colors.BLUE_GREY_100),
+            ft.Container(height=6),
 
-            item_menu(
-                "Cerrar sesión",
-                ft.Icons.LOGOUT,
-                cerrar_sesion,
-            ),
+            item_menu("Cerrar sesión", ft.Icons.LOGOUT, cerrar_sesion, es_logout=True),
         ]
 
     reconstruir_menu()
-
-
-    #  Layout General 
 
     layout = ft.Row(
         controls=[
@@ -286,6 +276,7 @@ def main_window_produccion(page: ft.Page, on_logout=None):
             ),
         ],
         expand=True,
+        spacing=0,
     )
 
     page.add(layout)
