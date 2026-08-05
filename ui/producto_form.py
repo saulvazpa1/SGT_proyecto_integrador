@@ -4,6 +4,7 @@ from models.producto import Producto
 from dao.producto_dao import ProductoDAO
 from ui.notificaciones import agregar_notificacion
 from ui.componentes import mostrar_notificacion
+from ui.validaciones import validar_nombre_producto, validar_nombre
 
 
 def _obtener_categorias():
@@ -163,7 +164,7 @@ def producto_form(regresar, producto=None, page=None):
         value=val_desc,
     )
 
-    mensaje = ft.Text("", color=ft.Colors.GREEN)
+    mensaje = ft.Text("", color=ft.Colors.RED)
 
     def guardar_producto(e):
         p_page = page or e.page
@@ -176,7 +177,23 @@ def producto_form(regresar, producto=None, page=None):
         categoria_id_seleccionada = categoria_dropdown.value
         descripcion = (descripcion_input.value or "").strip()
 
-        if not nombre or not precio or not stock or not unidad or not color or not categoria_id_seleccionada:
+        es_valido, texto_error = validar_nombre_producto(nombre)
+        if not es_valido:
+            mensaje.value = texto_error
+            mensaje.color = ft.Colors.RED
+            if p_page:
+                p_page.update()
+            return
+
+        es_valido, texto_error = validar_nombre(color, campo="Color")
+        if not es_valido:
+            mensaje.value = texto_error
+            mensaje.color = ft.Colors.RED
+            if p_page:
+                p_page.update()
+            return
+
+        if not precio or not stock or not unidad or not categoria_id_seleccionada:
             mensaje.value = "Todos los campos son obligatorios (excepto descripción)"
             mensaje.color = ft.Colors.RED
             if p_page:
@@ -227,12 +244,9 @@ def producto_form(regresar, producto=None, page=None):
 
                 texto = f"Producto '{nombre}' actualizado"
                 agregar_notificacion(texto)
-                mostrar_notificacion(p_page, "Producto actualizado", texto, "exito")
-
-                mensaje.value = f"Producto '{nombre}' actualizado"
-                mensaje.color = ft.Colors.GREEN
                 if p_page:
-                    p_page.update()
+                    mostrar_notificacion(p_page, "Producto actualizado", texto, "exito")
+
                 regresar()
                 return
 
@@ -252,17 +266,11 @@ def producto_form(regresar, producto=None, page=None):
 
             texto = f"Producto '{nombre}' registrado (stock: {stock_num})"
             agregar_notificacion(texto)
-            mostrar_notificacion(p_page, "Nuevo producto", texto, "exito")
+            if p_page:
+                mostrar_notificacion(p_page, "Nuevo producto", texto, "exito")
 
-            mensaje.value = f"Producto '{nombre}' ha sido registrado"
-            mensaje.color = ft.Colors.GREEN
-            nombre_input.value = ""
-            precio_input.value = ""
-            stock_input.value = "0"
-            unidad_input.value = None
-            color_input.value = ""
-            categoria_dropdown.value = None
-            descripcion_input.value = ""
+            regresar()
+            return
 
         except Exception as error:
             mensaje.value = f"Error al guardar el producto: {error}"

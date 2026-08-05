@@ -141,7 +141,7 @@ def orden_produccion_form(regresar, orden=None, page=None):
         value=orden.fecha_entrega.strftime("%Y-%m-%d") if editando and orden.fecha_entrega else "",
     )
 
-    # --- Sección de tela y patrón ---
+    #  Sección de tela y patrón 
     tela_tipo_input = ft.TextField(
         label="Tipo de tela:",
         width=210,

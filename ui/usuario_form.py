@@ -2,6 +2,7 @@ import flet as ft
 from database.conexion import Conexion
 from models.usuario import Usuario
 from dao.usuario_dao import UsuarioDAO
+from ui.validaciones import validar_nombre, validar_correo, validar_password, validar_telefono
 
 def _obtener_roles():
     """ (rol_id, rol_nombre) """
@@ -23,6 +24,7 @@ def usuario_form(regresar, usuario=None):
     nombre_input = ft.TextField(
         label="Nombre",
         hint_text="Ej: Juan",
+        prefix_icon=ft.Icons.PERSON_OUTLINE,
         width=320,
         border_radius=6,
         value=usuario.usuario_nombre if editando else "",
@@ -31,6 +33,7 @@ def usuario_form(regresar, usuario=None):
     apellidop_input = ft.TextField(
         label="Apellido paterno",
         hint_text="Ej: Pérez",
+        prefix_icon=ft.Icons.BADGE_OUTLINED,
         width=320,
         border_radius=6,
         value=getattr(usuario, "usuario_apellidop", "") if editando else "",
@@ -39,6 +42,7 @@ def usuario_form(regresar, usuario=None):
     apellidom_input = ft.TextField(
         label="Apellido materno",
         hint_text="Opcional (Ej: López)",
+        prefix_icon=ft.Icons.BADGE_OUTLINED,
         width=320,
         border_radius=6,
         value=getattr(usuario, "usuario_apellidom", "") if editando else "",
@@ -47,6 +51,7 @@ def usuario_form(regresar, usuario=None):
     telefono_input = ft.TextField(
         label="Teléfono",
         hint_text="Ej. 10 dígitos",
+        prefix_icon=ft.Icons.PHONE_OUTLINED,
         width=320,
         border_radius=6,
         value=usuario.usuario_telefono if editando else "",
@@ -55,6 +60,7 @@ def usuario_form(regresar, usuario=None):
     correo_input = ft.TextField(
         label="Correo electrónico",
         hint_text="Ej: correo@ejemplo.com",
+        prefix_icon=ft.Icons.EMAIL_OUTLINED,
         width=320,
         border_radius=6,
         value=usuario.usuario_correo if editando else "",
@@ -63,6 +69,7 @@ def usuario_form(regresar, usuario=None):
     password_input = ft.TextField(
         label="Contraseña" if not editando else "Nueva contraseña",
         hint_text="Mínimo 8 caracteres" if not editando else "Déjalo vacío si no cambiarás la contraseña",
+        prefix_icon=ft.Icons.LOCK_OUTLINE,
         width=320,
         border_radius=6,
         password=True,
@@ -75,6 +82,7 @@ def usuario_form(regresar, usuario=None):
         nombre_rol_actual = str(getattr(usuario, "rol_id", ""))
         valor_inicial_rol = nombre_a_id.get(nombre_rol_actual)
 
+   
     rol_dropdown = ft.Dropdown(
         label="Rol",
         hint_text="Selecciona un rol",
@@ -86,25 +94,44 @@ def usuario_form(regresar, usuario=None):
         ],
     )
 
+    rol_campo = ft.Row(
+        controls=[
+            ft.Icon(ft.Icons.SECURITY_OUTLINED, color=ft.Colors.BLUE_GREY_400, size=20),
+            rol_dropdown,
+        ],
+        spacing=8,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
     mensaje = ft.Text("", color=ft.Colors.RED)
 
     def guardar_usuario(e):
-        nombre = nombre_input.value
-        apellidop = apellidop_input.value
-        apellidom = apellidom_input.value
-        telefono = telefono_input.value
-        correo = correo_input.value
-        password = password_input.value
+        nombre = (nombre_input.value or "").strip()
+        apellidop = (apellidop_input.value or "").strip()
+        apellidom = (apellidom_input.value or "").strip()
+        telefono = (telefono_input.value or "").strip()
+        correo = (correo_input.value or "").strip()
+        password = password_input.value or ""
         rol_id_seleccionado = rol_dropdown.value
 
-        if not nombre or not apellidop or not telefono or not correo or not rol_id_seleccionado:
-            mensaje.value = "Todos los campos son obligatorios (excepto apellido materno)"
-            mensaje.color = ft.Colors.RED
-            e.page.update()
-            return
+        validaciones = [
+            validar_nombre(nombre, campo="Nombre"),
+            validar_nombre(apellidop, campo="Apellido paterno"),
+            validar_nombre(apellidom, campo="Apellido materno", obligatorio=False),
+            validar_correo(correo),
+            validar_telefono(telefono),
+            validar_password(password, obligatorio=not editando),
+        ]
 
-        if not editando and not password:
-            mensaje.value = "La contraseña es obligatoria para un usuario nuevo"
+        for es_valido, texto_error in validaciones:
+            if not es_valido:
+                mensaje.value = texto_error
+                mensaje.color = ft.Colors.RED
+                e.page.update()
+                return
+
+        if not rol_id_seleccionado:
+            mensaje.value = "Selecciona un rol"
             mensaje.color = ft.Colors.RED
             e.page.update()
             return
@@ -141,18 +168,6 @@ def usuario_form(regresar, usuario=None):
                 rol_id=int(rol_id_seleccionado),
             )
             dao.insertar(nuevo_usuario)
-
-            mensaje.value = f"Usuario '{nombre}' ha sido registrado"
-            mensaje.color = ft.Colors.GREEN
-
-            # limpiar campos
-            nombre_input.value = ""
-            apellidop_input.value = ""
-            apellidom_input.value = ""
-            telefono_input.value = ""
-            correo_input.value = ""
-            password_input.value = ""
-            rol_dropdown.value = None
             regresar(f"Usuario '{nombre}' registrado correctamente")
             return
 
@@ -198,7 +213,7 @@ def usuario_form(regresar, usuario=None):
         controls=[
             password_input,
             telefono_input,
-            rol_dropdown,
+            rol_campo,
         ],
         spacing=15,
     )

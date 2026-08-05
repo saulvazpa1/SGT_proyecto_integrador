@@ -2,6 +2,7 @@ import flet as ft
 from dao.cliente_dao import ClienteDAO
 from ui.cliente_form import cliente_form
 from ui.componentes import mostrar_notificacion
+from ui.colores import *
 
 
 def clientes_list(page: ft.Page):
@@ -149,7 +150,6 @@ def clientes_list(page: ft.Page):
 
         paginador.controls.clear()
 
-        # Flecha izquierda
         paginador.controls.append(
             ft.IconButton(
                 icon=ft.Icons.CHEVRON_LEFT,
@@ -158,9 +158,7 @@ def clientes_list(page: ft.Page):
             )
         )
 
-        # Botones numéricos
         for i in range(1, total_paginas() + 1):
-
             paginador.controls.append(
                 ft.Container(
                     width=36,
@@ -178,7 +176,6 @@ def clientes_list(page: ft.Page):
                 )
             )
 
-        # Flecha derecha
         paginador.controls.append(
             ft.IconButton(
                 icon=ft.Icons.CHEVRON_RIGHT,
@@ -203,9 +200,7 @@ def clientes_list(page: ft.Page):
 
     def cambiar_pagina(numero):
         nonlocal pagina_actual
-
         pagina_actual = numero
-
         render_pagina()
 
     def aplicar_filtro(texto=""):
@@ -256,11 +251,6 @@ def clientes_list(page: ft.Page):
             ),
             tabla,
             paginador,
-            mensaje,
-            ft.Row(
-                controls=[boton_anterior, texto_pagina, boton_siguiente],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
         ],
         spacing=20,
         expand=True,

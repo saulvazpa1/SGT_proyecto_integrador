@@ -1,5 +1,5 @@
 import flet as ft
-from ui.dashboard_vendedor import dashboard_vendedor
+from ui.dashboard_produccion import dashboard_produccion
 from ui.cliente_list import clientes_list
 from ui.pedido_list import pedidos_list
 from ui.producto_catalogo_vendedor import catalogo_productos_vendedor
@@ -114,7 +114,7 @@ def main_window_produccion(page: ft.Page, on_logout=None):
 
     def inicio():
         return ft.Column(
-            controls=[dashboard_vendedor(page)],
+            controls=[dashboard_produccion(page)],
             spacing=20,
             expand=True,
         )

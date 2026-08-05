@@ -152,8 +152,8 @@ def main_window(page: ft.Page, on_logout=None):
             expand=True,
         )
 
-    # Funciones de navegación
     
+
     def mostrar_inicio(e=None):
         nonlocal menu_activo
         menu_activo = "Inicio"
@@ -173,9 +173,8 @@ def main_window(page: ft.Page, on_logout=None):
     def mostrar_roles(e=None):
         nonlocal menu_activo
         menu_activo = "Roles"
-        contenido.content = roles_list(page)
-        reconstruir_menu()
         contenido.content = rol_list(page)
+        reconstruir_menu()
         page.update()
         actualizar_badge_notificaciones()
 
@@ -185,30 +184,21 @@ def main_window(page: ft.Page, on_logout=None):
         contenido.content = productos_list(page)
         reconstruir_menu()
         page.update()
+        actualizar_badge_notificaciones()
 
     def mostrar_pedido(e=None):
         nonlocal menu_activo
         menu_activo = "Pedidos"
-        contenido.content = pedidos_list(page)
+        contenido.content = pedidos_list(page, puede_editar=False)
         reconstruir_menu()
         page.update()
+        actualizar_badge_notificaciones()
 
     def mostrar_orden_produccion(e=None):
         nonlocal menu_activo
         menu_activo = "Producción"
         contenido.content = produccion_list(page)
         reconstruir_menu()
-        contenido.content = productos_list(page)
-        page.update()
-        actualizar_badge_notificaciones()
-
-    def mostrar_pedido(e=None):
-        contenido.content = pedidos_list(page)
-        page.update()
-        actualizar_badge_notificaciones()
-
-    def mostrar_orden_produccion(e=None):
-        contenido.content = produccion_list(page)
         page.update()
         actualizar_badge_notificaciones()
 

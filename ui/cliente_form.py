@@ -1,10 +1,8 @@
-from turtle import color
-
 import flet as ft
 from models.cliente import Cliente
 from dao.cliente_dao import ClienteDAO
 from ui.colores import *
-
+from ui.validaciones import validar_nombre, validar_correo, validar_telefono
 
 
 def cliente_form(regresar, cliente=None, page=None):
@@ -14,7 +12,7 @@ def cliente_form(regresar, cliente=None, page=None):
         label="Nombre",
         hint_text="Ingrese el nombre completo",
         prefix_icon=ft.Icons.PERSON_OUTLINE,
-        expand=True,
+        width=320,
         border_radius=10,
         filled=True,
         bgcolor=BLANCO,
@@ -23,12 +21,13 @@ def cliente_form(regresar, cliente=None, page=None):
         cursor_color=AZUL,
         value=getattr(cliente, "cliente_nombre", "") if editando else "",
     )
+
     correo_input = ft.TextField(
-        label="Correo (opcional):",
+        label="Correo (opcional)",
         hint_text="ejemplo@correo.com",
         prefix_icon=ft.Icons.EMAIL_OUTLINED,
         width=320,
-        border_radius=6,
+        border_radius=10,
         filled=True,
         bgcolor=BLANCO,
         border_color=BORDE,
@@ -38,11 +37,11 @@ def cliente_form(regresar, cliente=None, page=None):
     )
 
     telefono_input = ft.TextField(
-        label="Teléfono:",
+        label="Teléfono",
         hint_text="10 dígitos",
         prefix_icon=ft.Icons.PHONE_OUTLINED,
         width=320,
-        border_radius=6,
+        border_radius=10,
         filled=True,
         bgcolor=BLANCO,
         border_color=BORDE,
@@ -51,13 +50,12 @@ def cliente_form(regresar, cliente=None, page=None):
         value=getattr(cliente, "cliente_telefono", "") if editando else "",
     )
 
-  
     calle_input = ft.TextField(
-        label="Calle:",
+        label="Calle",
         hint_text="Nombre de la calle",
         prefix_icon=ft.Icons.HOME_OUTLINED,
-        width=210,
-        border_radius=6,
+        width=320,
+        border_radius=10,
         filled=True,
         bgcolor=BLANCO,
         border_color=BORDE,
@@ -67,11 +65,11 @@ def cliente_form(regresar, cliente=None, page=None):
     )
 
     numero_input = ft.TextField(
-        label="Número:",
+        label="Número",
         hint_text="No.",
         prefix_icon=ft.Icons.NUMBERS,
-        width=210,
-        border_radius=6,
+        width=320,
+        border_radius=10,
         filled=True,
         bgcolor=BLANCO,
         border_color=BORDE,
@@ -81,11 +79,11 @@ def cliente_form(regresar, cliente=None, page=None):
     )
 
     municipio_input = ft.TextField(
-        label="Municipio:",
+        label="Municipio",
         hint_text="Municipio",
         prefix_icon=ft.Icons.LOCATION_CITY,
-        width=210,
-        border_radius=6,
+        width=320,
+        border_radius=10,
         filled=True,
         bgcolor=BLANCO,
         border_color=BORDE,
@@ -95,10 +93,11 @@ def cliente_form(regresar, cliente=None, page=None):
     )
 
     estado_input = ft.TextField(
-        label="Estado:",
+        label="Estado",
         hint_text="Estado",
-        width=210,
-        border_radius=6,
+        prefix_icon=ft.Icons.MAP_OUTLINED,
+        width=320,
+        border_radius=10,
         filled=True,
         bgcolor=BLANCO,
         border_color=BORDE,
@@ -108,11 +107,11 @@ def cliente_form(regresar, cliente=None, page=None):
     )
 
     codigopostal_input = ft.TextField(
-        label="Código postal:",
+        label="Código postal",
         hint_text="C.P.",
         prefix_icon=ft.Icons.MARKUNREAD_MAILBOX_OUTLINED,
-        width=210,
-        border_radius=6,
+        width=320,
+        border_radius=10,
         filled=True,
         bgcolor=BLANCO,
         border_color=BORDE,
@@ -121,109 +120,7 @@ def cliente_form(regresar, cliente=None, page=None):
         value=str(getattr(cliente, "cliente_codigopostal", "")) if editando else "",
     )
 
-    seccion_domicilio = ft.Container(
-        padding=15,
-        bgcolor=ft.Colors.BLUE_GREY_50,
-        border_radius=8,
-        content=ft.Column(
-            controls=[
-                ft.Text("Domicilio", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_GREY_800),
-                ft.Row(
-                    controls=[
-                        calle_input,
-                        numero_input,
-                        municipio_input,
-                        estado_input,
-                        codigopostal_input,
-                    ],
-                    wrap=True,
-                    spacing=10,
-                ),
-            ],
-            spacing=10,
-        ),
-    )
-
-    mensaje = ft.Text("", color=ft.Colors.GREEN)
-
-    def mostrar_notificacion(titulo, mensaje, color=ft.Colors.GREEN):
-        page.snack_bar = ft.SnackBar(
-            bgcolor=color,
-            content=ft.Text(f"{titulo}: {mensaje}", color=ft.Colors.WHITE),
-            open=True,
-        )
-        page.update()
-
-        toast = ft.Container(
-            width=430,
-            bgcolor=ft.Colors.WHITE,
-            border_radius=12,
-            shadow=ft.BoxShadow(
-                blur_radius=18,
-                spread_radius=1,
-                color=ft.Colors.BLACK26,
-                offset=ft.Offset(0, 4),
-            ),
-            animate_opacity=300,
-            content=ft.Row(
-                spacing=0,
-                controls=[
-                    ft.Container(
-                        width=60,
-                        height=80,
-                        bgcolor=color + "_100",
-                        alignment=ft.Alignment(0, 0),
-                        content=ft.Icon(
-                            ft.Icons.ERROR if color == ft.Colors.RED else ft.Icons.CHECK_CIRCLE,
-                            color=color,
-                            size=30,
-                        ),
-                    ),
-                    ft.Container(
-                        expand=True,
-                        padding=15,
-                        content=ft.Column(
-                            spacing=4,
-                            controls=[
-                                ft.Text(
-                                    titulo,
-                                    weight=ft.FontWeight.BOLD,
-                                    size=17,
-                                ),
-                                ft.Text(
-                                    mensaje,
-                                    size=13,
-                                    color=ft.Colors.GREY_700,
-                                ),
-                            ],
-                        ),
-                    ),
-                    ft.IconButton(
-                        icon=ft.Icons.CLOSE,
-                        on_click=lambda e: cerrar_toast(),
-                    ),
-                ],
-            ),
-        )
-
-        def cerrar_toast():
-            page.overlay.remove(toast)
-            page.update()
-
-        overlay_toast = ft.Container(
-            alignment=ft.Alignment.TOP_RIGHT,
-            padding=20,
-            content=toast,
-        )
-
-        page.overlay.append(overlay_toast)
-        page.update()
-
-        def cerrar_toast():
-            if overlay_toast in page.overlay:
-                page.overlay.remove(overlay_toast)
-                page.update()
-
+    mensaje = ft.Text("", color=ft.Colors.RED)
 
     def guardar_cliente(e):
         p_page = page or e.page
@@ -237,8 +134,46 @@ def cliente_form(regresar, cliente=None, page=None):
         estado = (estado_input.value or "").strip()
         codigopostal = (codigopostal_input.value or "").strip()
 
-        if not nombre or not telefono or not calle or not numero or not municipio or not estado or not codigopostal:
-            mensaje.value = "Todos los campos son obligatorios (excepto correo)"
+        validaciones = [
+            validar_nombre(nombre, campo="Nombre"),
+            validar_correo(correo, obligatorio=False),
+            validar_telefono(telefono),
+            validar_nombre(calle, campo="Calle"),
+            validar_nombre(municipio, campo="Municipio"),
+            validar_nombre(estado, campo="Estado"),
+        ]
+
+        for es_valido, texto_error in validaciones:
+            if not es_valido:
+                mensaje.value = texto_error
+                mensaje.color = ft.Colors.RED
+                if p_page:
+                    p_page.update()
+                return
+
+        if not numero:
+            mensaje.value = "El número es obligatorio"
+            mensaje.color = ft.Colors.RED
+            if p_page:
+                p_page.update()
+            return
+
+        if not numero.isdigit():
+            mensaje.value = "El número solo debe contener dígitos"
+            mensaje.color = ft.Colors.RED
+            if p_page:
+                p_page.update()
+            return
+
+        if not codigopostal:
+            mensaje.value = "El código postal es obligatorio"
+            mensaje.color = ft.Colors.RED
+            if p_page:
+                p_page.update()
+            return
+
+        if not codigopostal.isdigit() or len(codigopostal) != 5:
+            mensaje.value = "El código postal debe tener exactamente 5 dígitos"
             mensaje.color = ft.Colors.RED
             if p_page:
                 p_page.update()
@@ -259,6 +194,9 @@ def cliente_form(regresar, cliente=None, page=None):
                     cliente_estado=estado,
                     cliente_codigopostal=codigopostal,
                 )
+                dao.actualizar(cliente_actualizado)
+                regresar(f"Cliente '{nombre}' actualizado correctamente")
+                return
 
             nuevo_id = dao.obtener_ultimo_id() + 1
             nuevo_cliente = Cliente(
@@ -273,24 +211,10 @@ def cliente_form(regresar, cliente=None, page=None):
                 cliente_codigopostal=codigopostal,
             )
             dao.insertar(nuevo_cliente)
-
-            mostrar_notificacion(
-                "Cliente registrado",
-                f"{nombre} se registró correctamente."
-            )
-
-            #regresar()
+            regresar(f"Cliente '{nombre}' registrado correctamente")
+            return
 
         except Exception as error:
-            mostrar_notificacion(
-                "Error",
-                str(error),
-                ft.Colors.RED,
-            )
-
-            mensaje.value = f"Error al guardar el cliente: {error}"
-            mensaje.color = ft.Colors.RED
-
             mensaje.value = f"Error al guardar el cliente: {error}"
             mensaje.color = ft.Colors.RED
 
@@ -319,11 +243,22 @@ def cliente_form(regresar, cliente=None, page=None):
         ),
     )
 
-    columna_datos = ft.Column(
+    columna_izquierda = ft.Column(
         controls=[
             nombre_input,
             correo_input,
             telefono_input,
+            calle_input,
+        ],
+        spacing=15,
+    )
+
+    columna_derecha = ft.Column(
+        controls=[
+            numero_input,
+            municipio_input,
+            estado_input,
+            codigopostal_input,
         ],
         spacing=15,
     )
@@ -335,16 +270,17 @@ def cliente_form(regresar, cliente=None, page=None):
                 ft.Text(
                     "Modifica los datos del cliente" if editando else "Captura los datos del nuevo cliente",
                     size=14,
-                    color=AZUL,
+                    color=ft.Colors.BLUE_GREY_600,
                 ),
-                columna_datos,
-                seccion_domicilio,
+                ft.Row(
+                    controls=[columna_izquierda, columna_derecha],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                ),
                 mensaje,
             ],
             spacing=15,
             scroll=ft.ScrollMode.AUTO,
         ),
-        height=500,
     )
 
     pie = ft.Container(
@@ -371,7 +307,6 @@ def cliente_form(regresar, cliente=None, page=None):
 
     return ft.Container(
         width=720,
-        height=620,
         bgcolor=ft.Colors.WHITE,
         border_radius=10,
         shadow=ft.BoxShadow(
@@ -381,15 +316,7 @@ def cliente_form(regresar, cliente=None, page=None):
             offset=ft.Offset(0, 4),
         ),
         content=ft.Column(
-            expand=True,
+            controls=[encabezado, cuerpo, pie],
             spacing=0,
-            controls=[
-                encabezado,
-                ft.Container(
-                    expand=True,
-                    content=cuerpo,
-                ),
-                pie,
-            ],
         ),
     )

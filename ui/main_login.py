@@ -20,8 +20,8 @@ def main_login(page: ft.Page):
     page.theme = ft.Theme(
         font_family="Segoe UI"
     )
-    page.window.width = 1000
-    page.window.height = 600
+    page.window.width = 1200
+    page.window.height = 1200
     page.window.resizable = False
     page.bgcolor = "#f2f2f2"
 

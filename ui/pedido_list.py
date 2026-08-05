@@ -3,74 +3,35 @@ from dao.pedido_dao import PedidoDAO
 from ui.pedido_form import pedido_form
 from ui.colores import *
 from ui.componentes import mostrar_notificacion
+from ui.notificaciones import agregar_notificacion
 
-def pedidos_list(page: ft.Page):
+
+def pedidos_list(page: ft.Page, puede_editar: bool = True):
+    """
+    puede_editar=True  -> se ven los botones Agregar / Editar / Eliminar (Vendedor)
+    puede_editar=False -> solo lectura, sin esos botones (Administrador y demás roles)
+    """
 
     todos_los_pedidos = []
     pedidos_filtrados = []
 
     TODOS_KEY = "__TODOS__"
 
+    columnas = [
+        ft.DataColumn(ft.Text("ID", weight=ft.FontWeight.BOLD, size=16)),
+        ft.DataColumn(ft.Text("Cliente", weight=ft.FontWeight.BOLD, size=16)),
+        ft.DataColumn(ft.Text("Vendedor", weight=ft.FontWeight.BOLD, size=16)),
+        ft.DataColumn(ft.Text("Producto", weight=ft.FontWeight.BOLD, size=16)),
+        ft.DataColumn(ft.Text("Cantidad", weight=ft.FontWeight.BOLD, size=16)),
+        ft.DataColumn(ft.Text("Total", weight=ft.FontWeight.BOLD, size=16)),
+        ft.DataColumn(ft.Text("Estado", weight=ft.FontWeight.BOLD, size=16)),
+        ft.DataColumn(ft.Text("Fecha", weight=ft.FontWeight.BOLD, size=16)),
+    ]
+    columnas.append(ft.DataColumn(ft.Text("Acciones", weight=ft.FontWeight.BOLD, size=16)))
+
     tabla = ft.DataTable(
         show_checkbox_column=False,
-        columns=[
-            ft.DataColumn(
-                ft.Text(
-                    "ID",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Cliente",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,                    
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Vendedor",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,                    
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Producto",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,                    
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Cantidad",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Total",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Estado",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Fecha",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-        ],
+        columns=columnas,
         rows=[],
     )
 
@@ -108,6 +69,7 @@ def pedidos_list(page: ft.Page):
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
             if texto_exito:
+                agregar_notificacion(texto_exito)
                 mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
 
         dialogo = ft.AlertDialog(
@@ -115,6 +77,90 @@ def pedidos_list(page: ft.Page):
             content=pedido_form(cerrar_dialogo, page=page),
         )
         page.show_dialog(dialogo)
+
+    def ver_detalles(pedido):
+        try:
+            total_texto = f"${float(pedido.pedido_total):,.2f}"
+        except (TypeError, ValueError):
+            total_texto = f"${pedido.pedido_total}"
+
+        def cerrar(e=None):
+            page.pop_dialog()
+
+        dialogo = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(f"Pedido #{pedido.pedido_id}"),
+            content=ft.Column(
+                controls=[
+                    ft.Text(f"Cliente: {pedido.cliente_id}"),
+                    ft.Text(f"Vendedor: {pedido.vendedor_id}"),
+                    ft.Text(f"Producto: {pedido.producto_id}"),
+                    ft.Text(f"Cantidad: {pedido.pedido_cantidad}"),
+                    ft.Text(f"Total: {total_texto}"),
+                    ft.Text(f"Estado: {pedido.pedido_estado}"),
+                    ft.Text(f"Fecha: {pedido.pedido_fecha}"),
+                ],
+                spacing=8,
+                tight=True,
+            ),
+            actions=[ft.TextButton("Cerrar", on_click=cerrar)],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.show_dialog(dialogo)
+
+    def abrir_editar(pedido):
+        def cerrar_dialogo(texto_exito=None):
+            page.pop_dialog()
+            cargar_desde_bd()
+            aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+            if texto_exito:
+                agregar_notificacion(texto_exito)
+                mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
+
+        dialogo = ft.AlertDialog(
+            modal=True,
+            content=pedido_form(cerrar_dialogo, pedido=pedido, page=page),
+        )
+        page.show_dialog(dialogo)
+
+    def confirmar_eliminar(pedido):
+        def eliminar_confirmado(e):
+            try:
+                PedidoDAO().eliminar(pedido.pedido_id)
+                page.pop_dialog()
+                cargar_desde_bd()
+                aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+
+                texto = f"Pedido #{pedido.pedido_id} eliminado"
+                agregar_notificacion(texto)
+                mostrar_notificacion(page, "Pedido eliminado", texto, "error")
+            except Exception as ex:
+                page.pop_dialog()
+                mostrar_notificacion(page, "Error al eliminar", str(ex), "error")
+
+        def cancelar_eliminar(e):
+            page.pop_dialog()
+
+        dialogo_confirmacion = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Confirmar eliminación"),
+            content=ft.Text(
+                f"¿Seguro que deseas eliminar el pedido #{pedido.pedido_id}? "
+                "Esta acción no se puede deshacer."
+            ),
+            actions=[
+                ft.TextButton("Cancelar", on_click=cancelar_eliminar),
+                ft.ElevatedButton(
+                    "Eliminar",
+                    icon=ft.Icons.DELETE,
+                    bgcolor=ft.Colors.RED,
+                    color=ft.Colors.WHITE,
+                    on_click=eliminar_confirmado,
+                ),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.show_dialog(dialogo_confirmacion)
 
     filas_por_pagina = 10
     pagina_actual = 1
@@ -127,12 +173,10 @@ def pedidos_list(page: ft.Page):
             paginas += 1
         return max(paginas, 1)
 
-
     paginador = ft.Row(
         alignment=ft.MainAxisAlignment.CENTER,
         spacing=8,
     )
-
 
     def render_pagina():
         inicio = (pagina_actual - 1) * filas_por_pagina
@@ -145,7 +189,6 @@ def pedidos_list(page: ft.Page):
 
         paginador.controls.clear()
 
-        # Flecha izquierda
         paginador.controls.append(
             ft.IconButton(
                 icon=ft.Icons.CHEVRON_LEFT,
@@ -154,7 +197,6 @@ def pedidos_list(page: ft.Page):
             )
         )
 
-        # Botones de páginas
         for i in range(1, total_paginas() + 1):
             paginador.controls.append(
                 ft.Container(
@@ -173,7 +215,6 @@ def pedidos_list(page: ft.Page):
                 )
             )
 
-        # Flecha derecha
         paginador.controls.append(
             ft.IconButton(
                 icon=ft.Icons.CHEVRON_RIGHT,
@@ -184,20 +225,17 @@ def pedidos_list(page: ft.Page):
 
         page.update()
 
-
     def ir_pagina_anterior(e):
         nonlocal pagina_actual
         if pagina_actual > 1:
             pagina_actual -= 1
             render_pagina()
 
-
     def ir_pagina_siguiente(e):
         nonlocal pagina_actual
         if pagina_actual < total_paginas():
             pagina_actual += 1
             render_pagina()
-
 
     def cambiar_pagina(numero):
         nonlocal pagina_actual
@@ -210,21 +248,51 @@ def pedidos_list(page: ft.Page):
         except (TypeError, ValueError):
             total_texto = f"${pedido.pedido_total}"
 
-        return ft.DataRow(
-            cells=[
-                ft.DataCell(ft.Text(str(pedido.pedido_id))),
-                ft.DataCell(ft.Text(str(pedido.cliente_id))),
-                ft.DataCell(ft.Text(str(pedido.vendedor_id))),
-                ft.DataCell(ft.Text(str(pedido.producto_id))),
-                ft.DataCell(ft.Text(str(pedido.pedido_cantidad))),
-                ft.DataCell(ft.Text(total_texto)),
-                ft.DataCell(ft.Text(str(pedido.pedido_estado))),
-                ft.DataCell(ft.Text(str(pedido.pedido_fecha))),
-            ]
-        )
+        celdas = [
+            ft.DataCell(ft.Text(str(pedido.pedido_id))),
+            ft.DataCell(ft.Text(str(pedido.cliente_id))),
+            ft.DataCell(ft.Text(str(pedido.vendedor_id))),
+            ft.DataCell(ft.Text(str(pedido.producto_id))),
+            ft.DataCell(ft.Text(str(pedido.pedido_cantidad))),
+            ft.DataCell(ft.Text(total_texto)),
+            ft.DataCell(ft.Text(str(pedido.pedido_estado))),
+            ft.DataCell(ft.Text(str(pedido.pedido_fecha))),
+        ]
+
+        if puede_editar:
+            celdas.append(
+                ft.DataCell(
+                    ft.Row([
+                        ft.IconButton(
+                            icon=ft.Icons.EDIT,
+                            tooltip="Editar",
+                            on_click=lambda e, p=pedido: abrir_editar(p),
+                        ),
+                        ft.IconButton(
+                            icon=ft.Icons.DELETE,
+                            icon_color=ft.Colors.RED,
+                            tooltip="Eliminar",
+                            on_click=lambda e, p=pedido: confirmar_eliminar(p),
+                        ),
+                    ])
+                )
+            )
+        else:
+            celdas.append(
+                ft.DataCell(
+                    ft.IconButton(
+                        icon=ft.Icons.VISIBILITY,
+                        icon_color=ft.Colors.BLUE_GREY_400,
+                        tooltip="Ver detalles",
+                        on_click=lambda e, p=pedido: ver_detalles(p),
+                    )
+                )
+            )
+
+        return ft.DataRow(cells=celdas)
 
     def aplicar_filtro(texto="", tipo_filtro=TODOS_KEY):
-        nonlocal pedidos_filtrados
+        nonlocal pedidos_filtrados, pagina_actual
         texto_busqueda = (texto or "").strip().lower()
         opcion_filtro = tipo_filtro or TODOS_KEY
 
@@ -241,8 +309,6 @@ def pedidos_list(page: ft.Page):
 
             if not texto_busqueda or texto_busqueda in campos:
                 resultado.append(pedido)
-
-        nonlocal pagina_actual
 
         pedidos_filtrados = resultado
         pagina_actual = 1
@@ -264,23 +330,43 @@ def pedidos_list(page: ft.Page):
     cargar_desde_bd()
     aplicar_filtro(texto="", tipo_filtro=TODOS_KEY)
 
-    boton_agregar = ft.ElevatedButton(
-        "Agregar pedido",
-        bgcolor=AZUL,
-        color=ft.Colors.WHITE,
-        icon=ft.Icons.ADD,
-        on_click=abrir_agregar,
-    )
+    controles_encabezado = [buscador, filtro]
+    if puede_editar:
+        controles_encabezado.append(
+            ft.ElevatedButton(
+                "Agregar pedido",
+                bgcolor=AZUL,
+                color=ft.Colors.WHITE,
+                icon=ft.Icons.ADD,
+                on_click=abrir_agregar,
+            )
+        )
+    else:
+        controles_encabezado.append(
+            ft.Container(
+                padding=ft.Padding.symmetric(horizontal=14, vertical=10),
+                bgcolor=ft.Colors.BLUE_GREY_100,
+                border_radius=8,
+                content=ft.Row(
+                    controls=[
+                        ft.Icon(ft.Icons.LOCK, size=16, color=ft.Colors.BLUE_GREY_600),
+                        ft.Text("Solo lectura", color=ft.Colors.BLUE_GREY_700, weight=ft.FontWeight.BOLD),
+                    ],
+                    spacing=6,
+                ),
+            )
+        )
 
     return ft.Column(
         controls=[
             ft.Text("Pedidos", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro, boton_agregar],
+                controls=controles_encabezado,
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 spacing=20,
             ),
             tabla,
+            paginador,
         ],
         spacing=20,
         expand=True,

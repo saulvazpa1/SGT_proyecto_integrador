@@ -27,8 +27,6 @@ def _chip_estado(estado):
         content=ft.Text(str(estado), size=12, color=color_texto, weight=ft.FontWeight.BOLD),
     )
 
-pagina_actual = 1
-filas_por_pagina = 5
 
 def produccion_list(page: ft.Page):
 
@@ -78,7 +76,6 @@ def produccion_list(page: ft.Page):
         spacing=10,
     )
 
-
     def total_paginas():
         if not ordenes_filtradas:
             return 1
@@ -86,6 +83,7 @@ def produccion_list(page: ft.Page):
         if len(ordenes_filtradas) % filas_por_pagina:
             paginas += 1
         return paginas
+
     def abrir_editar(produccion_id):
         if not puede_gestionar:
             return
@@ -101,10 +99,12 @@ def produccion_list(page: ft.Page):
             page.update()
             return
 
-        def cerrar_editar():
+        def cerrar_editar(texto_exito=None):
             page.pop_dialog()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+            if texto_exito:
+                mostrar_notificacion(page, "Se guardó correctamente", texto_exito, "exito")
 
         dialogo = ft.AlertDialog(
             modal=True,
@@ -217,7 +217,6 @@ def produccion_list(page: ft.Page):
             )
         )
 
-        
         for i in range(1, total_paginas() + 1):
             activo = i == pagina_actual
 
@@ -237,7 +236,6 @@ def produccion_list(page: ft.Page):
                 )
             )
 
-        # ➡️
         paginador.controls.append(
             ft.IconButton(
                 icon=ft.Icons.CHEVRON_RIGHT,
@@ -284,15 +282,23 @@ def produccion_list(page: ft.Page):
         except Exception as ex:
             mensaje.value = f"Error BD: {ex}"
 
-
     def abrir_agregar(e):
         if not puede_gestionar:
             return
 
-        def cerrar_dialogo():
+        def cerrar_dialogo(texto_exito=None):
             page.pop_dialog()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
+            if texto_exito:
+                agregar_notificacion(texto_exito)
+                mostrar_notificacion(page, "Nueva orden de producción", texto_exito, "exito")
+
+        dialogo = ft.AlertDialog(
+            modal=True,
+            content=orden_produccion_form(cerrar_dialogo, page=page),
+        )
+        page.show_dialog(dialogo)
 
     buscador.on_change = lambda e: aplicar_filtro(e.control.value, filtro.value)
     filtro.on_change = lambda e: aplicar_filtro(buscador.value, e.control.value)
@@ -334,7 +340,6 @@ def produccion_list(page: ft.Page):
         controls=[
             ft.Text("Producción", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro],
                 controls=controles_derecha,
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             ),

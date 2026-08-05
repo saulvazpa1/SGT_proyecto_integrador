@@ -22,56 +22,8 @@ def productos_list(page: ft.Page):
             ft.DataColumn(ft.Text("Categoría", weight=ft.FontWeight.BOLD, size=16)),
             ft.DataColumn(ft.Text("Precio", weight=ft.FontWeight.BOLD, size=16)),
             ft.DataColumn(ft.Text("Stock", weight=ft.FontWeight.BOLD, size=16)),
+            ft.DataColumn(ft.Text("Unidad", weight=ft.FontWeight.BOLD, size=16)),
             ft.DataColumn(ft.Text("Color", weight=ft.FontWeight.BOLD, size=16)),
-            ft.DataColumn(
-                ft.Text(
-                    "ID",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,                    
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Nombre",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,                    
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Categoría",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,                    
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Precio",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Stock",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Unidad",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
-            ft.DataColumn(
-                ft.Text(
-                    "Color",
-                    weight=ft.FontWeight.BOLD,
-                    size=16,
-                )
-            ),
             ft.DataColumn(ft.Text("Acciones")),
         ],
         rows=[],
@@ -198,7 +150,6 @@ def productos_list(page: ft.Page):
             paginas += 1
         return max(paginas, 1)
 
-  
     def ir_a_pagina(pagina):
         nonlocal pagina_actual
         pagina_actual = pagina
@@ -220,7 +171,7 @@ def productos_list(page: ft.Page):
                     border_radius=8,
                     width=40,
                     height=40,
-                    alignment=ft.Alignment(0, 0),  # 👈 SOLUCIÓN
+                    alignment=ft.Alignment(0, 0),
                     on_click=lambda e, p=i: ir_a_pagina(p),
                 )
             )
@@ -235,7 +186,7 @@ def productos_list(page: ft.Page):
         boton_anterior.disabled = pagina_actual <= 1
         boton_siguiente.disabled = pagina_actual >= total_paginas()
 
-        construir_paginador()  # 👈 NUEVO
+        construir_paginador()
 
         page.update()
 
@@ -289,7 +240,6 @@ def productos_list(page: ft.Page):
     filtro.on_select = lambda e: aplicar_filtro(buscador.value, e.control.value)
 
     cargar_desde_bd()
-    aplicar_filtro()
     aplicar_filtro(texto="", tipo_filtro=TODAS_KEY)
 
     def abrir_agregar(e):
@@ -318,11 +268,10 @@ def productos_list(page: ft.Page):
         controls=[
             ft.Text("Gestión de Productos", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro],
+                controls=[buscador, filtro, boton_agregar],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             ),
             tabla,
-
             ft.Row(
                 controls=[
                     boton_anterior,
@@ -331,8 +280,6 @@ def productos_list(page: ft.Page):
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
-
-            mensaje,
         ],
         spacing=20,
         expand=True,

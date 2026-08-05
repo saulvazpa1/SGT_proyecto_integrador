@@ -4,6 +4,7 @@ import flet.canvas as cv
 
 from dao.cliente_dao import ClienteDAO
 from dao.pedido_dao import PedidoDAO
+from dao.producto_dao import ProductoDAO
 
 
 # 🔷 TARJETA KPI
@@ -31,109 +32,147 @@ def _tarjeta_kpi(titulo, valor, subtitulo, color, icono):
     )
 
 
-# 🔷 GRÁFICA DE BARRAS
-def _grafica_barras(titulo, categorias, serie1, serie2):
-    alto_maximo = 140
-    valores = serie1 + serie2
-    valor_maximo = max(valores) if valores else 1
-
-    grupos = []
-    for i, nombre in enumerate(categorias):
-        alto1 = (serie1[i] / valor_maximo) * alto_maximo
-        alto2 = (serie2[i] / valor_maximo) * alto_maximo
-
-        grupos.append(
-            ft.Column(
-                controls=[
-                    ft.Row(
-                        controls=[
-                            ft.Container(width=20, height=alto1, bgcolor=ft.Colors.INDIGO_300),
-                            ft.Container(width=20, height=alto2, bgcolor=ft.Colors.PINK_400),
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        vertical_alignment=ft.CrossAxisAlignment.END,
-                        spacing=4,
-                    ),
-                    ft.Text(nombre, size=12),
-                ],
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            )
-        )
-
-    return ft.Container(
-        expand=True,
-        padding=15,
-        content=ft.Column(
-            controls=[
-                ft.Text(titulo, size=18, weight=ft.FontWeight.BOLD),
-                ft.Row(controls=grupos, alignment=ft.MainAxisAlignment.SPACE_EVENLY),
-            ],
-        ),
-    )
-
-
 # 🔷 GRÁFICA DE PASTEL
-def _grafica_pastel(titulo, secciones):
+def _grafica_pastel(titulo, secciones, tamano=170):
+    """secciones: lista de tuplas (valor, color, etiqueta)"""
     total = sum(valor for valor, _, _ in secciones) or 1
 
     formas = []
     angulo_actual = -math.pi / 2
-
     for valor, color, _ in secciones:
         barrido = (valor / total) * 2 * math.pi
         formas.append(
             cv.Arc(
-                x=0,
-                y=0,
-                width=180,
-                height=180,
-                start_angle=angulo_actual,
-                sweep_angle=barrido,
+                x=0, y=0, width=tamano, height=tamano,
+                start_angle=angulo_actual, sweep_angle=barrido,
                 use_center=True,
                 paint=ft.Paint(style=ft.PaintingStyle.FILL, color=color),
             )
         )
         angulo_actual += barrido
 
-    lienzo = cv.Canvas(width=180, height=180, shapes=formas)
+    lienzo = cv.Canvas(width=tamano, height=tamano, shapes=formas)
 
     leyenda = ft.Column(
         controls=[
             ft.Row(
                 controls=[
-                    ft.Container(width=10, height=10, bgcolor=color),
-                    ft.Text(f"{etiqueta} ({valor})"),
-                ]
+                    ft.Container(width=10, height=10, bgcolor=color, border_radius=5),
+                    ft.Text(f"{etiqueta} ({valor})", size=12),
+                ],
+                spacing=5,
             )
             for valor, color, etiqueta in secciones
-        ]
+        ],
+        spacing=6,
     )
 
     return ft.Container(
         expand=True,
         padding=15,
+        bgcolor=ft.Colors.WHITE,
+        border_radius=10,
+        border=ft.Border.all(1, ft.Colors.BLUE_GREY_100),
         content=ft.Column(
             controls=[
-                ft.Text(titulo, size=18, weight=ft.FontWeight.BOLD),
-                ft.Row([lienzo, leyenda], alignment=ft.MainAxisAlignment.CENTER),
+                ft.Text(titulo, size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_GREY_900),
+                ft.Row(
+                    controls=[lienzo, leyenda],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=25,
+                ),
             ],
+            spacing=15,
         ),
     )
+
+
+# 🔷 GRÁFICA DE BARRAS (RANKING)
+def _grafica_barras_ranking(titulo, items, color=ft.Colors.INDIGO_400):
+    valor_maximo = max((v for _, v in items), default=1) or 1
+
+    filas = []
+    for etiqueta, valor in items:
+        ancho_proporcional = (valor / valor_maximo) * 260
+
+        filas.append(
+            ft.Column(
+                controls=[
+                    ft.Row(
+                        controls=[
+                            ft.Text(etiqueta, size=13, color=ft.Colors.BLUE_GREY_800),
+                            ft.Text(str(valor), size=13, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_GREY_900),
+                        ],
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    ),
+                    ft.Container(
+                        width=max(ancho_proporcional, 4),
+                        height=10,
+                        bgcolor=color,
+                        border_radius=5,
+                    ),
+                ],
+                spacing=4,
+            )
+        )
+
+    if not filas:
+        filas = [ft.Text("Aún no hay pedidos registrados", size=13, color=ft.Colors.BLUE_GREY_400)]
+
+    return ft.Container(
+        expand=True,
+        padding=15,
+        bgcolor=ft.Colors.WHITE,
+        border_radius=10,
+        border=ft.Border.all(1, ft.Colors.BLUE_GREY_100),
+        content=ft.Column(
+            controls=[
+                ft.Text(titulo, size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_GREY_900),
+                ft.Column(controls=filas, spacing=14),
+            ],
+            spacing=15,
+        ),
+    )
+
+
+_PALETA = [
+    ft.Colors.PURPLE_300,
+    ft.Colors.INDIGO_300,
+    ft.Colors.TEAL_300,
+    ft.Colors.ORANGE_300,
+    ft.Colors.PINK_300,
+    ft.Colors.CYAN_300,
+]
+
+
+def _nombre_producto(producto):
+    """Intenta obtener un nombre legible del producto; si no existe, usa el id."""
+    for atributo in ("producto_nombre", "nombre", "producto_descripcion"):
+        valor = getattr(producto, atributo, None)
+        if valor:
+            return str(valor)
+    return str(getattr(producto, "producto_id", producto))
 
 
 # 🔷 DASHBOARD PRINCIPAL
 def dashboard_vendedor(page=None):
 
-    # 🔹 Datos
+    # 🔹 Datos reales
     try:
         clientes = ClienteDAO().obtener_todos()
-    except:
+    except Exception:
         clientes = []
 
     try:
         pedidos = PedidoDAO().obtener_todos()
-    except:
+    except Exception:
         pedidos = []
+
+    try:
+        productos = ProductoDAO().obtener_todos()
+    except Exception:
+        productos = []
 
     total_clientes = len(clientes)
     total_pedidos = len(pedidos)
@@ -145,22 +184,8 @@ def dashboard_vendedor(page=None):
 
     try:
         total_vendido = sum(float(getattr(p, "pedido_total", 0) or 0) for p in pedidos)
-    except:
+    except Exception:
         total_vendido = 0
-
-    # 🔹 ROLES (CORREGIDO)
-    admins = 0
-    vendedores = 0
-    produccion = 0
-
-    for c in clientes:
-        rol = str(getattr(c, "rol_id", "")).lower()
-        if "admin" in rol:
-            admins += 1
-        elif "vendedor" in rol:
-            vendedores += 1
-        elif "produccion" in rol:
-            produccion += 1
 
     # 🔹 KPI
     tarjetas = ft.Row(
@@ -174,35 +199,52 @@ def dashboard_vendedor(page=None):
         spacing=20,
     )
 
-    # 🔹 Gráficas
-    grafica_barras = _grafica_barras(
-        "Crecimiento",
-        ["Ene", "Feb", "Mar"],
-        [2, 4, 6],
-        [10, 15, 20],
+    # 🔹 Pedidos por estado (real)
+    conteo_por_estado = {}
+    for p in pedidos:
+        estado = str(getattr(p, "pedido_estado", "") or "Sin estado").strip()
+        conteo_por_estado[estado] = conteo_por_estado.get(estado, 0) + 1
+
+    secciones_estado = [
+        (cantidad, _PALETA[i % len(_PALETA)], estado)
+        for i, (estado, cantidad) in enumerate(conteo_por_estado.items())
+        if cantidad > 0
+    ]
+    if not secciones_estado:
+        secciones_estado = [(1, ft.Colors.GREY_300, "Sin datos")]
+
+    grafica_estados = _grafica_pastel("Pedidos por estado", secciones_estado)
+
+    # 🔹 Top 5 productos más vendidos (real)
+    mapa_nombres = {str(getattr(prod, "producto_id", "")): _nombre_producto(prod) for prod in productos}
+
+    ventas_por_producto = {}
+    for p in pedidos:
+        producto_id = str(getattr(p, "producto_id", ""))
+        cantidad = getattr(p, "pedido_cantidad", 0) or 0
+        etiqueta = mapa_nombres.get(producto_id, producto_id or "Producto")
+        ventas_por_producto[etiqueta] = ventas_por_producto.get(etiqueta, 0) + cantidad
+
+    top_productos = sorted(ventas_por_producto.items(), key=lambda item: item[1], reverse=True)[:5]
+
+    grafica_top_productos = _grafica_barras_ranking(
+        "Top 5 productos más vendidos (por unidades pedidas)",
+        top_productos,
+        color=ft.Colors.PINK_400,
     )
-
-    secciones = []
-    if admins:
-        secciones.append((admins, ft.Colors.PURPLE_300, "Admin"))
-    if vendedores:
-        secciones.append((vendedores, ft.Colors.INDIGO_300, "Vendedor"))
-    if produccion:
-        secciones.append((produccion, ft.Colors.TEAL_300, "Producción"))
-
-    if not secciones:
-        secciones = [(1, ft.Colors.GREY_300, "Sin datos")]
-
-    grafica_pastel = _grafica_pastel("Roles", secciones)
 
     # 🔹 Layout final
     return ft.Column(
         controls=[
             tarjetas,
             ft.Row(
-                controls=[grafica_barras, grafica_pastel],
+                controls=[grafica_estados, grafica_top_productos],
                 alignment=ft.MainAxisAlignment.START,
+                vertical_alignment=ft.CrossAxisAlignment.START,
+                spacing=20,
             ),
         ],
         spacing=25,
+        scroll=ft.ScrollMode.AUTO,
+        expand=True,
     )
