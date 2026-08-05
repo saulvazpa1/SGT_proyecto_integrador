@@ -13,8 +13,10 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
     page.bgcolor = FONDO
     page.theme_mode = ft.ThemeMode.LIGHT
     page.theme = ft.Theme(font_family="Segoe UI")
-    page.window_width = 1100
-    page.window_height = 700
+    page.window.maximized = True
+    page.window.resizable = True
+    page.window.min_width = 1000
+    page.window.min_height = 650
     page.padding = 0
     page.bgcolor = ft.Colors.WHITE
 

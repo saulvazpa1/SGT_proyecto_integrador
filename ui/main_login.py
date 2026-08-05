@@ -1,14 +1,8 @@
 import flet as ft
-import subprocess
-import sys
-
-from ui.vendedor import vendedor
-#from ui.produccion_form import das
 from dao.usuario_dao import UsuarioDAO
 from ui.main_window import main_window
 from ui.main_window_vendedor import main_window_vendedor
 from ui.main_window_produccion import main_window_produccion
-
 from ui.colores import *
 
 
@@ -16,13 +10,12 @@ def main_login(page: ft.Page):
     page.title = "SGPT - Inicio de sesión"
     page.bgcolor = FONDO
     page.theme_mode = ft.ThemeMode.LIGHT
+    page.theme = ft.Theme(font_family="Segoe UI")
 
-    page.theme = ft.Theme(
-        font_family="Segoe UI"
-    )
-    page.window.width = 1200
-    page.window.height = 1200
-    page.window.resizable = False
+    page.window.maximized = True
+    page.window.resizable = True
+    page.window.min_width = 1000
+    page.window.min_height = 650
     page.bgcolor = "#f2f2f2"
 
     logo = ft.Column(
@@ -56,8 +49,29 @@ def main_login(page: ft.Page):
 
     mensaje = ft.Text(color="red")
 
+    # ===== CARGANDO =====
+    cargando = ft.ProgressRing(
+        width=20,
+        height=20,
+        stroke_width=3,
+        color=ft.Colors.WHITE,
+        visible=False,
+    )
+
+    texto_boton = ft.Text(
+        "Iniciar sesión",
+        size=16,
+        weight=ft.FontWeight.BOLD,
+        color="white",
+    )
+
+    contenido_boton = ft.Row(
+        controls=[cargando, texto_boton],
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=10,
+    )
+
     def volver_al_login():
-        print(">>> volver_al_login ejecutado")
         page.rol_id_actual = None
         page.usuario_id_actual = None
         page.usuario_nombre_actual = None
@@ -65,67 +79,60 @@ def main_login(page: ft.Page):
         main_login(page)
 
     def iniciar(e):
-        usuario_dao = UsuarioDAO()
-
-        usuario = usuario_dao.iniciar_sesion(
-            correo.value,
-            password.value
-        )
-    
-
-        if usuario:
-            print("Rol:", usuario.rol_id)
-            print(type(usuario.rol_id))
-            mensaje.value = f"Bienvenido {usuario.usuario_nombre}"
-            mensaje.color = "green"
-
-          
-            page.rol_id_actual = usuario.rol_id
-            page.usuario_id_actual = usuario.usuario_id
-            page.usuario_nombre_actual = usuario.usuario_nombre
-
-            if usuario.rol_id == 1:
-                page.clean()
-               
-                res = main_window(page, on_logout=volver_al_login)
-                if isinstance(res, ft.Control):
-                    page.add(res)
-
-            elif usuario.rol_id == 2:
-                page.clean()
-                main_window_vendedor(page, on_logout=volver_al_login)
-            elif usuario.rol_id == 3:
-                page.clean()
-                main_window_produccion(page, on_logout=volver_al_login)
-        else:
-            mensaje.value = "Correo o contraseña incorrectos"
-            mensaje.color = "red"
+        # Activar cargando
+        cargando.visible = True
+        texto_boton.value = "Iniciando..."
+        boton.disabled = True
+        mensaje.value = ""
         page.update()
 
+        try:
+            usuario_dao = UsuarioDAO()
+            usuario = usuario_dao.iniciar_sesion(
+                correo.value,
+                password.value
+            )
+
+            if usuario:
+                print("Rol:", usuario.rol_id)
+                mensaje.value = f"Bienvenido {usuario.usuario_nombre}"
+                mensaje.color = "green"
+
+                page.rol_id_actual = usuario.rol_id
+                page.usuario_id_actual = usuario.usuario_id
+                page.usuario_nombre_actual = usuario.usuario_nombre
+
+                page.clean()
+
+                if usuario.rol_id == 1:
+                    main_window(page, on_logout=volver_al_login)
+                elif usuario.rol_id == 2:
+                    main_window_vendedor(page, on_logout=volver_al_login)
+                elif usuario.rol_id == 3:
+                    main_window_produccion(page, on_logout=volver_al_login)
+            else:
+                mensaje.value = "Correo o contraseña incorrectos"
+                mensaje.color = "red"
+        except Exception as ex:
+            mensaje.value = f"Error: {ex}"
+            mensaje.color = "red"
+        finally:
+            # Quitar cargando
+            cargando.visible = False
+            texto_boton.value = "Iniciar sesión"
+            boton.disabled = False
+            page.update()
+
     boton = ft.ElevatedButton(
-        on_click=iniciar,
-        content=ft.Text(
-            "Iniciar sesión",
-            size=16,
-            weight=ft.FontWeight.BOLD,
-            color="white",
-        ),
+        content=contenido_boton,
         width=340,
         height=50,
         style=ft.ButtonStyle(
             bgcolor=AZUL,
             shape=ft.RoundedRectangleBorder(radius=8)
         ),
+        on_click=iniciar,
     )
-    ft.ElevatedButton(
-    "Guardar",
-    bgcolor=AZUL,
-    color=BLANCO,
-    style=ft.ButtonStyle(
-        elevation=3,
-        shape=ft.RoundedRectangleBorder(radius=8)
-    )
-)
 
     formulario = ft.Column(
         controls=[
@@ -160,7 +167,7 @@ def main_login(page: ft.Page):
             controls=[
                 ft.Container(
                     expand=True,
-                    alignment=ft.alignment.Alignment(0,0),
+                    alignment=ft.alignment.Alignment(0, 0),
                     content=logo
                 ),
                 ft.VerticalDivider(
@@ -169,7 +176,7 @@ def main_login(page: ft.Page):
                 ),
                 ft.Container(
                     expand=1,
-                    alignment=ft.alignment.Alignment(0,0),
+                    alignment=ft.alignment.Alignment(0, 0),
                     content=formulario
                 )
             ],
