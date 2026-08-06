@@ -729,8 +729,8 @@ def submenu(modulo, f_ver, f_ins, f_act=None, f_elim=None, es_movimiento=False):
 #             print("Entrada no válida. Elige una opción del menú numérico.")
 
 if __name__ == "__main__":
-   ft.app(target=main_login)
+   #ft.app(target=main_login)
    #ft.app(target=main_window)
    #ft.app(target=main_window_vendedor)
-   #ft.app(target=main_window_produccion)
+   ft.app(target=main_window_produccion)
   

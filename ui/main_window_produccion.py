@@ -7,6 +7,11 @@ from ui.colores import *
 from ui.notificaciones_list import mostrar_panel_notificaciones
 from ui.notificaciones import contar_no_leidas
 
+NOMBRE_EMPRESA = "Cosmos"
+ANIO_COPYRIGHT = "2026"
+EQUIPO_DESARROLLO = "Equipo DSM"
+CORREO_DESARROLLO = "dsm@gmail.com"
+
 
 def main_window_produccion(page: ft.Page, on_logout=None):
     page.title = "Sistema Gestor de Inventario Textil - Producción"
@@ -68,6 +73,57 @@ def main_window_produccion(page: ft.Page, on_logout=None):
         ],
     )
 
+    def abrir_ayuda(e=None):
+        def cerrar_ayuda(e=None):
+            page.pop_dialog()
+
+        dialogo_ayuda = ft.AlertDialog(
+            modal=True,
+            title=ft.Row(
+                controls=[
+                    ft.Icon(ft.Icons.HELP_OUTLINE, color=ft.Colors.BLUE_600),
+                    ft.Text("Ayuda"),
+                ],
+                spacing=8,
+            ),
+            content=ft.Column(
+                controls=[
+                    ft.Text(
+                        "Desarrollado por:",
+                        size=13,
+                        color=ft.Colors.BLUE_GREY_600,
+                    ),
+                    ft.Row(
+                        controls=[
+                            ft.Icon(ft.Icons.GROUPS_OUTLINED, size=18, color=ft.Colors.BLUE_600),
+                            ft.Text(EQUIPO_DESARROLLO, size=14, weight=ft.FontWeight.W_500),
+                        ],
+                        spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            ft.Icon(ft.Icons.EMAIL_OUTLINED, size=18, color=ft.Colors.BLUE_600),
+                            ft.Text(CORREO_DESARROLLO, size=14, weight=ft.FontWeight.W_500),
+                        ],
+                        spacing=8,
+                    ),
+                ],
+                spacing=12,
+                tight=True,
+            ),
+            actions=[
+                ft.TextButton("Cerrar", on_click=cerrar_ayuda),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.show_dialog(dialogo_ayuda)
+
+    boton_ayuda = ft.IconButton(
+        icon=ft.Icons.HELP_OUTLINE,
+        tooltip="Ayuda",
+        on_click=abrir_ayuda,
+    )
+
     # Barra superior
     barra_superior = ft.Container(
         height=65,
@@ -94,6 +150,37 @@ def main_window_produccion(page: ft.Page, on_logout=None):
                         ),
                         ft.Text("Área Producción", weight=ft.FontWeight.BOLD),
                     ],
+                ),
+            ],
+        ),
+    )
+
+    # Footer / pie de página
+    pie_pagina = ft.Container(
+        height=40,
+        bgcolor=ft.Colors.GREY_100,
+        border=ft.Border(top=ft.BorderSide(1, ft.Colors.BLUE_GREY_100)),
+        padding=ft.Padding.symmetric(horizontal=20, vertical=4),
+        content=ft.Row(
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            controls=[
+                ft.Text(
+                    f"© {ANIO_COPYRIGHT} {NOMBRE_EMPRESA}. Todos los derechos reservados.",
+                    size=12,
+                    color=ft.Colors.BLUE_GREY_400,
+                ),
+                ft.Row(
+                    controls=[
+                        ft.Text(
+                            "Sistema Gestor de Inventario Textil",
+                            size=12,
+                            color=ft.Colors.BLUE_GREY_400,
+                        ),
+                        boton_ayuda,
+                    ],
+                    spacing=4,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
             ],
         ),
@@ -224,7 +311,6 @@ def main_window_produccion(page: ft.Page, on_logout=None):
         )
         page.show_dialog(dialogo_confirmacion)
 
-    
     menu_lateral = ft.Container(
         width=230,
         bgcolor=ft.Colors.WHITE,
@@ -271,9 +357,11 @@ def main_window_produccion(page: ft.Page, on_logout=None):
             menu_lateral,
             ft.Column(
                 expand=True,
+                spacing=0,
                 controls=[
                     barra_superior,
                     contenido,
+                    pie_pagina,
                 ],
             ),
         ],

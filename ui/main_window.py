@@ -9,6 +9,13 @@ from ui.notificaciones_list import mostrar_panel_notificaciones
 from ui.colores import *
 from ui.componentes import mostrar_notificacion
 from ui.notificaciones import contar_no_leidas
+from ui.reporte_list import reportes_list
+
+
+NOMBRE_EMPRESA = "Cosmos"
+ANIO_COPYRIGHT = "2026"
+EQUIPO_DESARROLLO = "Equipo DSM"
+CORREO_DESARROLLO = "dsm@gmail.com"
 
 
 def main_window(page: ft.Page, on_logout=None):
@@ -71,7 +78,58 @@ def main_window(page: ft.Page, on_logout=None):
         ],
     )
 
+    def abrir_ayuda(e=None):
+        def cerrar_ayuda(e=None):
+            page.pop_dialog()
+
+        dialogo_ayuda = ft.AlertDialog(
+            modal=True,
+            title=ft.Row(
+                controls=[
+                    ft.Icon(ft.Icons.HELP_OUTLINE, color=ft.Colors.BLUE_600),
+                    ft.Text("Ayuda"),
+                ],
+                spacing=8,
+            ),
+            content=ft.Column(
+                controls=[
+                    ft.Text(
+                        "Desarrollado por:",
+                        size=13,
+                        color=ft.Colors.BLUE_GREY_600,
+                    ),
+                    ft.Row(
+                        controls=[
+                            ft.Icon(ft.Icons.GROUPS_OUTLINED, size=18, color=ft.Colors.BLUE_600),
+                            ft.Text(EQUIPO_DESARROLLO, size=14, weight=ft.FontWeight.W_500),
+                        ],
+                        spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            ft.Icon(ft.Icons.EMAIL_OUTLINED, size=18, color=ft.Colors.BLUE_600),
+                            ft.Text(CORREO_DESARROLLO, size=14, weight=ft.FontWeight.W_500),
+                        ],
+                        spacing=8,
+                    ),
+                ],
+                spacing=12,
+                tight=True,
+            ),
+            actions=[
+                ft.TextButton("Cerrar", on_click=cerrar_ayuda),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.show_dialog(dialogo_ayuda)
+
+    boton_ayuda = ft.IconButton(
+        icon=ft.Icons.HELP_OUTLINE,
+        tooltip="Ayuda",
+        on_click=abrir_ayuda,
+    )
     # Barra superior
+    
     barra_superior = ft.Container(
         height=65,
         bgcolor=ft.Colors.GREY_100,
@@ -102,10 +160,40 @@ def main_window(page: ft.Page, on_logout=None):
         ),
     )
 
+    # Footer / pie de página (con boton_ayuda)
+    pie_pagina = ft.Container(
+        height=40,
+        bgcolor=ft.Colors.GREY_100,
+        border=ft.Border(top=ft.BorderSide(1, ft.Colors.BLUE_GREY_100)),
+        padding=ft.Padding.symmetric(horizontal=20, vertical=4),
+        content=ft.Row(
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            controls=[
+                ft.Text(
+                    f"© {ANIO_COPYRIGHT} {NOMBRE_EMPRESA}. Todos los derechos reservados.",
+                    size=12,
+                    color=ft.Colors.BLUE_GREY_400,
+                ),
+                ft.Row(
+                    controls=[
+                        ft.Text(
+                            "Sistema Gestor de Inventario Textil",
+                            size=12,
+                            color=ft.Colors.BLUE_GREY_400,
+                        ),
+                        boton_ayuda,
+                    ],
+                    spacing=4,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+            ],
+        ),
+    )
+
     def item_menu(texto, icono, accion, es_logout=False):
         activo = menu_activo == texto
 
-        # Colores según estado
         if es_logout:
             color_icono = ft.Colors.RED_400
             color_texto = ft.Colors.RED_400
@@ -130,7 +218,6 @@ def main_window(page: ft.Page, on_logout=None):
             content=ft.Row(
                 spacing=0,
                 controls=[
-                    # Barrita lateral de activo
                     ft.Container(
                         width=4,
                         height=28,
@@ -160,7 +247,6 @@ def main_window(page: ft.Page, on_logout=None):
             ),
         )
 
-    # Vistas
     def inicio():
         return ft.Column(
             controls=[dashboard_admin(page)],
@@ -216,6 +302,11 @@ def main_window(page: ft.Page, on_logout=None):
         page.update()
         actualizar_badge_notificaciones()
 
+    def mostrar_reportes(e=None):
+        contenido.content = reportes_list(page)
+        page.update()
+        actualizar_badge_notificaciones()
+
     def cerrar_sesion(e=None):
         def confirmar_cierre(e):
             page.pop_dialog()
@@ -245,7 +336,6 @@ def main_window(page: ft.Page, on_logout=None):
         )
         page.show_dialog(dialogo_confirmacion)
 
-    # MENÚ LATERAL MEJORADO 
     menu_lateral = ft.Container(
         width=230,
         bgcolor=ft.Colors.WHITE,
@@ -259,8 +349,7 @@ def main_window(page: ft.Page, on_logout=None):
 
     def reconstruir_menu():
         menu_lateral.content.controls = [
-            # Logo
-           ft.Image(
+            ft.Image(
                 src="logo.png",
                 width=130,
                 height=55,
@@ -271,22 +360,20 @@ def main_window(page: ft.Page, on_logout=None):
 
             ft.Container(height=8),
 
-            # Items del menú
             item_menu("Inicio", ft.Icons.HOME_OUTLINED, mostrar_inicio),
             item_menu("Usuarios", ft.Icons.PEOPLE_OUTLINE, mostrar_usuarios),
             item_menu("Roles", ft.Icons.SECURITY_OUTLINED, mostrar_roles),
             item_menu("Productos", ft.Icons.INVENTORY_2_OUTLINED, mostrar_productos),
             item_menu("Pedidos", ft.Icons.SHOPPING_CART_OUTLINED, mostrar_pedido),
             item_menu("Producción", ft.Icons.PRECISION_MANUFACTURING, mostrar_orden_produccion),
+            item_menu("Reportes", ft.Icons.PICTURE_AS_PDF, mostrar_reportes),
 
-            # Empuja el cerrar sesión hacia abajo
             ft.Container(expand=True),
 
             ft.Divider(height=1, color=ft.Colors.BLUE_GREY_100),
 
             ft.Container(height=6),
 
-            # Cerrar sesión (estilo diferente)
             item_menu("Cerrar sesión", ft.Icons.LOGOUT, cerrar_sesion, es_logout=True),
         ]
 
@@ -298,9 +385,11 @@ def main_window(page: ft.Page, on_logout=None):
             menu_lateral,
             ft.Column(
                 expand=True,
+                spacing=0,
                 controls=[
                     barra_superior,
                     contenido,
+                    pie_pagina,
                 ],
             ),
         ],
@@ -310,5 +399,4 @@ def main_window(page: ft.Page, on_logout=None):
 
     page.add(layout)
 
-    # Vista inicial
     mostrar_inicio()

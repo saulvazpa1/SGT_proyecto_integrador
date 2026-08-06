@@ -1,4 +1,6 @@
 import flet as ft
+import asyncio
+import time
 from dao.usuario_dao import UsuarioDAO
 from ui.main_window import main_window
 from ui.main_window_vendedor import main_window_vendedor
@@ -49,7 +51,7 @@ def main_login(page: ft.Page):
 
     mensaje = ft.Text(color="red")
 
-    # ===== CARGANDO =====
+    
     cargando = ft.ProgressRing(
         width=20,
         height=20,
@@ -71,6 +73,16 @@ def main_login(page: ft.Page):
         spacing=10,
     )
 
+    boton = ft.ElevatedButton(
+        content=contenido_boton,
+        width=340,
+        height=50,
+        style=ft.ButtonStyle(
+            bgcolor=AZUL,
+            shape=ft.RoundedRectangleBorder(radius=8)
+        ),
+    )
+
     def volver_al_login():
         page.rol_id_actual = None
         page.usuario_id_actual = None
@@ -78,19 +90,43 @@ def main_login(page: ft.Page):
         page.clean()
         main_login(page)
 
-    def iniciar(e):
-        # Activar cargando
+    def pantalla_cargando(texto="Cargando tu panel..."):
+        page.clean()
+        page.add(
+            ft.Container(
+                expand=True,
+                alignment=ft.alignment.Alignment(0, 0),
+                content=ft.Column(
+                    controls=[
+                        ft.ProgressRing(width=42, height=42, stroke_width=4, color=AZUL),
+                        ft.Text(texto, size=16, color=ft.Colors.BLUE_GREY_600),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=15,
+                ),
+            )
+        )
+        page.update()
+
+    async def iniciar(e):
+
+       
         cargando.visible = True
-        texto_boton.value = "Iniciando..."
+        texto_boton.value = "Iniciando sesión..."
         boton.disabled = True
         mensaje.value = ""
         page.update()
 
         try:
             usuario_dao = UsuarioDAO()
+
+            correo_limpio = (correo.value or "").strip()
+            password_limpio = (password.value or "").strip()
+
             usuario = usuario_dao.iniciar_sesion(
-                correo.value,
-                password.value
+                correo_limpio,
+                password_limpio
             )
 
             if usuario:
@@ -102,6 +138,10 @@ def main_login(page: ft.Page):
                 page.usuario_id_actual = usuario.usuario_id
                 page.usuario_nombre_actual = usuario.usuario_nombre
 
+                # Pantalla de carga breve antes de mostrar el panel
+                pantalla_cargando(f"Bienvenido {usuario.usuario_nombre}, cargando tu panel...")
+                await asyncio.sleep(2.4)
+
                 page.clean()
 
                 if usuario.rol_id == 1:
@@ -110,29 +150,23 @@ def main_login(page: ft.Page):
                     main_window_vendedor(page, on_logout=volver_al_login)
                 elif usuario.rol_id == 3:
                     main_window_produccion(page, on_logout=volver_al_login)
+                return
             else:
                 mensaje.value = "Correo o contraseña incorrectos"
                 mensaje.color = "red"
+
         except Exception as ex:
             mensaje.value = f"Error: {ex}"
             mensaje.color = "red"
+
         finally:
-            # Quitar cargando
+            
             cargando.visible = False
             texto_boton.value = "Iniciar sesión"
             boton.disabled = False
             page.update()
 
-    boton = ft.ElevatedButton(
-        content=contenido_boton,
-        width=340,
-        height=50,
-        style=ft.ButtonStyle(
-            bgcolor=AZUL,
-            shape=ft.RoundedRectangleBorder(radius=8)
-        ),
-        on_click=iniciar,
-    )
+    boton.on_click = iniciar
 
     formulario = ft.Column(
         controls=[
