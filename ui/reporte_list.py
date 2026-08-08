@@ -20,6 +20,7 @@ def _tarjeta_reporte(titulo, descripcion, icono, color, on_click):
                     "Generar PDF",
                     icon=ft.Icons.PICTURE_AS_PDF,
                     bgcolor=color,
+                    tooltip="Genera reporte",
                     color=ft.Colors.WHITE,
                     on_click=on_click,
                 ),
@@ -69,6 +70,8 @@ def reportes_list(page: ft.Page):
             ft.Text(
                 "Genera reportes en PDF ",
                 size=13,
+                tooltip="Genera reporte",
+                
                 color=ft.Colors.BLUE_GREY_600,
             ),
             tarjetas,

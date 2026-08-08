@@ -188,7 +188,7 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
               ],
           ),
       )
-    def item_menu(texto, icono, accion, es_logout=False):
+    def item_menu(texto, icono, accion, es_logout=False, tooltip=None):
         activo = menu_activo == texto
 
         if es_logout:
@@ -212,6 +212,7 @@ def main_window_vendedor(page: ft.Page, on_logout=None):
             border_radius=10,
             on_click=accion,
             ink=True,
+            tooltip=tooltip or texto,
             content=ft.Row(
                 spacing=0,
                 controls=[

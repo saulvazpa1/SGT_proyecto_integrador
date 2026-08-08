@@ -309,6 +309,7 @@ def produccion_list(page: ft.Page):
         boton_agregar = ft.ElevatedButton(
             "Nueva orden",
             icon=ft.Icons.ADD,
+            tooltip="Nueva orden",
             bgcolor=ft.Colors.LIGHT_BLUE_500,
             color=ft.Colors.WHITE,
             style=ft.ButtonStyle(

@@ -95,7 +95,7 @@ def main_login(page: ft.Page):
         page.add(
             ft.Container(
                 expand=True,
-                alignment=ft.alignment.Alignment(0, 0),
+                alignment=ft.Alignment.CENTER,
                 content=ft.Column(
                     controls=[
                         ft.ProgressRing(width=42, height=42, stroke_width=4, color=AZUL),
@@ -201,7 +201,7 @@ def main_login(page: ft.Page):
             controls=[
                 ft.Container(
                     expand=True,
-                    alignment=ft.alignment.Alignment(0, 0),
+                    alignment=ft.Alignment.CENTER,
                     content=logo
                 ),
                 ft.VerticalDivider(
@@ -210,7 +210,7 @@ def main_login(page: ft.Page):
                 ),
                 ft.Container(
                     expand=1,
-                    alignment=ft.alignment.Alignment(0, 0),
+                    alignment=ft.Alignment.CENTER,
                     content=formulario
                 )
             ],

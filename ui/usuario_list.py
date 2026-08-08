@@ -6,6 +6,7 @@ from ui.componentes import mostrar_notificacion
 
 
 def usuarios_list(page: ft.Page):
+    
 
     todos_los_usuarios = []
     usuarios_filtrados = []
@@ -87,6 +88,12 @@ def usuarios_list(page: ft.Page):
         ],
     )
 
+    icono_filtro = ft.Icon(
+        ft.Icons.FILTER_LIST,
+        color=ft.Colors.BLUE_GREY_400,
+        size=22,
+    )
+
     def cargar_desde_bd():
         nonlocal todos_los_usuarios
         try:
@@ -165,12 +172,21 @@ def usuarios_list(page: ft.Page):
                         ft.IconButton(
                             icon=ft.Icons.EDIT,
                             tooltip="Editar",
+                            icon_color=ft.Colors.BLUE_700,
+                            bgcolor=ft.Colors.BLUE_50,
+                            style=ft.ButtonStyle(
+                            shape=ft.RoundedRectangleBorder(radius=8),
+                            ),
                             on_click=lambda e, u=usuario: abrir_editar(u),
                         ),
                         ft.IconButton(
                             icon=ft.Icons.DELETE,
-                            icon_color=ft.Colors.RED,
+                            icon_color=ft.Colors.RED_700,
+                            bgcolor=ft.Colors.RED_50,
                             tooltip="Eliminar",
+                            style=ft.ButtonStyle(
+                            shape=ft.RoundedRectangleBorder(radius=8),
+                            ),
                             on_click=lambda e, u=usuario: confirmar_eliminar(u),
                         ),
                     ])
@@ -200,7 +216,7 @@ def usuarios_list(page: ft.Page):
                     ),
                     bgcolor=ft.Colors.BLUE if i == pagina_actual else ft.Colors.GREY_300,
                     padding=10,
-                    border_radius=8,
+                    border_radius=10,
                     alignment=ft.Alignment(0, 0),
                     width=40,
                     height=40,
@@ -321,6 +337,7 @@ def usuarios_list(page: ft.Page):
         bgcolor=AZUL,
         color=ft.Colors.WHITE,
         icon=ft.Icons.ADD,
+        tooltip="Agregar usuario",
         on_click=abrir_agregar,
     )
 
@@ -328,10 +345,21 @@ def usuarios_list(page: ft.Page):
         controls=[
             ft.Text("Gestión de Usuarios", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro, boton_agregar],
+                controls=[
+                    buscador,
+                    ft.Row(
+                        controls=[icono_filtro, filtro],
+                        spacing=6,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    boton_agregar,
+                ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             ),
-            tabla,
+            ft.Row(
+                controls=[tabla],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
             ft.Row(
                 controls=[
                     boton_anterior,

@@ -96,7 +96,7 @@ def usuario_form(regresar, usuario=None):
 
     rol_campo = ft.Row(
         controls=[
-            ft.Icon(ft.Icons.SECURITY_OUTLINED, color=ft.Colors.BLUE_GREY_400, size=20),
+            
             rol_dropdown,
         ],
         spacing=8,

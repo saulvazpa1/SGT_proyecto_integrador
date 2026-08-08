@@ -266,12 +266,21 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
                         ft.IconButton(
                             icon=ft.Icons.EDIT,
                             tooltip="Editar",
+                            icon_color=ft.Colors.BLUE_700,
+                            bgcolor=ft.Colors.BLUE_50,
+                            style=ft.ButtonStyle(
+                            shape=ft.RoundedRectangleBorder(radius=8),
+                             ),
                             on_click=lambda e, p=pedido: abrir_editar(p),
                         ),
                         ft.IconButton(
                             icon=ft.Icons.DELETE,
-                            icon_color=ft.Colors.RED,
+                            icon_color=ft.Colors.RED_700,
+                            bgcolor=ft.Colors.RED_50,
                             tooltip="Eliminar",
+                            style=ft.ButtonStyle(
+                            shape=ft.RoundedRectangleBorder(radius=8),
+                             ),
                             on_click=lambda e, p=pedido: confirmar_eliminar(p),
                         ),
                     ])
@@ -338,6 +347,7 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
                 bgcolor=AZUL,
                 color=ft.Colors.WHITE,
                 icon=ft.Icons.ADD,
+                tooltip="Agregar pedido",
                 on_click=abrir_agregar,
             )
         )

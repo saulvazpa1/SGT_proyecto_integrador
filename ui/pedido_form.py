@@ -59,7 +59,7 @@ def pedido_form(regresar, pedido=None, page=None):
 
     precio_por_producto = {str(pid): float(precio) for pid, _, precio in productos}
 
-    # ---------- DROPDOWNS (limpios) ----------
+    # 
     cliente_dropdown = ft.Dropdown(
         label="Cliente",
         hint_text="Selecciona un cliente",
@@ -100,7 +100,7 @@ def pedido_form(regresar, pedido=None, page=None):
         options=[ft.dropdown.Option(key=e, text=e) for e in estados_disponibles],
     )
 
-    # ---------- CANTIDAD CON CONTADOR ----------
+    # CANTIDAD CON CONTADOR
     cantidad_input = ft.TextField(
         value=str(pedido.pedido_cantidad) if editando else "1",
         width=70,
@@ -151,11 +151,13 @@ def pedido_form(regresar, pedido=None, page=None):
         width=320,
     )
 
-    # ---------- TOTAL ----------
+    # TOTAL 
     total_input = ft.TextField(
         label="Total",
         hint_text="Se calcula automáticamente",
+        
         width=320,
+        tooltip="calcular total",
         border_radius=6,
         prefix=ft.Text("$ "),
         value=str(pedido.pedido_total) if editando else "",
@@ -188,10 +190,15 @@ def pedido_form(regresar, pedido=None, page=None):
             page.update()
 
     boton_calcular = ft.TextButton(
-        "Calcular total",
-        icon=ft.Icons.CALCULATE,
-        on_click=calcular_total,
-    )
+            "Calcular total",
+            icon=ft.Icons.CALCULATE,
+            tooltip="Calcular total",
+            style=ft.ButtonStyle(
+                bgcolor=AZUL,
+                color=ft.Colors.WHITE,
+            ),
+            on_click=calcular_total,
+        )
 
     def guardar_pedido(e):
         p_page = page or e.page

@@ -68,6 +68,8 @@ def main_window(page: ft.Page, on_logout=None):
     boton_notificaciones = ft.Stack(
         width=40,
         height=40,
+        
+        tooltip="Notificaciones",
         controls=[
             ft.IconButton(
                 icon=ft.Icons.NOTIFICATIONS,
@@ -215,6 +217,7 @@ def main_window(page: ft.Page, on_logout=None):
             border_radius=10,
             on_click=accion,
             ink=True,
+            tooltip=texto,
             content=ft.Row(
                 spacing=0,
                 controls=[
@@ -303,10 +306,12 @@ def main_window(page: ft.Page, on_logout=None):
         actualizar_badge_notificaciones()
 
     def mostrar_reportes(e=None):
+        nonlocal menu_activo
+        menu_activo = "Reportes"
         contenido.content = reportes_list(page)
+        reconstruir_menu()
         page.update()
         actualizar_badge_notificaciones()
-
     def cerrar_sesion(e=None):
         def confirmar_cierre(e):
             page.pop_dialog()

@@ -90,6 +90,12 @@ def catalogo_productos_vendedor(page: ft.Page):
         ],
     )
 
+    icono_filtro = ft.Icon(
+        ft.Icons.FILTER_LIST,
+        color=ft.Colors.BLUE_GREY_400,
+        size=22,
+    )
+
     def cargar_desde_bd():
         nonlocal todos_los_productos
         try:
@@ -182,7 +188,6 @@ def catalogo_productos_vendedor(page: ft.Page):
 
         paginador.controls.clear()
 
-        # Flecha izquierda
         paginador.controls.append(
             ft.IconButton(
                 icon=ft.Icons.CHEVRON_LEFT,
@@ -191,7 +196,6 @@ def catalogo_productos_vendedor(page: ft.Page):
             )
         )
 
-        # Botones de páginas
         for i in range(1, total_paginas() + 1):
 
             paginador.controls.append(
@@ -211,7 +215,6 @@ def catalogo_productos_vendedor(page: ft.Page):
                 )
             )
 
-        # Flecha derecha
         paginador.controls.append(
             ft.IconButton(
                 icon=ft.Icons.CHEVRON_RIGHT,
@@ -280,11 +283,21 @@ def catalogo_productos_vendedor(page: ft.Page):
         controls=[
             ft.Text("Catálogo de Productos", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro],
+                controls=[
+                    buscador,
+                    ft.Row(
+                        controls=[icono_filtro, filtro],
+                        spacing=6,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                ],
                 alignment=ft.MainAxisAlignment.START,
                 spacing=20,
             ),
-            tabla,
+            ft.Row(
+                controls=[tabla],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
             paginador,
             mensaje,
         ],

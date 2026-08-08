@@ -127,18 +127,45 @@ def orden_produccion_form(regresar, orden=None, page=None):
         value=str(orden.produccion_cantidad) if editando else "",
     )
 
-    fecha_inicio_input = ft.TextField(
-        label="Fecha de inicio (AAAA-MM-DD):",
-        width=320,
-        border_radius=6,
-        value=orden.fecha_inicio.strftime("%Y-%m-%d") if editando and orden.fecha_inicio else datetime.now().strftime("%Y-%m-%d"),
+    # --- Campos de fecha con botón de calendario ---
+    def _campo_fecha(label, valor_inicial, ancho=320):
+        """TextField normal (se puede escribir a mano) + botón de calendario para elegir la fecha."""
+        campo = ft.TextField(
+            label=label,
+            width=ancho - 55,
+            border_radius=6,
+            value=valor_inicial,
+        )
+
+        def abrir_calendario(e):
+            def al_elegir_fecha(ev):
+                campo.value = ev.control.value.strftime("%Y-%m-%d")
+                page.update()
+
+            selector = ft.DatePicker(
+                value=datetime.now(),
+                first_date=datetime(2020, 1, 1),
+                last_date=datetime(2035, 12, 31),
+                on_change=al_elegir_fecha,
+            )
+            page.show_dialog(selector)
+
+        boton_calendario = ft.IconButton(
+            icon=ft.Icons.CALENDAR_MONTH,
+            tooltip="Elegir del calendario",
+            on_click=abrir_calendario,
+        )
+
+        return ft.Row(controls=[campo, boton_calendario], spacing=4, width=ancho), campo
+
+    fila_fecha_inicio, fecha_inicio_input = _campo_fecha(
+        "Fecha de inicio (AAAA-MM-DD):",
+        orden.fecha_inicio.strftime("%Y-%m-%d") if editando and orden.fecha_inicio else datetime.now().strftime("%Y-%m-%d"),
     )
 
-    fecha_entrega_input = ft.TextField(
-        label="Fecha de entrega (opcional):",
-        width=320,
-        border_radius=6,
-        value=orden.fecha_entrega.strftime("%Y-%m-%d") if editando and orden.fecha_entrega else "",
+    fila_fecha_entrega, fecha_entrega_input = _campo_fecha(
+        "Fecha de entrega (opcional):",
+        orden.fecha_entrega.strftime("%Y-%m-%d") if editando and orden.fecha_entrega else "",
     )
 
     #  Sección de tela y patrón 
@@ -194,11 +221,6 @@ def orden_produccion_form(regresar, orden=None, page=None):
     mensaje = ft.Text("", color=ft.Colors.GREEN)
 
     def calcular_tela(e):
-        """
-        Calcula la tela necesaria simulando cómo se acomodan los patrones sobre
-        la tela (por filas y columnas, sin rotar piezas), más un margen de
-        desperdicio para costuras/orillas/errores de corte.
-        """
         try:
             cantidad = int(float(cantidad_input.value or 0))
             p_largo = float(patron_largo_input.value or 0)
@@ -220,7 +242,6 @@ def orden_produccion_form(regresar, orden=None, page=None):
                 page.update()
             return
 
-        # ¿Cuántas piezas caben una junto a otra a lo ancho de la tela?
         piezas_por_fila = int(t_ancho // p_ancho)
         if piezas_por_fila < 1:
             mensaje.value = (
@@ -232,14 +253,12 @@ def orden_produccion_form(regresar, orden=None, page=None):
                 page.update()
             return
 
-        # ¿Cuántas filas se necesitan para juntar la cantidad pedida?
-        filas_necesarias = -(-cantidad // piezas_por_fila)  # redondeo hacia arriba
+        filas_necesarias = -(-cantidad // piezas_por_fila)
         largo_necesario_sin_margen = round(filas_necesarias * p_largo, 2)
 
         margen_factor = 1 + (margen_pct / 100)
         largo_necesario_con_margen = round(largo_necesario_sin_margen * margen_factor, 2)
 
-        # área que realmente se ocupa sobre la tela (ancho completo de la tela x el largo necesario)
         area_utilizada = round(t_ancho * largo_necesario_con_margen, 2)
 
         tela_disponible = round(t_ancho * t_largo, 2) if t_largo > 0 else None
@@ -381,7 +400,6 @@ def orden_produccion_form(regresar, orden=None, page=None):
             texto_notificacion = f"Orden #{nuevo_id} registrada — {nombre_producto}"
             agregar_notificacion(texto_notificacion)
 
-         
             regresar()
 
             if p_page:
@@ -423,11 +441,10 @@ def orden_produccion_form(regresar, orden=None, page=None):
         spacing=15,
     )
     columna_derecha = ft.Column(
-        controls=[cantidad_input, estado_dropdown, fecha_inicio_input, fecha_entrega_input],
+        controls=[cantidad_input, estado_dropdown, fila_fecha_inicio, fila_fecha_entrega],
         spacing=15,
     )
 
-    
     cuerpo = ft.Container(
         padding=ft.Padding.symmetric(horizontal=30, vertical=20),
         content=ft.Column(
@@ -477,7 +494,6 @@ def orden_produccion_form(regresar, orden=None, page=None):
         ),
     )
 
-   
     alto_disponible = (page.height - 120) if (page and page.height) else 640
     alto_dialogo = max(420, min(alto_disponible, 680))
 

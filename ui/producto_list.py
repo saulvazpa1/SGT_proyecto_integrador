@@ -47,6 +47,12 @@ def productos_list(page: ft.Page):
         ],
     )
 
+    icono_filtro = ft.Icon(
+        ft.Icons.FILTER_LIST,
+        color=ft.Colors.BLUE_GREY_400,
+        size=22,
+    )
+
     contenedor_paginas = ft.Row(
         alignment=ft.MainAxisAlignment.CENTER,
         spacing=5
@@ -103,6 +109,7 @@ def productos_list(page: ft.Page):
                     icon=ft.Icons.DELETE,
                     bgcolor=ft.Colors.RED,
                     color=ft.Colors.WHITE,
+                    tooltip="Eliminar",
                     on_click=eliminar_confirmado,
                 ),
             ],
@@ -133,12 +140,30 @@ def productos_list(page: ft.Page):
                 ft.DataCell(ft.Text(str(unidad))),
                 ft.DataCell(ft.Text(str(color))),
                 ft.DataCell(
-                    ft.Row([
-                        ft.IconButton(icon=ft.Icons.EDIT, on_click=lambda e, p=producto: abrir_editar(p)),
-                        ft.IconButton(icon=ft.Icons.DELETE, icon_color=ft.Colors.RED,
-                                      on_click=lambda e, p=producto: confirmar_eliminar(p)),
-                    ])
-                ),
+                        ft.Row([
+                            ft.IconButton(
+                                icon=ft.Icons.EDIT,
+                                icon_color=ft.Colors.BLUE_700,
+                                bgcolor=ft.Colors.BLUE_50,
+                                style=ft.ButtonStyle(
+                                shape=ft.RoundedRectangleBorder(radius=8),
+                                 ),
+                                tooltip="Editar",
+                                on_click=lambda e, p=producto: abrir_editar(p),
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.DELETE,
+                                icon_color=ft.Colors.RED_700,
+                                bgcolor=ft.Colors.RED_50,
+                                
+                                style=ft.ButtonStyle(
+                                shape=ft.RoundedRectangleBorder(radius=8),
+                                 ),
+                                tooltip="Eliminar",
+                                on_click=lambda e, p=producto: confirmar_eliminar(p),
+                            ),
+                        ])
+                    ),
             ]
         )
 
@@ -261,6 +286,7 @@ def productos_list(page: ft.Page):
         bgcolor=AZUL,
         color=ft.Colors.WHITE,
         icon=ft.Icons.ADD,
+        tooltip="Agregar producto",
         on_click=abrir_agregar,
     )
 
@@ -268,10 +294,21 @@ def productos_list(page: ft.Page):
         controls=[
             ft.Text("Gestión de Productos", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
-                controls=[buscador, filtro, boton_agregar],
+                controls=[
+                    buscador,
+                    ft.Row(
+                        controls=[icono_filtro, filtro],
+                        spacing=6,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    boton_agregar,
+                ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             ),
-            tabla,
+            ft.Row(
+                controls=[tabla],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
             ft.Row(
                 controls=[
                     boton_anterior,

@@ -112,12 +112,21 @@ def clientes_list(page: ft.Page):
                         ft.IconButton(
                             icon=ft.Icons.EDIT,
                             tooltip="Editar",
+                            icon_color=ft.Colors.BLUE_700,
+                            bgcolor=ft.Colors.BLUE_50,
+                            style=ft.ButtonStyle(
+                            shape=ft.RoundedRectangleBorder(radius=8),
+                            ),
                             on_click=lambda e, c=cliente: abrir_editar(c),
                         ),
                         ft.IconButton(
                             icon=ft.Icons.DELETE,
-                            icon_color=ft.Colors.RED,
+                            icon_color=ft.Colors.RED_700,
+                            bgcolor=ft.Colors.RED_50,
                             tooltip="Eliminar",
+                            style=ft.ButtonStyle(
+                            shape=ft.RoundedRectangleBorder(radius=8),
+                            ),
                             on_click=lambda e, c=cliente: confirmar_eliminar(c),
                         ),
                     ])
@@ -238,7 +247,10 @@ def clientes_list(page: ft.Page):
 
     boton_agregar = ft.ElevatedButton(
         "Agregar cliente",
+        bgcolor=AZUL,
+        color=ft.Colors.WHITE,
         icon=ft.Icons.ADD,
+        tooltip="Agregar cliente",
         on_click=abrir_agregar,
     )
 

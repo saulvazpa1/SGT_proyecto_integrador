@@ -46,7 +46,7 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
         spacing=10,
     )
 
-    # ---------------- FUNCIONES ---------------- #
+    # FUNCIONES 
 
     def total_paginas():
         if not pedidos_filtrados:
@@ -165,7 +165,7 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
             mensaje.value = "Panel actualizado"
             mensaje.color = ft.Colors.GREEN
 
-    # ---------------- EVENTOS ---------------- #
+    #  EVENTOS 
 
     buscador.on_change = lambda e: aplicar_filtro(e.control.value)
 
@@ -174,23 +174,25 @@ def pedidos_pendientes(page: ft.Page, estado_objetivo: str = "Pendiente"):
         bgcolor=AZUL,
         color=ft.Colors.WHITE,
         icon=ft.Icons.REFRESH,
-        on_click=refrescar,
+        tooltip="Actualizar",
+        on_click=refrescar
+        
     )
 
-    # ---------------- INIT ---------------- #
+    #  
 
     refrescar()
 
     return ft.Column(
         controls=[
-            ft.Text("Panel de producción — Pedidos pendientes", size=24, weight=ft.FontWeight.BOLD),
+            ft.Text(" Pedidos pendientes", size=24, weight=ft.FontWeight.BOLD),
             ft.Row(
                 controls=[buscador, boton_refrescar],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             ),
             contador,
             tabla,
-            paginador,  # 👈 AQUÍ
+            paginador,  
             mensaje,
         ],
         spacing=20,
