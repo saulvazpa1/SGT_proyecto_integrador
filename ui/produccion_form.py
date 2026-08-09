@@ -19,11 +19,11 @@ ESTADOS_SUGERIDOS = [
 
 
 def _obtener_pedidos():
-    """(pedido_id, 'Pedido #N - Cliente')"""
+    """(pedido_id, 'Pedido #N — Cliente', producto_id, cantidad_pedida)"""
     conexion = Conexion.obtener_conexion()
     cursor = conexion.cursor()
     cursor.execute("""
-        SELECT p.pedido_id, c.cliente_nombre
+        SELECT p.pedido_id, c.cliente_nombre, p.producto_id, p.pedido_cantidad
         FROM pedidos p
         JOIN clientes c ON p.cliente_id = c.cliente_id
         ORDER BY p.pedido_id DESC
@@ -31,7 +31,10 @@ def _obtener_pedidos():
     filas = cursor.fetchall()
     cursor.close()
     conexion.close()
-    return [(pid, f"Pedido #{pid} — {nombre}") for pid, nombre in filas]
+    return [
+        (pid, f"Pedido #{pid} — {nombre}", producto_id, cantidad)
+        for pid, nombre, producto_id, cantidad in filas
+    ]
 
 
 def _obtener_productos():
@@ -88,11 +91,14 @@ def orden_produccion_form(regresar, orden=None, page=None):
     productos = _obtener_productos()
     encargados = _obtener_encargados()
 
+    # Mapa rápido:
+    mapa_pedidos = {str(pid): (producto_id, cantidad) for pid, _, producto_id, cantidad in pedidos}
+
     pedido_dropdown = ft.Dropdown(
         label="Pedido:",
         width=320,
         value=str(orden.pedido_id) if editando else None,
-        options=[ft.dropdown.Option(key=str(pid), text=texto) for pid, texto in pedidos],
+        options=[ft.dropdown.Option(key=str(pid), text=texto) for pid, texto, _, _ in pedidos],
     )
 
     producto_dropdown = ft.Dropdown(
@@ -127,7 +133,25 @@ def orden_produccion_form(regresar, orden=None, page=None):
         value=str(orden.produccion_cantidad) if editando else "",
     )
 
-    # --- Campos de fecha con botón de calendario ---
+    # Autocompletar producto y cantidad al elegir el pedido 
+    def al_elegir_pedido(e):
+        datos = mapa_pedidos.get(pedido_dropdown.value)
+        if not datos:
+            return
+        producto_id_pedido, cantidad_pedida = datos
+
+        if producto_id_pedido is not None:
+            producto_dropdown.value = str(producto_id_pedido)
+
+        if cantidad_pedida is not None:
+            cantidad_input.value = str(cantidad_pedida)
+
+        if page:
+            page.update()
+
+    pedido_dropdown.on_select = al_elegir_pedido
+
+    #  Campos de fecha con botón de calendario 
     def _campo_fecha(label, valor_inicial, ancho=320):
         """TextField normal (se puede escribir a mano) + botón de calendario para elegir la fecha."""
         campo = ft.TextField(
@@ -416,8 +440,8 @@ def orden_produccion_form(regresar, orden=None, page=None):
 
     encabezado = ft.Container(
         bgcolor=ft.Colors.LIGHT_BLUE_500,
-        padding=ft.Padding.symmetric(horizontal=20, vertical=14),
-        border_radius=ft.BorderRadius.only(top_left=10, top_right=10),
+        padding=ft.Padding(left=20, right=20, top=14, bottom=14),
+        border_radius=ft.BorderRadius(top_left=10, top_right=10, bottom_left=0, bottom_right=0),
         content=ft.Row(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
@@ -446,7 +470,7 @@ def orden_produccion_form(regresar, orden=None, page=None):
     )
 
     cuerpo = ft.Container(
-        padding=ft.Padding.symmetric(horizontal=30, vertical=20),
+        padding=ft.Padding(left=30, right=30, top=20, bottom=20),
         content=ft.Column(
             controls=[
                 ft.Text(
@@ -467,7 +491,7 @@ def orden_produccion_form(regresar, orden=None, page=None):
     )
 
     pie = ft.Container(
-        padding=ft.Padding.only(left=30, right=30, bottom=20, top=10),
+        padding=ft.Padding(left=30, right=30, top=10, bottom=20),
         bgcolor=ft.Colors.WHITE,
         border=ft.Border.only(top=ft.BorderSide(1, ft.Colors.BLUE_GREY_100)),
         content=ft.Row(

@@ -1,4 +1,5 @@
 import flet as ft
+from database.conexion import Conexion
 from dao.ordenes_produccion_dao import OrdenProduccionDAO
 from ui.produccion_form import orden_produccion_form
 from ui.notificaciones import agregar_notificacion
@@ -21,7 +22,7 @@ def _color_estado(estado):
 def _chip_estado(estado):
     color_texto, color_fondo = _color_estado(estado)
     return ft.Container(
-        padding=ft.Padding.symmetric(horizontal=10, vertical=4),
+        padding=ft.Padding(left=10, right=10, top=4, bottom=4),
         bgcolor=color_fondo,
         border_radius=20,
         content=ft.Text(str(estado), size=12, color=color_texto, weight=ft.FontWeight.BOLD),
@@ -35,6 +36,10 @@ def produccion_list(page: ft.Page):
 
     todas_las_ordenes = []
     ordenes_filtradas = []
+
+    mapa_clientes_por_pedido = {}
+    mapa_productos = {}
+    mapa_encargados = {}
 
     pagina_actual = 1
     filas_por_pagina = 5
@@ -76,6 +81,46 @@ def produccion_list(page: ft.Page):
         spacing=10,
     )
 
+    def cargar_catalogos():
+        """Trae nombres de cliente (por pedido), producto y encargado para mostrarlos en la tabla."""
+        nonlocal mapa_clientes_por_pedido, mapa_productos, mapa_encargados
+        try:
+            conexion = Conexion.obtener_conexion()
+            cursor = conexion.cursor()
+
+            cursor.execute("""
+                SELECT p.pedido_id, c.cliente_nombre
+                FROM pedidos p
+                JOIN clientes c ON p.cliente_id = c.cliente_id
+            """)
+            mapa_clientes_por_pedido = {pid: nombre for pid, nombre in cursor.fetchall()}
+
+            cursor.execute("SELECT producto_id, producto_nombre FROM productos")
+            mapa_productos = {pid: nombre for pid, nombre in cursor.fetchall()}
+
+            cursor.execute("SELECT usuario_id, usuario_nombre, usuario_apellidop FROM usuarios")
+            mapa_encargados = {
+                uid: f"{nombre} {apellido}".strip()
+                for uid, nombre, apellido in cursor.fetchall()
+            }
+
+            cursor.close()
+            conexion.close()
+        except Exception as ex:
+            mensaje.value = f"Error al cargar catálogos: {ex}"
+
+    def texto_pedido(orden):
+        nombre_cliente = mapa_clientes_por_pedido.get(orden.pedido_id)
+        return f"#{orden.pedido_id} — {nombre_cliente}" if nombre_cliente else f"#{orden.pedido_id}"
+
+    def texto_producto(orden):
+        nombre = mapa_productos.get(orden.producto_id)
+        return nombre if nombre else f"#{orden.producto_id}"
+
+    def texto_encargado(orden):
+        nombre = mapa_encargados.get(orden.encargado_produccion_id)
+        return nombre if nombre else f"#{orden.encargado_produccion_id}"
+
     def total_paginas():
         if not ordenes_filtradas:
             return 1
@@ -101,6 +146,7 @@ def produccion_list(page: ft.Page):
 
         def cerrar_editar(texto_exito=None):
             page.pop_dialog()
+            cargar_catalogos()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
             if texto_exito:
@@ -159,9 +205,9 @@ def produccion_list(page: ft.Page):
         return ft.DataRow(
             cells=[
                 ft.DataCell(ft.Text(str(orden.produccion_id))),
-                ft.DataCell(ft.Text(f"#{orden.pedido_id}")),
-                ft.DataCell(ft.Text(str(orden.producto_id))),
-                ft.DataCell(ft.Text(str(orden.encargado_produccion_id))),
+                ft.DataCell(ft.Text(texto_pedido(orden))),
+                ft.DataCell(ft.Text(texto_producto(orden))),
+                ft.DataCell(ft.Text(texto_encargado(orden))),
                 ft.DataCell(ft.Text(str(orden.produccion_cantidad))),
                 ft.DataCell(_chip_estado(orden.produccion_estado)),
                 ft.DataCell(ft.Text(str(orden.fecha_inicio))),
@@ -261,7 +307,12 @@ def produccion_list(page: ft.Page):
             if tipo_filtro != TODOS_KEY and str(orden.produccion_estado) != tipo_filtro:
                 continue
 
-            campos = f"{orden.producto_id} {orden.encargado_produccion_id}".lower()
+            campos = " ".join([
+                texto_pedido(orden),
+                texto_producto(orden),
+                texto_encargado(orden),
+            ]).lower()
+
             if not texto_busqueda or texto_busqueda in campos:
                 resultado.append(orden)
 
@@ -288,6 +339,7 @@ def produccion_list(page: ft.Page):
 
         def cerrar_dialogo(texto_exito=None):
             page.pop_dialog()
+            cargar_catalogos()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
             if texto_exito:
@@ -301,7 +353,11 @@ def produccion_list(page: ft.Page):
         page.show_dialog(dialogo)
 
     buscador.on_change = lambda e: aplicar_filtro(e.control.value, filtro.value)
-    filtro.on_change = lambda e: aplicar_filtro(buscador.value, e.control.value)
+
+    def cambiar_filtro(e):
+        aplicar_filtro(texto=buscador.value, tipo_filtro=e.control.value)
+
+    filtro.on_select = cambiar_filtro
 
     controles_derecha = [buscador, filtro]
 
@@ -321,7 +377,7 @@ def produccion_list(page: ft.Page):
     else:
         controles_derecha.append(
             ft.Container(
-                padding=ft.Padding.symmetric(horizontal=12, vertical=8),
+                padding=ft.Padding(left=12, right=12, top=8, bottom=8),
                 bgcolor=ft.Colors.BLUE_GREY_50,
                 border_radius=8,
                 content=ft.Row(
@@ -334,6 +390,7 @@ def produccion_list(page: ft.Page):
             )
         )
 
+    cargar_catalogos()
     cargar_desde_bd()
     aplicar_filtro()
 

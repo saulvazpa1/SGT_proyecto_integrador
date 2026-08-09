@@ -31,7 +31,6 @@ def main_window_produccion(page: ft.Page, on_logout=None):
 
     menu_activo = "Inicio"
 
-    # Badge notificaciones
     badge_no_leidas = ft.Container(
         top=2,
         right=2,
@@ -124,7 +123,6 @@ def main_window_produccion(page: ft.Page, on_logout=None):
         on_click=abrir_ayuda,
     )
 
-    # Barra superior
     barra_superior = ft.Container(
         height=65,
         bgcolor=ft.Colors.GREY_100,
@@ -155,7 +153,6 @@ def main_window_produccion(page: ft.Page, on_logout=None):
         ),
     )
 
-    # Footer / pie de página
     pie_pagina = ft.Container(
         height=40,
         bgcolor=ft.Colors.GREY_100,
@@ -186,7 +183,7 @@ def main_window_produccion(page: ft.Page, on_logout=None):
         ),
     )
 
-    def item_menu(texto, icono, accion, es_logout=False):
+    def item_menu(texto, icono, accion, es_logout=False, tooltip=None):
         activo = menu_activo == texto
 
         if es_logout:
@@ -210,6 +207,7 @@ def main_window_produccion(page: ft.Page, on_logout=None):
             border_radius=10,
             on_click=accion,
             ink=True,
+            tooltip=tooltip or texto,
             content=ft.Row(
                 spacing=0,
                 controls=[
@@ -242,10 +240,13 @@ def main_window_produccion(page: ft.Page, on_logout=None):
             ),
         )
 
-    # Vistas
     def inicio():
         return ft.Column(
-            controls=[dashboard_produccion(page)],
+            controls=[dashboard_produccion(
+                page,
+                on_ir_productos=mostrar_productos,
+                on_ir_pendientes=mostrar_pedidos_pendientes,
+            )],
             spacing=20,
             expand=True,
         )

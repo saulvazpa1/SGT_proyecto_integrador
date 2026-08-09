@@ -5,12 +5,14 @@ from dao.producto_dao import ProductoDAO
 from dao.pedido_dao import PedidoDAO
 
 
-def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS):
+def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS, on_click=None):
     return ft.Container(
         width=210,
         padding=18,
         bgcolor=ft.Colors.WHITE,
         border_radius=12,
+        ink=on_click is not None,
+        on_click=on_click,
         shadow=ft.BoxShadow(
             spread_radius=0,
             blur_radius=8,
@@ -30,6 +32,7 @@ def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS):
                             content=ft.Icon(icono, size=18, color=color),
                         ),
                         ft.Container(expand=True),
+                        ft.Icon(ft.Icons.CHEVRON_RIGHT, size=18, color=ft.Colors.BLUE_GREY_200) if on_click else ft.Container(),
                     ],
                 ),
                 ft.Container(height=10),
@@ -71,7 +74,11 @@ def _grafica_pastel(titulo, secciones, tamano=160):
             ft.Row(
                 controls=[
                     ft.Container(width=10, height=10, bgcolor=color, border_radius=5),
-                    ft.Text(f"{etiqueta} ({valor})", size=12, color=ft.Colors.BLUE_GREY_700),
+                    ft.Text(
+                        f"{etiqueta} — {round((valor / total) * 100)}% ({valor})",
+                        size=12,
+                        color=ft.Colors.BLUE_GREY_700,
+                    ),
                 ],
                 spacing=8,
             )
@@ -182,7 +189,11 @@ _PALETA = [
 ]
 
 
-def dashboard_produccion(page=None):
+def dashboard_produccion(
+    page=None,
+    on_ir_productos=None,
+    on_ir_pendientes=None,
+):
 
     try:
         productos = ProductoDAO().obtener_todos()
@@ -210,10 +221,10 @@ def dashboard_produccion(page=None):
     # Tarjetas KPI modernas
     tarjetas = ft.Row(
         controls=[
-            _tarjeta_kpi("Productos", total_productos, "En catálogo", ft.Colors.BLUE_400, ft.Icons.INVENTORY_2_OUTLINED),
-            _tarjeta_kpi("Pedidos", total_pedidos, "Registrados", ft.Colors.TEAL_400, ft.Icons.SHOPPING_CART_OUTLINED),
-            _tarjeta_kpi("Pendientes", pendientes, "Por completar", ft.Colors.ORANGE_400, ft.Icons.PENDING_ACTIONS),
-            _tarjeta_kpi("Stock bajo", stock_bajo, "≤ 20 unidades", ft.Colors.RED_400, ft.Icons.WARNING_AMBER_ROUNDED),
+            _tarjeta_kpi("Productos", total_productos, "En catálogo", ft.Colors.BLUE_400, ft.Icons.INVENTORY_2_OUTLINED, on_click=on_ir_productos),
+            _tarjeta_kpi("Pedidos", total_pedidos, "Registrados", ft.Colors.TEAL_400, ft.Icons.SHOPPING_CART_OUTLINED, on_click=on_ir_pendientes),
+            _tarjeta_kpi("Pendientes", pendientes, "Por completar", ft.Colors.ORANGE_400, ft.Icons.PENDING_ACTIONS, on_click=on_ir_pendientes),
+            _tarjeta_kpi("Stock bajo", stock_bajo, "≤ 20 unidades", ft.Colors.RED_400, ft.Icons.WARNING_AMBER_ROUNDED, on_click=on_ir_productos),
         ],
         wrap=True,
         spacing=16,

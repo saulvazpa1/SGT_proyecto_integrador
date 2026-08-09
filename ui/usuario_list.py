@@ -94,6 +94,14 @@ def usuarios_list(page: ft.Page):
         size=22,
     )
 
+    def nombre_completo(usuario):
+        partes = [
+            str(getattr(usuario, "usuario_nombre", "") or "").strip(),
+            str(getattr(usuario, "usuario_apellidop", "") or "").strip(),
+            str(getattr(usuario, "usuario_apellidom", "") or "").strip(),
+        ]
+        return " ".join(p for p in partes if p)
+
     def cargar_desde_bd():
         nonlocal todos_los_usuarios
         try:
@@ -118,7 +126,7 @@ def usuarios_list(page: ft.Page):
 
     def confirmar_eliminar(usuario):
         def eliminar_confirmado(e):
-            nombre_usuario = getattr(usuario, "usuario_nombre", "")
+            nombre_usuario = nombre_completo(usuario)
             try:
                 UsuarioDAO().eliminar(usuario.usuario_id)
                 page.pop_dialog()
@@ -136,7 +144,7 @@ def usuarios_list(page: ft.Page):
             modal=True,
             title=ft.Text("Confirmar eliminación"),
             content=ft.Text(
-                f"¿Seguro que deseas eliminar al usuario '{getattr(usuario, 'usuario_nombre', '')}'? "
+                f"¿Seguro que deseas eliminar al usuario '{nombre_completo(usuario)}'? "
                 "Esta acción no se puede deshacer."
             ),
             actions=[
@@ -162,7 +170,7 @@ def usuarios_list(page: ft.Page):
         return ft.DataRow(
             cells=[
                 ft.DataCell(ft.Text(str(getattr(usuario, "usuario_id", "")))),
-                ft.DataCell(ft.Text(str(getattr(usuario, "usuario_nombre", "")))),
+                ft.DataCell(ft.Text(nombre_completo(usuario))),
                 ft.DataCell(ft.Text(str(getattr(usuario, "usuario_telefono", "")))),
                 ft.DataCell(ft.Text(str(getattr(usuario, "usuario_correo", "")))),
                 ft.DataCell(ft.Text(password_oculta)),
@@ -290,10 +298,10 @@ def usuarios_list(page: ft.Page):
             if opcion_filtro == "Encargado de produccion" and rol_nombre != "Encargado de produccion":
                 continue
 
-            # 2. Filtro por texto
-            nombre = str(getattr(usuario, "usuario_nombre", "")).lower()
+            # 2. Filtro por texto 
+            texto_completo = nombre_completo(usuario).lower()
 
-            if not texto_busqueda or texto_busqueda in nombre:
+            if not texto_busqueda or texto_busqueda in texto_completo:
                 resultado.append(usuario)
 
         usuarios_filtrados = resultado

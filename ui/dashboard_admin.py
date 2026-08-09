@@ -6,12 +6,14 @@ from dao.producto_dao import ProductoDAO
 from dao.pedido_dao import PedidoDAO
 
 
-def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS):
+def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS, on_click=None):
     return ft.Container(
         width=210,
         padding=18,
         bgcolor=ft.Colors.WHITE,
         border_radius=12,
+        ink=on_click is not None,
+        on_click=on_click,
         shadow=ft.BoxShadow(
             spread_radius=0,
             blur_radius=8,
@@ -31,6 +33,7 @@ def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS):
                             content=ft.Icon(icono, size=18, color=color),
                         ),
                         ft.Container(expand=True),
+                        ft.Icon(ft.Icons.CHEVRON_RIGHT, size=18, color=ft.Colors.BLUE_GREY_200) if on_click else ft.Container(),
                     ],
                 ),
                 ft.Container(height=10),
@@ -72,7 +75,11 @@ def _grafica_pastel(titulo, secciones, tamano=160):
             ft.Row(
                 controls=[
                     ft.Container(width=10, height=10, bgcolor=color, border_radius=5),
-                    ft.Text(f"{etiqueta} ({valor})", size=12, color=ft.Colors.BLUE_GREY_700),
+                    ft.Text(
+                        f"{etiqueta} — {round((valor / total) * 100)}% ({valor})",
+                        size=12,
+                        color=ft.Colors.BLUE_GREY_700,
+                    ),
                 ],
                 spacing=8,
             )
@@ -183,7 +190,13 @@ _PALETA = [
 ]
 
 
-def dashboard_admin(page=None):
+def dashboard_admin(
+    page=None,
+    on_ir_usuarios=None,
+    on_ir_productos=None,
+    on_ir_pedidos=None,
+    on_ir_administradores=None,
+):
 
     try:
         usuarios = UsuarioDAO().obtener_todos()
@@ -217,14 +230,14 @@ def dashboard_admin(page=None):
 
     admins = conteo_por_rol.get("Administrador", 0)
 
-    #  TARJETAS-
+ 
     tarjetas = ft.Row(
         controls=[
-            _tarjeta_kpi("Usuarios", total_usuarios, "Registrados en el sistema", ft.Colors.BLUE_400, ft.Icons.PEOPLE_OUTLINED),
-            _tarjeta_kpi("Productos", total_productos, "En catálogo", ft.Colors.TEAL_400, ft.Icons.INVENTORY_2_OUTLINED),
-            _tarjeta_kpi("Pedidos", total_pedidos, "Registrados en total", ft.Colors.ORANGE_400, ft.Icons.SHOPPING_CART_OUTLINED),
-            _tarjeta_kpi("Ingresos", ingresos_texto, "Suma de todos los pedidos", ft.Colors.GREEN_400, ft.Icons.PAID_OUTLINED),
-            _tarjeta_kpi("Administradores", admins, "Acceso total", ft.Colors.PURPLE_400, ft.Icons.ADMIN_PANEL_SETTINGS_OUTLINED),
+            _tarjeta_kpi("Usuarios", total_usuarios, "Registrados en el sistema", ft.Colors.BLUE_400, ft.Icons.PEOPLE_OUTLINED, on_click=on_ir_usuarios),
+            _tarjeta_kpi("Productos", total_productos, "En catálogo", ft.Colors.TEAL_400, ft.Icons.INVENTORY_2_OUTLINED, on_click=on_ir_productos),
+            _tarjeta_kpi("Pedidos", total_pedidos, "Registrados en total", ft.Colors.ORANGE_400, ft.Icons.SHOPPING_CART_OUTLINED, on_click=on_ir_pedidos),
+            _tarjeta_kpi("Ingresos", ingresos_texto, "Suma de todos los pedidos", ft.Colors.GREEN_400, ft.Icons.PAID_OUTLINED, on_click=on_ir_pedidos),
+            _tarjeta_kpi("Administradores", admins, "Acceso total", ft.Colors.PURPLE_400, ft.Icons.ADMIN_PANEL_SETTINGS_OUTLINED, on_click=on_ir_administradores),
         ],
         wrap=True,
         spacing=16,
@@ -242,7 +255,7 @@ def dashboard_admin(page=None):
 
     grafica_roles = _grafica_pastel("Distribución por roles", secciones_roles)
 
-    #
+    
     conteo_por_estado = {}
     for p in pedidos:
         estado = str(getattr(p, "pedido_estado", "") or "Sin estado").strip()
@@ -258,6 +271,7 @@ def dashboard_admin(page=None):
 
     grafica_estados = _grafica_pastel("Pedidos por estado", secciones_estado)
 
+   
     ventas_por_producto = {}
     for p in pedidos:
         nombre_producto = str(getattr(p, "producto_id", "Producto"))

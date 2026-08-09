@@ -1,5 +1,6 @@
 import flet as ft
 from dao.pedido_dao import PedidoDAO
+from database.conexion import Conexion
 from ui.pedido_form import pedido_form
 from ui.colores import *
 from ui.componentes import mostrar_notificacion
@@ -14,6 +15,10 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
 
     todos_los_pedidos = []
     pedidos_filtrados = []
+
+    mapa_clientes = {}
+    mapa_vendedores = {}
+    mapa_productos = {}
 
     TODOS_KEY = "__TODOS__"
 
@@ -50,6 +55,42 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
         options=[ft.dropdown.Option(key=TODOS_KEY, text="Todos")],
     )
 
+    def cargar_catalogos():
+        """Carga nombres de clientes, vendedores y productos para mostrarlos en vez del ID crudo."""
+        nonlocal mapa_clientes, mapa_vendedores, mapa_productos
+        try:
+            conexion = Conexion.obtener_conexion()
+            cursor = conexion.cursor()
+
+            cursor.execute("SELECT cliente_id, cliente_nombre FROM clientes")
+            mapa_clientes = {str(cid): nombre for cid, nombre in cursor.fetchall()}
+
+            cursor.execute("SELECT usuario_id, usuario_nombre, usuario_apellidop FROM usuarios")
+            mapa_vendedores = {
+                str(uid): f"{nombre} {apellido}".strip()
+                for uid, nombre, apellido in cursor.fetchall()
+            }
+
+            cursor.execute("SELECT producto_id, producto_nombre FROM productos")
+            mapa_productos = {str(pid): nombre for pid, nombre in cursor.fetchall()}
+
+            cursor.close()
+            conexion.close()
+        except Exception as ex:
+            mostrar_notificacion(page, "Error de conexión", str(ex), "error")
+
+    def nombre_cliente(pedido):
+        nombre = mapa_clientes.get(str(pedido.cliente_id))
+        return f"#{pedido.cliente_id} — {nombre}" if nombre else f"#{pedido.cliente_id}"
+
+    def nombre_vendedor(pedido):
+        nombre = mapa_vendedores.get(str(pedido.vendedor_id))
+        return f"#{pedido.vendedor_id} — {nombre}" if nombre else f"#{pedido.vendedor_id}"
+
+    def nombre_producto(pedido):
+        nombre = mapa_productos.get(str(pedido.producto_id))
+        return f"#{pedido.producto_id} — {nombre}" if nombre else f"#{pedido.producto_id}"
+
     def cargar_desde_bd():
         nonlocal todos_los_pedidos
         try:
@@ -66,6 +107,7 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
     def abrir_agregar(e):
         def cerrar_dialogo(texto_exito=None):
             page.pop_dialog()
+            cargar_catalogos()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
             if texto_exito:
@@ -92,9 +134,9 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
             title=ft.Text(f"Pedido #{pedido.pedido_id}"),
             content=ft.Column(
                 controls=[
-                    ft.Text(f"Cliente: {pedido.cliente_id}"),
-                    ft.Text(f"Vendedor: {pedido.vendedor_id}"),
-                    ft.Text(f"Producto: {pedido.producto_id}"),
+                    ft.Text(f"Cliente: {nombre_cliente(pedido)}"),
+                    ft.Text(f"Vendedor: {nombre_vendedor(pedido)}"),
+                    ft.Text(f"Producto: {nombre_producto(pedido)}"),
                     ft.Text(f"Cantidad: {pedido.pedido_cantidad}"),
                     ft.Text(f"Total: {total_texto}"),
                     ft.Text(f"Estado: {pedido.pedido_estado}"),
@@ -111,6 +153,7 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
     def abrir_editar(pedido):
         def cerrar_dialogo(texto_exito=None):
             page.pop_dialog()
+            cargar_catalogos()
             cargar_desde_bd()
             aplicar_filtro(texto=buscador.value, tipo_filtro=filtro.value)
             if texto_exito:
@@ -250,9 +293,9 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
 
         celdas = [
             ft.DataCell(ft.Text(str(pedido.pedido_id))),
-            ft.DataCell(ft.Text(str(pedido.cliente_id))),
-            ft.DataCell(ft.Text(str(pedido.vendedor_id))),
-            ft.DataCell(ft.Text(str(pedido.producto_id))),
+            ft.DataCell(ft.Text(nombre_cliente(pedido))),
+            ft.DataCell(ft.Text(nombre_vendedor(pedido))),
+            ft.DataCell(ft.Text(nombre_producto(pedido))),
             ft.DataCell(ft.Text(str(pedido.pedido_cantidad))),
             ft.DataCell(ft.Text(total_texto)),
             ft.DataCell(ft.Text(str(pedido.pedido_estado))),
@@ -311,9 +354,9 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
                 continue
 
             campos = " ".join([
-                str(pedido.cliente_id),
-                str(pedido.vendedor_id),
-                str(pedido.producto_id),
+                nombre_cliente(pedido),
+                nombre_vendedor(pedido),
+                nombre_producto(pedido),
             ]).lower()
 
             if not texto_busqueda or texto_busqueda in campos:
@@ -336,6 +379,7 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
 
     filtro.on_select = cambiar_filtro
 
+    cargar_catalogos()
     cargar_desde_bd()
     aplicar_filtro(texto="", tipo_filtro=TODOS_KEY)
 
@@ -354,7 +398,7 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
     else:
         controles_encabezado.append(
             ft.Container(
-                padding=ft.Padding.symmetric(horizontal=14, vertical=10),
+                padding=ft.Padding(left=14, right=14, top=10, bottom=10),
                 bgcolor=ft.Colors.BLUE_GREY_100,
                 border_radius=8,
                 content=ft.Row(

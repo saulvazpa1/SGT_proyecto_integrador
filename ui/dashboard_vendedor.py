@@ -7,12 +7,14 @@ from dao.pedido_dao import PedidoDAO
 from dao.producto_dao import ProductoDAO
 
 
-def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS):
+def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS, on_click=None):
     return ft.Container(
         width=210,
         padding=18,
         bgcolor=ft.Colors.WHITE,
         border_radius=12,
+        ink=on_click is not None,
+        on_click=on_click,
         shadow=ft.BoxShadow(
             spread_radius=0,
             blur_radius=8,
@@ -32,6 +34,7 @@ def _tarjeta_kpi(titulo, valor, subtitulo, color, icono=ft.Icons.INSIGHTS):
                             content=ft.Icon(icono, size=18, color=color),
                         ),
                         ft.Container(expand=True),
+                        ft.Icon(ft.Icons.CHEVRON_RIGHT, size=18, color=ft.Colors.BLUE_GREY_200) if on_click else ft.Container(),
                     ],
                 ),
                 ft.Container(height=10),
@@ -73,7 +76,11 @@ def _grafica_pastel(titulo, secciones, tamano=160):
             ft.Row(
                 controls=[
                     ft.Container(width=10, height=10, bgcolor=color, border_radius=5),
-                    ft.Text(f"{etiqueta} ({valor})", size=12, color=ft.Colors.BLUE_GREY_700),
+                    ft.Text(
+                        f"{etiqueta} — {round((valor / total) * 100)}% ({valor})",
+                        size=12,
+                        color=ft.Colors.BLUE_GREY_700,
+                    ),
                 ],
                 spacing=8,
             )
@@ -192,7 +199,11 @@ def _nombre_producto(producto):
     return str(getattr(producto, "producto_id", producto))
 
 
-def dashboard_vendedor(page=None):
+def dashboard_vendedor(
+    page=None,
+    on_ir_clientes=None,
+    on_ir_pedidos=None,
+):
 
     try:
         clientes = ClienteDAO().obtener_todos()
@@ -222,13 +233,13 @@ def dashboard_vendedor(page=None):
     except Exception:
         total_vendido = 0
 
-    # Tarjetas KPI 
+    # Tarjetas KPI
     tarjetas = ft.Row(
         controls=[
-            _tarjeta_kpi("Clientes", total_clientes, "Registrados", ft.Colors.BLUE_400, ft.Icons.PEOPLE_OUTLINED),
-            _tarjeta_kpi("Pedidos", total_pedidos, "Total registrados", ft.Colors.INDIGO_400, ft.Icons.SHOPPING_CART_OUTLINED),
-            _tarjeta_kpi("Pendientes", pendientes, "Por completar", ft.Colors.AMBER_400, ft.Icons.WARNING_AMBER_ROUNDED),
-            _tarjeta_kpi("Total vendido", f"${total_vendido:,.2f}", "Ingresos generados", ft.Colors.GREEN_400, ft.Icons.ATTACH_MONEY),
+            _tarjeta_kpi("Clientes", total_clientes, "Registrados", ft.Colors.BLUE_400, ft.Icons.PEOPLE_OUTLINED, on_click=on_ir_clientes),
+            _tarjeta_kpi("Pedidos", total_pedidos, "Total registrados", ft.Colors.INDIGO_400, ft.Icons.SHOPPING_CART_OUTLINED, on_click=on_ir_pedidos),
+            _tarjeta_kpi("Pendientes", pendientes, "Por completar", ft.Colors.AMBER_400, ft.Icons.WARNING_AMBER_ROUNDED, on_click=on_ir_pedidos),
+            _tarjeta_kpi("Total vendido", f"${total_vendido:,.2f}", "Ingresos generados", ft.Colors.GREEN_400, ft.Icons.ATTACH_MONEY, on_click=on_ir_pedidos),
         ],
         wrap=True,
         spacing=16,
