@@ -19,7 +19,7 @@ CORREO_DESARROLLO = "dsm@gmail.com"
 
 
 def main_window(page: ft.Page, on_logout=None):
-    page.title = "Sistema Gestor de Inventario Textil"
+    page.title = "Sistema Gestor de Producción Textil"
     page.bgcolor = FONDO
     page.theme_mode = ft.ThemeMode.LIGHT
     page.theme = ft.Theme(font_family="Segoe UI")
@@ -139,7 +139,7 @@ def main_window(page: ft.Page, on_logout=None):
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
                 ft.Text(
-                    "Sistema Gestor de Inventario Textil",
+                    "Sistema Gestor de Producción Textil",
                     size=22,
                     weight=ft.FontWeight.BOLD,
                     color=ft.Colors.BLUE_GREY_900,
