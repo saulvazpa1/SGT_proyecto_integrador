@@ -151,6 +151,17 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
         page.show_dialog(dialogo)
 
     def abrir_editar(pedido):
+     
+        try:
+            pedido_completo = PedidoDAO().obtener_por_id(pedido.pedido_id)
+        except Exception as ex:
+            mostrar_notificacion(page, "Error al cargar el pedido", str(ex), "error")
+            return
+
+        if pedido_completo is None:
+            mostrar_notificacion(page, "No se encontró el pedido", "", "error")
+            return
+
         def cerrar_dialogo(texto_exito=None):
             page.pop_dialog()
             cargar_catalogos()
@@ -162,7 +173,7 @@ def pedidos_list(page: ft.Page, puede_editar: bool = True):
 
         dialogo = ft.AlertDialog(
             modal=True,
-            content=pedido_form(cerrar_dialogo, pedido=pedido, page=page),
+            content=pedido_form(cerrar_dialogo, pedido=pedido_completo, page=page),
         )
         page.show_dialog(dialogo)
 

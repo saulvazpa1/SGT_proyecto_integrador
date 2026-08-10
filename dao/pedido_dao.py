@@ -32,6 +32,39 @@ class PedidoDAO:
         cursor.close()
         conexion.close()
         return pedidos
+
+   
+    def obtener_por_id(self, pedido_id):
+        conexion = Conexion.obtener_conexion()
+        cursor = conexion.cursor()
+
+        cursor.execute(
+            """
+            SELECT pedido_id, cliente_id, vendedor_id, producto_id,
+                   pedido_cantidad, pedido_total, pedido_estado, pedido_fecha
+            FROM pedidos
+            WHERE pedido_id = %s
+            """,
+            (pedido_id,)
+        )
+        registro = cursor.fetchone()
+        cursor.close()
+        conexion.close()
+
+        if registro is None:
+            return None
+
+        return Pedido(
+            pedido_id=registro[0],
+            cliente_id=registro[1],
+            vendedor_id=registro[2],
+            producto_id=registro[3],
+            pedido_cantidad=registro[4],
+            pedido_total=registro[5],
+            pedido_estado=registro[6],
+            pedido_fecha=registro[7]
+        )
+
     # Crear insertar
 
     def insertar(self, pedido):

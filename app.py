@@ -1,4 +1,4 @@
-#<<<<<<< HEAD
+#
 #=======
 from database.conexion import Conexion    # Carpeta/archivo/clase 
 from models.usuario import Usuario
@@ -730,7 +730,7 @@ def submenu(modulo, f_ver, f_ins, f_act=None, f_elim=None, es_movimiento=False):
 
 if __name__ == "__main__":
    #ft.app(target=main_login)
-   ft.app(target=main_window)
-   #ft.app(target=main_window_vendedor)
+   #ft.app(target=main_window)
+   ft.app(target=main_window_vendedor)
    #ft.app(target=main_window_produccion)
   
